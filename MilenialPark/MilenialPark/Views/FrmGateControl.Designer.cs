@@ -44,10 +44,16 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.dgvReminder = new System.Windows.Forms.DataGridView();
             this.rtxDataIO = new System.Windows.Forms.RichTextBox();
+            this.cbxBaudRate = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.panellabel1.SuspendLayout();
             this.leftPanel.SuspendLayout();
             this.panel3.SuspendLayout();
+            this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvReminder)).BeginInit();
             this.SuspendLayout();
             // 
             // panellabel1
@@ -73,6 +79,8 @@
             // 
             // leftPanel
             // 
+            this.leftPanel.Controls.Add(this.cbxBaudRate);
+            this.leftPanel.Controls.Add(this.label1);
             this.leftPanel.Controls.Add(this.lblmanual);
             this.leftPanel.Controls.Add(this.btnSend);
             this.leftPanel.Controls.Add(this.txtGateCode);
@@ -87,7 +95,7 @@
             this.leftPanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.leftPanel.Location = new System.Drawing.Point(0, 51);
             this.leftPanel.Name = "leftPanel";
-            this.leftPanel.Size = new System.Drawing.Size(479, 610);
+            this.leftPanel.Size = new System.Drawing.Size(406, 610);
             this.leftPanel.TabIndex = 19;
             // 
             // lblmanual
@@ -144,7 +152,7 @@
             this.btnDisc.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnDisc.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnDisc.ForeColor = System.Drawing.SystemColors.Control;
-            this.btnDisc.Location = new System.Drawing.Point(156, 185);
+            this.btnDisc.Location = new System.Drawing.Point(156, 235);
             this.btnDisc.Name = "btnDisc";
             this.btnDisc.Size = new System.Drawing.Size(170, 46);
             this.btnDisc.TabIndex = 48;
@@ -158,7 +166,7 @@
             this.btnConn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnConn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnConn.ForeColor = System.Drawing.SystemColors.Control;
-            this.btnConn.Location = new System.Drawing.Point(156, 124);
+            this.btnConn.Location = new System.Drawing.Point(156, 174);
             this.btnConn.Name = "btnConn";
             this.btnConn.Size = new System.Drawing.Size(170, 46);
             this.btnConn.TabIndex = 47;
@@ -172,7 +180,7 @@
             this.btnRefrs.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnRefrs.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnRefrs.ForeColor = System.Drawing.SystemColors.Control;
-            this.btnRefrs.Location = new System.Drawing.Point(36, 124);
+            this.btnRefrs.Location = new System.Drawing.Point(36, 174);
             this.btnRefrs.Name = "btnRefrs";
             this.btnRefrs.Size = new System.Drawing.Size(101, 46);
             this.btnRefrs.TabIndex = 46;
@@ -224,25 +232,80 @@
             // 
             // panel3
             // 
+            this.panel3.Controls.Add(this.panel1);
             this.panel3.Controls.Add(this.rtxDataIO);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(479, 51);
+            this.panel3.Location = new System.Drawing.Point(406, 51);
             this.panel3.Name = "panel3";
             this.panel3.Padding = new System.Windows.Forms.Padding(7);
-            this.panel3.Size = new System.Drawing.Size(623, 610);
+            this.panel3.Size = new System.Drawing.Size(696, 610);
             this.panel3.TabIndex = 20;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.dgvReminder);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(7, 396);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(682, 207);
+            this.panel1.TabIndex = 4;
+            // 
+            // dgvReminder
+            // 
+            this.dgvReminder.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvReminder.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvReminder.Location = new System.Drawing.Point(0, 0);
+            this.dgvReminder.Name = "dgvReminder";
+            this.dgvReminder.Size = new System.Drawing.Size(682, 207);
+            this.dgvReminder.TabIndex = 0;
             // 
             // rtxDataIO
             // 
             this.rtxDataIO.BackColor = System.Drawing.SystemColors.MenuText;
-            this.rtxDataIO.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtxDataIO.Dock = System.Windows.Forms.DockStyle.Top;
             this.rtxDataIO.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rtxDataIO.ForeColor = System.Drawing.SystemColors.Window;
             this.rtxDataIO.Location = new System.Drawing.Point(7, 7);
             this.rtxDataIO.Name = "rtxDataIO";
-            this.rtxDataIO.Size = new System.Drawing.Size(609, 596);
+            this.rtxDataIO.Size = new System.Drawing.Size(682, 389);
             this.rtxDataIO.TabIndex = 3;
             this.rtxDataIO.Text = "";
+            // 
+            // cbxBaudRate
+            // 
+            this.cbxBaudRate.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxBaudRate.FormattingEnabled = true;
+            this.cbxBaudRate.ItemHeight = 20;
+            this.cbxBaudRate.Items.AddRange(new object[] {
+            "9600",
+            "",
+            "",
+            "19200",
+            "",
+            "",
+            "38400",
+            "",
+            "",
+            "57600",
+            "",
+            "",
+            "115200"});
+            this.cbxBaudRate.Location = new System.Drawing.Point(156, 116);
+            this.cbxBaudRate.Name = "cbxBaudRate";
+            this.cbxBaudRate.Size = new System.Drawing.Size(170, 28);
+            this.cbxBaudRate.TabIndex = 54;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label1.Location = new System.Drawing.Point(40, 119);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(106, 20);
+            this.label1.TabIndex = 53;
+            this.label1.Text = "BAUD RATE:";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // FrmGateControl
             // 
@@ -263,6 +326,8 @@
             this.leftPanel.ResumeLayout(false);
             this.leftPanel.PerformLayout();
             this.panel3.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvReminder)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -285,5 +350,9 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.RichTextBox rtxDataIO;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.DataGridView dgvReminder;
+        private System.Windows.Forms.ComboBox cbxBaudRate;
+        private System.Windows.Forms.Label label1;
     }
 }

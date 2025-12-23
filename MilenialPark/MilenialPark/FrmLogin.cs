@@ -86,17 +86,35 @@ namespace MilenialPark
             cbxCategory.Items.Clear();
             cbxCategory.DisplayMember = "Text";
             cbxCategory.ValueMember = "Value";
-            int selected = 0;
+
+            int selectedIndex = -1;
+            int index = 0;
+
             foreach (ClsCabang x in ClsStaticVariable.controllerUser.listcabang)
             {
-                if (ClsStaticVariable.controllerUser.listcabang.Count != 0)
+                cbxCategory.Items.Add(new
                 {
-                    cbxCategory.Items.Add(new { Text = (x.KodeCabang + "-" + x.NamaCabang), Value = x.KodeCabang });
+                    Text = x.KodeCabang + " - " + x.NamaCabang,
+                    Value = x.KodeCabang
+                });
+
+                // ✅ Auto select based on stored KodeBranch
+                if (!string.IsNullOrEmpty(ClsStaticVariable.KodeBranch) &&
+                    x.KodeCabang == ClsStaticVariable.KodeBranch)
+                {
+                    selectedIndex = index;
                 }
-                cbxCategory.SelectedIndex = selected;
+
+                index++;
             }
-            
+
+            // fallback kalau tidak ketemu
+            if (selectedIndex >= 0)
+                cbxCategory.SelectedIndex = selectedIndex;
+            else if (cbxCategory.Items.Count > 0)
+                cbxCategory.SelectedIndex = 0;
         }
+
 
         private void FormLogin_Load(object sender, EventArgs e)
         {

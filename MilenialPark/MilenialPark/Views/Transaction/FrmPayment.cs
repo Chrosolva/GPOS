@@ -11,7 +11,7 @@ using MilenialPark.Controller;
 using MilenialPark.Models;
 using MilenialPark.Master;
 using MilenialPark.UserControls;
-using QRCoder;
+//using QRCoder;
 using CrystalDecisions.CrystalReports.Engine;
 using MilenialPark.Views.Reports;
 using MilenialPark.Reports;
@@ -61,25 +61,10 @@ namespace MilenialPark.Views.Transaction
             controllerTran.SetCard(txtCardID.Text);
             CustomerName = controllerTran.objCard.CustomerName;
             // check MasterCard 
-            if (CustomerName == "MASTER_CARD1")
-            {
-                cbxPaymentType.SelectedIndex = 1;
-                Mastercard = true;
-                cbxRemarks.Enabled = true;
-            }
-            else if (CustomerName == "MASTER_CARD2")
-            {
-                cbxPaymentType.SelectedIndex = 1;
-                Mastercard = true;
-                cbxRemarks.Enabled = true;
-            }
-            else
-            {
-                cbxPaymentType.SelectedIndex = 0;
-                Mastercard = false;
-                cbxRemarks.Enabled = false;
-                cbxRemarks.SelectedIndex = 0;
-            }
+            // Decide if this card is a master card
+            Mastercard = controllerTran.objCard.CustomerName.StartsWith("MASTER_CARD");
+            cbxPaymentType.SelectedIndex = Mastercard ? 1 : 0;
+            cbxRemarks.Enabled = Mastercard;
 
 
             if (controllerTran.dt.Rows.Count == 0)
@@ -102,188 +87,307 @@ namespace MilenialPark.Views.Transaction
             }
         }
 
+        public void missingRFID()
+        {
+            // ✅ Validate: all ticket rows must have RFID before saving
+            int missingCount = 0;
+            List<int> missingNoUrut = new List<int>();
+
+            foreach (DataGridViewRow r in dgvTransacTiketDet.Rows)
+            {
+                if (r.IsNewRow) continue;
+
+                string rfid = Convert.ToString(r.Cells["RFID"].Value)?.Trim();
+                if (string.IsNullOrEmpty(rfid))
+                {
+                    missingCount++;
+                    // collect NoUrut for message (if column exists)
+                    if (r.Cells["NoUrut"].Value != null)
+                        missingNoUrut.Add(Convert.ToInt32(r.Cells["NoUrut"].Value));
+                }
+            }
+
+            if (missingCount > 0)
+            {
+                // Focus first missing row
+                var firstMissing = dgvTransacTiketDet.Rows
+                    .Cast<DataGridViewRow>()
+                    .FirstOrDefault(r => !r.IsNewRow && string.IsNullOrWhiteSpace(Convert.ToString(r.Cells["RFID"].Value)));
+
+                if (firstMissing != null)
+                {
+                    dgvTransacTiketDet.CurrentCell = firstMissing.Cells["RFID"];
+                    dgvTransacTiketDet.ClearSelection();
+                    firstMissing.Selected = true;
+                }
+
+                string detail = (missingNoUrut.Count > 0)
+                    ? " NoUrut: " + string.Join(", ", missingNoUrut.Take(10)) + (missingNoUrut.Count > 10 ? "..." : "")
+                    : "";
+
+                ClsFungsi.Pesan($"RFID belum lengkap! Masih ada {missingCount} tiket belum di-scan.{detail}", "ERROR");
+
+                // return focus to RFID scan box (your helper)
+                BeginInvoke(new Action(FocusRFIDScan));
+
+                btnSave.Enabled = true;
+                return;
+            }
+
+        }
+
         private void btnSave_Click(object sender, EventArgs e)
         {
             btnSave.Enabled = false;
 
+            missingRFID();
+
+            decimal totalAmount = Convert.ToDecimal(lblTotal.Text);
+            decimal balance = Convert.ToDecimal(lblCardBalance.Text);
+
             decimal selisih = Convert.ToDecimal(lblCardBalance.Text) - Convert.ToDecimal(lblTotal.Text);
-            if (cbxPaymentType.Text =="CARD" && Convert.ToDecimal(lblCardBalance.Text) == 0)
+            if (cbxPaymentType.Text == "CARD" && balance < totalAmount)
             {
-                ClsFungsi.Pesan("Maaf Saldo anda kosong , silahkan diisi terlebih dahulu !!!", "INFO");
-            }
-            else if (cbxPaymentType.Text == "CARD" &&  selisih < 0)
-            {
-                ClsFungsi.Pesan("Maaf Saldo anda tidak cukup , silahkan diisi terlebih dahulu !!!", "ERROR");
+                ClsFungsi.Pesan("Saldo kartu tidak cukup!", "ERROR");
+                btnSave.Enabled = true;
+                return;
             }
             else
             {
-                DialogResult dialogResult = MessageBox.Show("Apakah anda yakin ingin menyimpan data Transaksi dengan ID  " + lblTransactionID.Text + " ? " +
-                    " Dengan Jumlah Sebanyak = " + lblTotal.Text.ToString() , "Warning", MessageBoxButtons.YesNo);
+                if (MessageBox.Show($"Simpan transaksi {lblTransactionID.Text} dengan jumlah {totalAmount} ?",
+                                "Confirm", MessageBoxButtons.YesNo) == DialogResult.No)
+                {
+                    btnSave.Enabled = true;
+                    return;
+                }
                 scan();
 
-                if (dialogResult == DialogResult.Yes)
+                //regenerate and substitute transactionID 
+                controllerTran.AutogenereateTransactionID("TICKET", controllerTran.objTransaction.ShopId);
+                controllerTran.objTransaction.TransactionID = controllerTran.TransactionID;
+                controllerTran.objTransaction.TransactionType = cbxTransType.Text;
+
+                // Update transaction details (non-ticket items)
+                foreach (var det in controllerTran.objTransaction.listtransdet)
+                    det.TransactionID = controllerTran.TransactionID;
+
+                // ===== 2) BUILD listtranstikdet FROM BOTH GRIDS =====
+                controllerTran.objTransaction.listtranstikdet = new List<ClsTransactionTiketDetail>();
+
+                int nourut = 1;
+
+                // A) Ticket grid (RFID + waktu bermain)
+                foreach (DataGridViewRow row in dgvTransacTiketDet.Rows)
                 {
-                    //regenerate and substitute transactionID 
-                    controllerTran.AutogenereateTransactionID("TICKET", controllerTran.objTransaction.ShopId);
-                    controllerTran.objTransaction.TransactionID = controllerTran.TransactionID;
-                    controllerTran.objTransaction.TransactionType = cbxTransType.Text;
-                    foreach (ClsTransactionDetail det in controllerTran.objTransaction.listtransdet)
-                    {
-                        det.TransactionID = controllerTran.TransactionID;
-                    }
+                    if (row.IsNewRow) continue;
 
-                    controllerTran.objTransaction.listtranstikdet = new List<ClsTransactionTiketDetail>();
-                    // set Detail Transaksi 
+                    string itemId = Convert.ToString(row.Cells["ItemID"].Value);
+                    string itemName = Convert.ToString(row.Cells["ItemName"].Value);
+                    decimal price = ToDecimalSafe(row.Cells["Price"].Value);
+                    int qty = ToIntSafe(row.Cells["Qty"].Value);             // should be 1 per row (your requirement)
+                    int waktu = ToIntSafe(row.Cells["WaktuBermain"].Value);
+                    int toleransi = ToIntSafe(row.Cells["Toleransi"].Value);
+                    string rfid = Convert.ToString(row.Cells["RFID"].Value); // may be null / empty
 
-                    int index  = 0;
-                    foreach (DataGridViewRow row in dgvTransacTiketDet.Rows)
-                    {
-                        if (!row.IsNewRow)
-                        {
-                            controllerTran.objTransactionTiketDetail = new ClsTransactionTiketDetail(lblTransactionID.Text, DateTime.Now, row.Cells["ItemID"].Value.ToString(), row.Cells["ItemName"].Value.ToString(), Convert.ToDecimal(row.Cells["Price"].Value), Convert.ToInt32(row.Cells["Qty"].Value), "BOUGHT", DateTime.Now, DateTime.Now, Convert.ToInt32(row.Cells["WaktuBermain"].Value), Convert.ToInt32(row.Cells["Toleransi"].Value));
-                            controllerTran.objTransaction.listtranstikdet.Add(controllerTran.objTransactionTiketDetail);
-                        }
-                    }
+                    var det = new ClsTransactionTiketDetail(
+                        controllerTran.TransactionID,
+                        DateTime.Now,
+                        itemId,
+                        itemName,
+                        price,
+                        qty,
+                        nourut,
+                        "BOUGHT",
+                        DateTime.Now,
+                        DateTime.Now,
+                        waktu,
+                        toleransi
+                    );
 
-                    if (cbxPaymentType.Text == "CARD")
-                    {
-                        controllerTran.objTransaction.CardID = txtCardID.Text;
-                        controllerTran.objTransaction.Remarks = txtRemarks.Text;
-                        controllerTran.objTransaction.PaymentType = cbxPaymentType.Text;
-                        controllerTran.objTransaction.InitialBalance = controllerTran.objCard.Saldo;
-                    }
-                    else
-                    {
-                        controllerTran.objTransaction.CardID = txtCardID.Text;
-                        controllerTran.objTransaction.Remarks = txtRemarks.Text;
-                        controllerTran.objTransaction.PaymentType = cbxPaymentType.Text;
-                        controllerTran.objTransaction.InitialBalance = 0;
-                    }
+                    // if your constructor doesn't include RFID, set property like this:
+                    det.RFID = rfid;
 
-
-
-                    //Insert Transaksi
-                    //ClsFungsi.Pesan(, "INFO");
-                    // Total Amount Check 
-                    decimal totalchecking = 0;
-                    string itemchecking = "";
-                    int i = 1;
-                    foreach(DataGridViewRow row in dgvTransacTiketDet.Rows)
-                    {
-                        if (!row.IsNewRow)
-                        {
-                            decimal tmp = Convert.ToDecimal(row.Cells["Price"].Value) * Convert.ToDecimal(row.Cells["Qty"].Value);
-                            totalchecking += tmp;
-                            itemchecking += "Item-" + i.ToString() + " :ID = " + row.Cells["ItemID"].Value.ToString() + " Name = " + row.Cells["ItemName"].Value.ToString() + " Qty = " + row.Cells["Qty"].Value.ToString() + " Price = " + row.Cells["Price"].Value.ToString() + "Subtotal = " + tmp.ToString();
-                            i++;
-                        }
-                         
-                    }
-
-                    string logmessage = "PRECHECK!";
-                    logmessage += "TOTALAMOUNT = " + totalchecking.ToString();
-                    logmessage += "ITEMCHECKING = " + itemchecking;
-
-                    if(controllerTran.objTransaction.totalAmount == totalchecking)
-                    {
-                        try
-                        {
-                            controllerTran.InsertLogMessage(controllerTran.TransactionID, logmessage);
-                            controllerTran.InsertTransactionTicket(controllerTran.objTransaction, controllerTran.objCard);
-                            PrintQR(controllerTran);
-                            PrintStruck(controllerTran);
-                        }
-                        catch (Exception ex)
-                        {
-                            ClsFungsi.Pesan("Terjadi Error Pada Penambahan Data Transaksi", ex.Message);
-                        }
-                    }
-                    else
-                    {
-                        ClsFungsi.Pesan("Terjadi Perbedaan Data antara list tiket dan total amount , silahkan di tutup window pembayaran dan di load kembali !!!");
-                    }
-
-
-                    this.Close();
+                    controllerTran.objTransaction.listtranstikdet.Add(det);
+                    nourut++;
                 }
-                else if (dialogResult == DialogResult.No) { }
+
+                // B) Non-ticket grid -> STILL INSERT INTO TransaksiTiketDetail (as you want)
+                // Here waktu bermain = 0, toleransi = 0, RFID = null
+                foreach (DataGridViewRow row in dgvTransaksiDetail.Rows)
+                {
+                    if (row.IsNewRow) continue;
+
+                    string itemId = Convert.ToString(row.Cells["dataGridViewTextBoxColumn3"].Value);  // ItemID
+                    string itemName = Convert.ToString(row.Cells["dataGridViewTextBoxColumn4"].Value); // ItemName
+                    decimal price = ToDecimalSafe(row.Cells["Price2"].Value); // Price
+                    int qty = ToIntSafe(row.Cells["Qty2"].Value); // Qty
+
+                    var det = new ClsTransactionTiketDetail(
+                        controllerTran.TransactionID,
+                        DateTime.Now,
+                        itemId,
+                        itemName,
+                        price,
+                        qty,
+                        nourut,
+                        "BOUGHT",
+                        DateTime.Now,
+                        DateTime.Now,
+                        0,   // WaktuBermain
+                        0    // Toleransi
+                    );
+
+                    det.RFID = null; // non-ticket has no RFID
+
+                    controllerTran.objTransaction.listtranstikdet.Add(det);
+                    nourut++;
+                }
+
+                // Populate payment fields
+                controllerTran.objTransaction.CardID = txtCardID.Text;
+                controllerTran.objTransaction.PaymentType = cbxPaymentType.Text;
+                controllerTran.objTransaction.Remarks = txtRemarks.Text;
+                controllerTran.objTransaction.InitialBalance = (cbxPaymentType.Text == "CARD") ? controllerTran.objCard.Saldo : 0;
+
+                //Insert Transaksi
+                //ClsFungsi.Pesan(, "INFO");
+                // Total Amount Check 
+                // Sum ticket items
+                decimal sumTickets = dgvTransacTiketDet.Rows.Cast<DataGridViewRow>()
+                    .Where(r => !r.IsNewRow)
+                    .Sum(r => Convert.ToDecimal(r.Cells["Price"].Value) *
+                              Convert.ToDecimal(r.Cells["Qty"].Value));
+
+                // Sum non‑ticket items
+                decimal sumDetails = dgvTransaksiDetail.Rows.Cast<DataGridViewRow>()
+                    .Where(r => !r.IsNewRow)
+                    .Sum(r => Convert.ToDecimal(r.Cells["Price2"].Value) *
+                              Convert.ToDecimal(r.Cells["Qty2"].Value));
+
+                // Check if combined total matches the transaction total
+                decimal sumCheck = sumTickets + sumDetails;
+                if (sumCheck != controllerTran.objTransaction.totalAmount)
+                {
+                    ClsFungsi.Pesan("Total tidak cocok dengan detail tiket dan detail item.", "ERROR");
+                    btnSave.Enabled = true;
+                    return;
+                }
+
+
+                // Log and insert
+                controllerTran.InsertLogMessage(controllerTran.TransactionID, "PRECHECK OK");
+                try
+                {
+                    controllerTran.InsertTransactionTicket(controllerTran.objTransaction, controllerTran.objCard);
+                    PrintStruck(controllerTran); // always print receipt
+                }
+                catch (Exception ex)
+                {
+                    ClsFungsi.Pesan("Error saat menyimpan transaksi: " + ex.Message, "ERROR");
+                }
+
                 btnSave.Enabled = true;
+                this.Close();
             }
         }
 
-        public void PrintQR(ControllerTransaction trans)
+        // ===== helpers =====
+        private decimal ToDecimalSafe(object v)
         {
-            string tmp;
-            string tmp2;
-            List<string> listqrcode = new List<string>();
-            List<string> listitemname = new List<string>();
-            // get list ticket and 
-            dt = controllerTran.gettransactionTiketDetail(trans.objTransaction.TransactionID);
-            foreach (DataRow row in dt.Rows)
-            {
-                if (row["category"].ToString() != "ACTIVITY")
-                {
-                    tmp = "(&" + row["TransactionID"].ToString() + "&" + row["NoUrut"].ToString() + ")";
-                    tmp2 = row["ItemName"].ToString();
-                    listqrcode.Add(tmp);
-                    listitemname.Add(tmp2);
-                }
-            }
-            //ClsFungsi.Pesan(listqrcode.ToString(), "INFO");
-            // generate qrcode 
-            List<byte[]> listQrCodes = new List<byte[]>();
-            QRCodeGenerator qrGenerator = new QRCodeGenerator();
-
-            foreach (String t in listqrcode)
-            {
-                QRCodeData qrCodeData = qrGenerator.CreateQrCode(t, QRCodeGenerator.ECCLevel.Q);
-                QRCode qrCode = new QRCode(qrCodeData);
-                Bitmap qrCodeImage = qrCode.GetGraphic(5);
-
-                byte[] yourByteArray;
-                using (var mStream = new System.IO.MemoryStream())
-                {
-                    qrCodeImage.Save(mStream, System.Drawing.Imaging.ImageFormat.Bmp);
-                    yourByteArray = mStream.ToArray();
-                    listQrCodes.Add(yourByteArray);
-                }
-            }
-
-            dsQR = controllerTran.LoadListQRCodes(listQrCodes, listqrcode, listitemname);
-            // Show or Print Tiket 
-
-            reportQRDoc2 = new PrintQRCode();
-            reportQRDoc2.SetDataSource(dsQR);
-
-            //MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-            //DialogResult result = MessageBox.Show("Data Ticket berhasil Diload !!! \n Lanjut Cetak Ticket ?", "Print Ticket ? ", buttons);
-            //if (result == DialogResult.Yes)
-            //{
-
-            //}
-            //else
-            //{
-
-            //}
-
-            if (listQrCodes.Count > 0)
-            {
-                PrintQRCode(reportQRDoc2);
-            }
-            else
-            {
-
-            }
-            //// check transaction type 
-            //if (dgvTransTiket.CurrentRow.Cells["TransactionType"].Value.ToString() == "ONE-TIME-TICKET")
-            //{
-
-            //}
-            //else
-            //{
-            //    ClsFungsi.Pesan("Tidak bisa mencetak QRCode karena tiket tersebut bukan ONE TIME TICKET, silahkan gunakan kartu untuk masuk", "INFO");
-            //}
+            if (v == null) return 0m;
+            decimal d;
+            return decimal.TryParse(v.ToString(), out d) ? d : 0m;
         }
+
+        private int ToIntSafe(object v)
+        {
+            if (v == null) return 0;
+            int i;
+            return int.TryParse(v.ToString(), out i) ? i : 0;
+        }
+
+        private void FocusRFIDScan()
+        {
+            if (!txtRFIDScan.Enabled || !txtRFIDScan.Visible) return;
+
+            txtRFIDScan.Focus();
+            txtRFIDScan.SelectAll();   // so next scan overwrites immediately
+        }
+
+
+        //public void PrintQR(ControllerTransaction trans)
+        //{
+        //    string tmp;
+        //    string tmp2;
+        //    List<string> listqrcode = new List<string>();
+        //    List<string> listitemname = new List<string>();
+        //    // get list ticket and 
+        //    dt = controllerTran.gettransactionTiketDetail(trans.objTransaction.TransactionID);
+        //    foreach (DataRow row in dt.Rows)
+        //    {
+        //        if (row["category"].ToString() != "ACTIVITY")
+        //        {
+        //            tmp = "(&" + row["TransactionID"].ToString() + "&" + row["NoUrut"].ToString() + ")";
+        //            tmp2 = row["ItemName"].ToString();
+        //            listqrcode.Add(tmp);
+        //            listitemname.Add(tmp2);
+        //        }
+        //    }
+        //    //ClsFungsi.Pesan(listqrcode.ToString(), "INFO");
+        //    // generate qrcode 
+        //    List<byte[]> listQrCodes = new List<byte[]>();
+        //    QRCodeGenerator qrGenerator = new QRCodeGenerator();
+
+        //    foreach (String t in listqrcode)
+        //    {
+        //        QRCodeData qrCodeData = qrGenerator.CreateQrCode(t, QRCodeGenerator.ECCLevel.Q);
+        //        QRCode qrCode = new QRCode(qrCodeData);
+        //        Bitmap qrCodeImage = qrCode.GetGraphic(5);
+
+        //        byte[] yourByteArray;
+        //        using (var mStream = new System.IO.MemoryStream())
+        //        {
+        //            qrCodeImage.Save(mStream, System.Drawing.Imaging.ImageFormat.Bmp);
+        //            yourByteArray = mStream.ToArray();
+        //            listQrCodes.Add(yourByteArray);
+        //        }
+        //    }
+
+        //    dsQR = controllerTran.LoadListQRCodes(listQrCodes, listqrcode, listitemname);
+        //    // Show or Print Tiket 
+
+        //    reportQRDoc2 = new PrintQRCode();
+        //    reportQRDoc2.SetDataSource(dsQR);
+
+        //    //MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+        //    //DialogResult result = MessageBox.Show("Data Ticket berhasil Diload !!! \n Lanjut Cetak Ticket ?", "Print Ticket ? ", buttons);
+        //    //if (result == DialogResult.Yes)
+        //    //{
+
+        //    //}
+        //    //else
+        //    //{
+
+        //    //}
+
+        //    if (listQrCodes.Count > 0)
+        //    {
+        //        PrintQRCode(reportQRDoc2);
+        //    }
+        //    else
+        //    {
+
+        //    }
+        //    //// check transaction type 
+        //    //if (dgvTransTiket.CurrentRow.Cells["TransactionType"].Value.ToString() == "ONE-TIME-TICKET")
+        //    //{
+
+        //    //}
+        //    //else
+        //    //{
+        //    //    ClsFungsi.Pesan("Tidak bisa mencetak QRCode karena tiket tersebut bukan ONE TIME TICKET, silahkan gunakan kartu untuk masuk", "INFO");
+        //    //}
+        //}
 
         public void PrintQRCode(ReportDocument reportQRDoc)
         {
@@ -340,76 +444,118 @@ namespace MilenialPark.Views.Transaction
             for (int i = 0; i < det.Qty; i++)
             {
                 DataGridViewRow row = (DataGridViewRow)dgvTransacTiketDet.Rows[0].Clone();
-                //Clstr objtransdet = new ClsTransactionDetail("ORDTMP", DateTime.Now, objShopItem.ItemID, objShopItem.ItemName, objShopItem.Price, Convert.ToInt32(NUDQty.Value), "NOTSERVED");
                 row.Cells[0].Value = lblTransactionID.Text;
-                row.Cells[1].Value = DateTime.Now;
-                row.Cells[2].Value = det.ItemId;
-                row.Cells[3].Value = det.ItemName;
-                row.Cells[4].Value = det.Price;
-                row.Cells[5].Value = 1;
-                row.Cells[6].Value = i + 1;
-                row.Cells[7].Value = "TMP";
-                row.Cells[8].Value = DateTime.Now;
-                row.Cells[9].Value = DateTime.Now;
-                row.Cells[10].Value = det.WaktuBermain;
-                row.Cells[11].Value = det.Toleransi;
+                row.Cells[1].Value = "";
+                row.Cells[2].Value = DateTime.Now;
+                row.Cells[3].Value = det.ItemId;
+                row.Cells[4].Value = det.ItemName;
+                row.Cells[5].Value = det.Price;
+                row.Cells[6].Value = 1;               // Always 1
+                row.Cells[7].Value = i + 1;           // NoUrut increments
+                row.Cells[8].Value = "TMP";
+                row.Cells[9].Value = DateTime.Now;    // JamMasuk
+                row.Cells[10].Value = DateTime.Now;    // JamKeluar
+                row.Cells[11].Value = det.WaktuBermain;
+                row.Cells[12].Value = det.Toleransi;
                 dgvTransacTiketDet.Rows.Add(row);
             }
         }
 
         private void FrmPayment_Load(object sender, EventArgs e)
         {
-            cbxRemarks.SelectedIndex = 0;
-            cbxRemarks.Enabled = false;
-
             foreach (ClsTransactionTiketDetail det in controllerTran.objTransaction.listtranstikdet)
             {
-                controllerTran.dt = controllerTran.checkCategory2(det.ItemId);
-                if (controllerTran.dt.Rows.Count > 0)
+                if (det.WaktuBermain > 0)
                 {
-                    string category = controllerTran.dt.Rows[0]["category"].ToString();
-                    if (category == "WEEKDAY" || category == "WEEKEND" || category == "COMPANION")
-                    {
-                        generatetransacttiketdetail(det);
-                    }
-                    else if (category != "WEEKDAY" || category != "WEEKEND" || category != "COMPANION")
-                    {
-                        DataGridViewRow row = (DataGridViewRow)dgvTransacTiketDet.Rows[0].Clone();
-                        //Clstr objtransdet = new ClsTransactionDetail("ORDTMP", DateTime.Now, objShopItem.ItemID, objShopItem.ItemName, objShopItem.Price, Convert.ToInt32(NUDQty.Value), "NOTSERVED");
-                        row.Cells[0].Value = lblTransactionID.Text;
-                        row.Cells[1].Value = DateTime.Now;
-                        row.Cells[2].Value = det.ItemId;
-                        row.Cells[3].Value = det.ItemName;
-                        row.Cells[4].Value = det.Price;
-                        row.Cells[5].Value = det.Qty;
-                        row.Cells[6].Value = 1;
-                        row.Cells[7].Value = "TMP";
-                        row.Cells[8].Value = DateTime.Now;
-                        row.Cells[9].Value = DateTime.Now;
-                        row.Cells[10].Value = det.WaktuBermain;
-                        row.Cells[11].Value = det.Toleransi;
-                        dgvTransacTiketDet.Rows.Add(row);
-                    }
+                    // Always generate one row per ticket
+                    generatetransacttiketdetail(det);
                 }
                 else
                 {
-                    DataGridViewRow row = (DataGridViewRow)dgvTransacTiketDet.Rows[0].Clone();
-                    //Clstr objtransdet = new ClsTransactionDetail("ORDTMP", DateTime.Now, objShopItem.ItemID, objShopItem.ItemName, objShopItem.Price, Convert.ToInt32(NUDQty.Value), "NOTSERVED");
-                    row.Cells[0].Value = lblTransactionID.Text;
-                    row.Cells[1].Value = DateTime.Now;
-                    row.Cells[2].Value = det.ItemId;
-                    row.Cells[3].Value = det.ItemName;
-                    row.Cells[4].Value = det.Price;
-                    row.Cells[5].Value = det.Qty;
-                    row.Cells[6].Value = 1;
-                    row.Cells[7].Value = "TMP";
-                    row.Cells[8].Value = DateTime.Now;
-                    row.Cells[9].Value = DateTime.Now;
-                    row.Cells[10].Value = det.WaktuBermain;
-                    row.Cells[11].Value = det.Toleransi;
-                    dgvTransacTiketDet.Rows.Add(row);
+                    dgvTransaksiDetail.Rows.Add(
+                    controllerTran.objTransaction.TransactionID,
+                    DateTime.Now,
+                    det.ItemId,
+                    det.ItemName,
+                    det.Price,
+                    det.Qty,
+                    1,             // NoUrut
+                    det.OrderStatus ?? "TMP",
+                    DateTime.Now,
+                    DateTime.Now,
+                    0,  // WaktuBermain
+                    0   // Toleransi
+                );
                 }
+                    
             }
+
+            cbxRemarks.SelectedIndex = 0;
+            cbxRemarks.Enabled = false;
+
+            DataGridViewHelper.ApplyPOSStyle(dgvTransacTiketDet);
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvTransacTiketDet, 100, 420);
+
+            DataGridViewHelper.ApplyPOSStyle(dgvTransaksiDetail);
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvTransaksiDetail, 100, 420);
+
+
         }
+
+        private void txtRFIDScan_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            
+        }
+
+        private void txtRFIDScan_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter) return;
+
+            e.SuppressKeyPress = true;
+
+            if (dgvTransacTiketDet.CurrentRow == null) return;
+
+            string rfid = txtRFIDScan.Text.Trim();
+            if (string.IsNullOrEmpty(rfid)) return;
+
+            // Optional: prevent duplicate RFID
+            bool exists = dgvTransacTiketDet.Rows
+                .Cast<DataGridViewRow>()
+                .Any(r => !r.IsNewRow &&
+                          Convert.ToString(r.Cells["RFID"].Value) == rfid);
+
+            if (exists)
+            {
+                ClsFungsi.Pesan("RFID sudah digunakan!", "WARNING");
+                FocusRFIDScan();
+                return;
+            }
+
+            // Assign RFID to current row
+            dgvTransacTiketDet.CurrentRow.Cells["RFID"].Value = rfid;
+
+            // Auto move to next row
+            int nextIndex = dgvTransacTiketDet.CurrentRow.Index + 1;
+            if (nextIndex < dgvTransacTiketDet.Rows.Count)
+            {
+                dgvTransacTiketDet.CurrentCell =
+                    dgvTransacTiketDet.Rows[nextIndex].Cells["RFID"];
+            }
+
+            txtRFIDScan.Clear();
+            FocusRFIDScan();
+        }
+
+
+        private void dgvTransacTiketDet_SelectionChanged(object sender, EventArgs e)
+        {
+            // Delay focus slightly so DataGridView finishes its internal processing
+            BeginInvoke(new Action(FocusRFIDScan));
+        }
+
     }
 }

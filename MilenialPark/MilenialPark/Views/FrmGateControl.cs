@@ -19,13 +19,30 @@ namespace MilenialPark.Views
     {
         #region properties
 
+        private bool _suppressReminderPopup = false; // dipakai saat enter/exit
+
         public SerialPort sp = new SerialPort();
         public ControllerShop controllerShop = new ControllerShop();
         public ControllerTransaction controllerTrans = new ControllerTransaction();
         public DataTable dt = new DataTable();
 
-        DateTime start = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
-        DateTime end = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59); 
+        DateTime startDay => new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
+        DateTime endDay => new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59);
+
+        private readonly Timer reminderTimer = new Timer();
+
+        // optional: untuk mencegah double scan RFID yang sama dalam hitungan detik
+        private string _lastRFID = "";
+        private DateTime _lastScanTime = DateTime.MinValue;
+        // === ADD THIS ===
+        private string _lastAlertState = "";   // "", "RED", "YELLOW"
+
+
+        private readonly int[] SupportedBaudRates =
+        {
+            9600, 19200, 38400, 57600, 115200
+        };
+
 
         #endregion
 
@@ -34,128 +51,218 @@ namespace MilenialPark.Views
             InitializeComponent();
         }
 
-        private void btnConn_Click(object sender, EventArgs e)
+        private void FrmGateControl_Load(object sender, EventArgs e)
         {
-            if (ComboPort.SelectedIndex != -1)
+            btnRefrs_Click(null, null);
+
+            InitBaudRate();
+            InitSerialDefaults();
+
+            SetupReminderGrid();
+            RefreshReminderCore();
+
+            reminderTimer.Interval = 5 * 60 * 1000; // 1 menit (kamu tulis 5 menit tapi nilainya 1)
+            reminderTimer.Tick += reminderTimer_Tick;
+            reminderTimer.Start();
+
+
+            DataGridViewHelper.ApplyPOSStyle(dgvReminder);
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvReminder, 100, 420);
+
+            this.FormClosing += FrmGateControl_FormClosing;
+        }
+
+        private void InitBaudRate()
+        {
+            cbxBaudRate.Items.Clear();
+            foreach (int br in SupportedBaudRates)
+                cbxBaudRate.Items.Add(br);
+
+            cbxBaudRate.SelectedItem = 9600; // default RFID reader
+        }
+
+        private void InitSerialDefaults()
+        {
+            sp = new SerialPort();
+            sp.DataReceived += serialPort_DataReceived;
+
+            sp.Encoding = Encoding.ASCII;
+            sp.ReadTimeout = 500;
+            sp.WriteTimeout = 500;
+
+            // SAFE defaults
+            sp.Parity = Parity.None;
+            sp.DataBits = 8;
+            sp.StopBits = StopBits.One;
+            sp.Handshake = Handshake.None;
+            sp.NewLine = "\r\n";
+        }
+
+
+        private void SetupReminderGrid()
+        {
+            dgvReminder.AutoGenerateColumns = false;
+            dgvReminder.Columns.Clear();
+
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "TransactionID", HeaderText = "TransactionID", DataPropertyName = "TransactionID" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "NoUrut", HeaderText = "NoUrut", DataPropertyName = "NoUrut" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "RFID", HeaderText = "RFID", DataPropertyName = "RFID" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "ItemName", HeaderText = "ItemName", DataPropertyName = "ItemName" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "JamMasuk", HeaderText = "JamMasuk", DataPropertyName = "JamMasuk" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "JamKeluar", HeaderText = "JamKeluar", DataPropertyName = "JamKeluar" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "SisaMenit", HeaderText = "Sisa (Menit)", DataPropertyName = "SisaMenit" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "Urgency", HeaderText = "Urgency", DataPropertyName = "Urgency" });
+
+            dgvReminder.ReadOnly = true;
+            dgvReminder.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        }
+
+        private void reminderTimer_Tick(object sender, EventArgs e)
+        {
+            if (_isClosing) return;
+            RefreshReminderWithPopup();
+        }
+
+
+        private void RefreshReminderCore()
+        {
+            dgvReminder.AutoGenerateColumns = false;
+
+            try
             {
-                if (sp.IsOpen == false)
+                // ✅ jangan Rows.Clear() kalau pakai DataSource
+                dgvReminder.DataSource = null;
+
+                var raw = controllerTrans.GetReminderEnterIn(startDay, endDay);
+
+                if (!raw.Columns.Contains("SisaMenit")) raw.Columns.Add("SisaMenit", typeof(int));
+                if (!raw.Columns.Contains("Urgency")) raw.Columns.Add("Urgency", typeof(string));
+
+                DateTime now = DateTime.Now;
+
+                foreach (DataRow row in raw.Rows)
                 {
-                    sp.PortName = ComboPort.SelectedItem.ToString();
-                    sp.Open();
-                    PortStatus.Text = "Connected";
-                    PortStatus.BackColor = Color.FromArgb(0, 255, 0);
+                    int waktuBermain = row["WaktuBermain"] == DBNull.Value ? 0 : Convert.ToInt32(row["WaktuBermain"]);
+
+                    if (waktuBermain == 15)
+                    {
+                        row["SisaMenit"] = 9999;
+                        row["Urgency"] = "GREEN";
+                        continue;
+                    }
+
+                    DateTime jamKeluar = row["JamKeluar"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["JamKeluar"]);
+                    int sisaMenit = (int)Math.Round((jamKeluar - now).TotalMinutes);
+
+                    row["SisaMenit"] = sisaMenit;
+
+                    if (jamKeluar == DateTime.MinValue)
+                        row["Urgency"] = "GREEN";
+                    else if (now >= jamKeluar)
+                        row["Urgency"] = "RED";
+                    else if (sisaMenit <= 15)
+                        row["Urgency"] = "YELLOW";
+                    else
+                        row["Urgency"] = "GREEN";
                 }
-                sp.DataReceived += serialPort_DataReceived;
+
+                dgvReminder.DataSource = raw;
+
+                foreach (DataGridViewRow r in dgvReminder.Rows)
+                {
+                    if (r.IsNewRow) continue;
+                    string urg = Convert.ToString(r.Cells["Urgency"].Value);
+
+                    if (urg == "RED") r.DefaultCellStyle.BackColor = Color.Red;
+                    else if (urg == "YELLOW") r.DefaultCellStyle.BackColor = Color.Yellow;
+                    else r.DefaultCellStyle.BackColor = Color.LightGreen;
+                }
+            }
+            catch (Exception ex)
+            {
+                rtxDataIO.Text += "\n[Reminder Error] " + ex.Message;
             }
         }
+
+
+        private void RefreshReminderWithPopup()
+        {
+            RefreshReminderCore();
+
+            // kalau lagi suppress (misal enter/exit), stop di sini
+            if (_suppressReminderPopup) return;
+
+            try
+            {
+                bool hasWarning = false;
+                bool hasCritical = false;
+
+                // dgvReminder.DataSource adalah DataTable "raw"
+                DataTable dt = dgvReminder.DataSource as DataTable;
+                if (dt == null) return;
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    string urg = Convert.ToString(row["Urgency"]);
+                    if (urg == "RED") hasCritical = true;
+                    else if (urg == "YELLOW") hasWarning = true;
+                }
+
+                // tentukan state sekarang
+                string currentState = "";
+                if (hasCritical) currentState = "RED";
+                else if (hasWarning) currentState = "YELLOW";
+
+                // Pop up hanya jika status naik/berubah (biar tidak spam)
+                if (currentState != "" && currentState != _lastAlertState)
+                {
+                    if (currentState == "RED")
+                    {
+                        MessageBox.Show("⚠️ ADA TIKET SUDAH HABIS WAKTU!", "TIME OUT",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else if (currentState == "YELLOW")
+                    {
+                        MessageBox.Show("⏰ ADA TIKET AKAN HABIS ≤ 15 MENIT!", "WARNING",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+
+                // simpan state terakhir
+                _lastAlertState = currentState;
+            }
+            catch (Exception ex)
+            {
+                rtxDataIO.Text += "\n[Reminder Popup Error] " + ex.Message;
+            }
+        }
+
 
         private void btnRefrs_Click(object sender, EventArgs e)
         {
             ComboPort.SelectedIndex = -1;
             ComboPort.Items.Clear();
             string[] ports = SerialPort.GetPortNames();
-            foreach (string port in ports)
-            {
-                ComboPort.Items.Add(port);  
-            }
-            if (ports.Length > 0)
-            {
-                ComboPort.SelectedIndex = 0;
-            }
+            foreach (string port in ports) ComboPort.Items.Add(port);
+            if (ports.Length > 0) ComboPort.SelectedIndex = 0;
         }
 
-        private void FrmGateControl_Load(object sender, EventArgs e)
+        private void btnConn_Click(object sender, EventArgs e)
         {
-            btnRefrs_Click(null, null);
+            if (ComboPort.SelectedIndex == -1) return;
 
-            //if (!ClsStaticVariables.controllerUser.objUser.HakAkses.Contains("admin"))
-            //{
-            //    lblmanual.Visible = false;
-            //    txtGateCode.Visible = false;
-            //    btnSend.Visible = false;
-            //}
-        }
-
-        public void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
-        {
-            SerialPort sp = (SerialPort)sender;
-            string s = sp.ReadLine();
-            this.BeginInvoke(new Action(() =>
+            if (!sp.IsOpen)
             {
-                rtxDataIO.Text += s;
+                sp.PortName = ComboPort.SelectedItem.ToString();
+                sp.Open();
+                PortStatus.Text = "Connected";
+                PortStatus.BackColor = Color.FromArgb(0, 255, 0);
+            }
 
-                if (s.Contains("(") && s.Contains(")") && s.Contains(","))
-                {
-                    string[] data = s.Split(',');
-                    data[0] = data[0].Replace("(", "");
-                    data[1] = data[1].Replace(")\r", "");
-                    string[] dataqr = data[0].Split('&');
-                    try
-                    {
-                        // check In or Out 
-                        if (Convert.ToInt32(data[1]) == 2)
-                        {
-                            // IN 
-                            // check Enter 
-                            start = start.AddDays(-240);
-                            dt = controllerTrans.getTiketwithTID(dataqr[1], "BOUGHT", Convert.ToInt32(dataqr[2]), start, end);
-                            if (dt.Rows.Count == 1)
-                            {
-                                ClsStaticVariable.QRCODEtoReply = dt.Rows[0]["TransactionID"].ToString();
-                                ClsStaticVariable.NoUrut = Convert.ToInt32(dt.Rows[0]["NoUrut"]);
-                                rtxDataIO.Text += "*" + data[1].ToString().Replace("\r", "") + "," + "buka" + "," + "SELAMAT DATANG" + "#";
-                                string reply = "*" + data[1].ToString().Replace("\r", "") + "," + "buka" + "," + "SELAMAT DATANG" + "#";
-                                sp.WriteLine(reply);
-                            }
-                            else
-                            {
-                                rtxDataIO.Text += "*" + data[1].ToString().Replace("\r", "") + "," + "tutup" + "," + "TIDAK ADA TIKET / SDH DIGUNAKAN" + "#";
-                                string reply = "*" + data[1].ToString().Replace("\r", "") + "," + "tutup" + "," + "TIDAK ADA TIKET / SDH DIGUNAKAN" + "#";
-                                sp.WriteLine(reply);
-                            }
-                        }
-                        //else if (Convert.ToInt32(data[1]) == 3)
-                        //{
-                        //    // OUT 
-                        //    dt = controllerTrans.getTiketwithTID(dataqr[1], "ENTER-IN", Convert.ToInt32(dataqr[2]), start, end);
-                        //    if (dt.Rows.Count == 1)
-                        //    {
-                        //        controllerTrans.UpdateOrderStatusTiket(dt.Rows[0]["TransactionID"].ToString(), Convert.ToInt32(dt.Rows[0]["NoUrut"]), "ENTER-OUT");
-                        //        rtxDataIO.Text += "*" + data[1].ToString().Replace("\r", "") + "," + "buka" + "," + "SELAMAT JALAN" + "#";
-                        //        string reply = "*" + data[1].ToString().Replace("\r", "") + "," + "buka" + "," + "SELAMAT JALAN" + "#";
-                        //        sp.WriteLine(reply);
-                        //    }
-                        //    else
-                        //    {
-                        //        rtxDataIO.Text += "*" + data[1].ToString().Replace("\r", "") + "," + "tutup" + "," + "TIDAK ADA TIKET / SDH DIGUNAKAN" + "#";
-                        //        string reply = "*" + data[1].ToString().Replace("\r", "") + "," + "tutup" + "," + "TIDAK ADA TIKET / SDH DIGUNAKAN" + "#";
-                        //        sp.WriteLine(reply);
-                        //    }
-                        //}
-                    }
-                    catch (Exception ex)
-                    {
-                        rtxDataIO.Text += "Terjadi error pada scan Card , pesan error = " + ex.Message;
-                    }
-                }
-                else if (s.Contains("[") && s.Contains("]") && s.Contains("OK"))
-                {
-                    if(ClsStaticVariable.QRCODEtoReply != "-" && ClsStaticVariable.NoUrut > 0)
-                    {
-                        try
-                        {
-                            controllerTrans.UpdateOrderStatusTiket(ClsStaticVariable.QRCODEtoReply, ClsStaticVariable.NoUrut, "ENTER-IN");
-                            ClsStaticVariable.QRCODEtoReply = "-";
-                            ClsStaticVariable.NoUrut = 0;
-                            rtxDataIO.Text += "Data Updated!!!";
-                        }
-                        catch (Exception ex)
-                        {
-                            rtxDataIO.Text += "Terjadi error pada scan Card , pesan error = " + ex.Message;
-                        }
-                    }
-                }
-            }));
+            sp.DataReceived -= serialPort_DataReceived;
+            sp.DataReceived += serialPort_DataReceived;
         }
 
         private void btnDisc_Click(object sender, EventArgs e)
@@ -189,9 +296,208 @@ namespace MilenialPark.Views
             }
         }
 
+        public void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        {
+            SerialPort port = (SerialPort)sender;
+            string s = port.ReadLine();
+
+            BeginInvoke(new Action(() =>
+            {
+                rtxDataIO.Text += s;
+
+                // contoh format: "(<payload>,<gateCode>)"
+                string payload;
+                int gateCode;
+                if (TryParseGatePacket(s, out payload, out gateCode))
+                {
+                    // anti double-scan cepat
+                    if (payload == _lastRFID && (DateTime.Now - _lastScanTime).TotalSeconds < 2)
+                        return;
+
+                    _lastRFID = payload;
+                    _lastScanTime = DateTime.Now;
+
+                    // gateCode==2 IN (sesuai code lama kamu)
+                    if (gateCode == 2)
+                        HandleEnter(payload, gateCode, port);
+                    else
+                        HandleExit(payload, gateCode, port);
+
+                    return;
+                }
+
+                // ack OK dari device
+                if (s.Contains("[") && s.Contains("]") && s.Contains("OK"))
+                {
+                    // optional: kalau device kamu memang kirim OK setelah buka, kamu bisa log saja
+                    rtxDataIO.Text += "\n[Device OK]";
+                }
+            }));
+        }
+
+        private void HandleEnter(string rfid, int gateCode, SerialPort port)
+        {
+            try
+            {
+                _suppressReminderPopup = true;
+                // Cari tiket yang masih BOUGHT untuk hari ini berdasarkan RFID
+                dt = controllerTrans.GetTicketByRFID(rfid, "BOUGHT", startDay, endDay);
+
+                if (dt.Rows.Count == 1)
+                {
+                    string tid = dt.Rows[0]["TransactionID"].ToString();
+                    int noUrut = Convert.ToInt32(dt.Rows[0]["NoUrut"]);
+                    int waktuBermain = dt.Rows[0]["WaktuBermain"] == DBNull.Value ? 0 : Convert.ToInt32(dt.Rows[0]["WaktuBermain"]);
+                    int toleransi = dt.Rows[0]["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(dt.Rows[0]["Toleransi"]);
+
+                    // Update JamMasuk & JamKeluar (expected end) + status ENTER-IN
+                    controllerTrans.UpdateOrderStatusTiketandTime(tid, noUrut, waktuBermain, toleransi, "ENTER-IN");
+
+                    // Buka gate
+                    SendGateReply(port, gateCode, true, "SELAMAT DATANG");
+
+                    RefreshReminderCore();
+                }
+                else
+                {
+                    SendGateReply(port, gateCode, false, "TIDAK ADA TIKET / SDH DIGUNAKAN");
+                }
+                _suppressReminderPopup = false;
+            }
+            catch (Exception ex)
+            {
+                rtxDataIO.Text += "\n[ENTER Error] " + ex.Message;
+                SendGateReply(port, gateCode, false, "ERROR");
+                _suppressReminderPopup = false;
+            }
+
+        }
+
+        private void HandleExit(string rfid, int gateCode, SerialPort port)
+        {
+            try
+            {
+                _suppressReminderPopup = true;
+                // Cari tiket yang sedang bermain (ENTER-IN)
+                dt = controllerTrans.GetTicketByRFID(rfid, "ENTER-IN", startDay, endDay);
+
+                if (dt.Rows.Count == 1)
+                {
+                    string tid = dt.Rows[0]["TransactionID"].ToString();
+                    int noUrut = Convert.ToInt32(dt.Rows[0]["NoUrut"]);
+
+                    // OUT: set JamKeluar actual = now, status ENTER-OUT (kamu bisa rename sesuai kebutuhan)
+                    controllerTrans.UpdateOrderStatusTiketOut(tid, noUrut, "ENTER-OUT");
+
+                    SendGateReply(port, gateCode, true, "TERIMA KASIH");
+
+                    RefreshReminderCore();
+                }
+                else
+                {
+                    // kalau bukan ENTER-IN berarti invalid untuk keluar
+                    SendGateReply(port, gateCode, false, "TIKET TIDAK VALID");
+                }
+                _suppressReminderPopup = false;
+            }
+            catch (Exception ex)
+            {
+                rtxDataIO.Text += "\n[EXIT Error] " + ex.Message;
+                SendGateReply(port, gateCode, false, "ERROR");
+                _suppressReminderPopup = false;
+            }
+        }
+
+        private void SendGateReply(SerialPort port, int gateCode, bool open, string message)
+        {
+            if (port == null || !port.IsOpen) return;
+
+            string cmd = open ? "buka" : "tutup";
+            string reply = "*" + gateCode.ToString().Replace("\r", "") + "," + cmd + "," + message + "#";
+            rtxDataIO.Text += "\n>> " + reply;
+            port.WriteLine(reply);
+        }
+
+        private bool TryParseGatePacket(string raw, out string payload, out int gateCode)
+        {
+            payload = "";
+            gateCode = 0;
+
+            if (!raw.Contains("(") || !raw.Contains(")") || !raw.Contains(",")) return false;
+
+            // ambil isi dalam ()
+            int i1 = raw.IndexOf("(");
+            int i2 = raw.IndexOf(")");
+            if (i2 <= i1) return false;
+
+            string inside = raw.Substring(i1 + 1, i2 - i1 - 1); // "payload,2"
+            string[] parts = inside.Split(',');
+
+            if (parts.Length < 2) return false;
+
+            payload = (parts[0] ?? "").Trim();
+
+            // kalau payload format lama QR: "&TRT..&NoUrut" -> ambil beda? (kita pakai RFID, jadi ignore)
+            // tapi supaya aman, kalau ternyata ada & -> mungkin scan QR lama
+            if (payload.Contains("&"))
+            {
+                // format " &TRT.xxx&NoUrut " -> ambil semuanya? atau reject
+                // Kita reject agar tidak salah
+                return false;
+            }
+
+            if (!int.TryParse(parts[1].Trim().Replace("\r", ""), out gateCode))
+                return false;
+
+            // RFID wajib ada
+            if (string.IsNullOrWhiteSpace(payload)) return false;
+
+            return true;
+        }
+
+        private bool _isClosing = false;
+
         private void FrmGateControl_FormClosing(object sender, FormClosingEventArgs e)
         {
-            btnDisc_Click(null, null);
+            _isClosing = true;
+
+            try
+            {
+                // 1. Stop timers
+                if (reminderTimer != null)
+                {
+                    reminderTimer.Stop();
+                    reminderTimer.Tick -= reminderTimer_Tick; // ✅ sekarang bisa dilepas
+                }
+
+                // Stop reminder popup
+                _suppressReminderPopup = true;
+
+                // Close SerialPort safely
+                if (sp != null)
+                {
+                    try
+                    {
+                        sp.DataReceived -= serialPort_DataReceived;
+
+                        if (sp.IsOpen)
+                            sp.Close();
+                    }
+                    catch { }
+
+                    try { sp.Dispose(); } catch { }
+                }
+
+                // 4. Optional logging
+                rtxDataIO.AppendText("\n[INFO] GateControl closed safely");
+            }
+            catch (Exception ex)
+            {
+                // ❗ DO NOT block closing
+                rtxDataIO.AppendText("\n[Close Error] " + ex.Message);
+            }
         }
+
+
     }
 }

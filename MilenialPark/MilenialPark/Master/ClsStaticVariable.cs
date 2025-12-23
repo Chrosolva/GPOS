@@ -31,7 +31,8 @@ namespace MilenialPark.Master
         public static ClsTransaction currenttrans;
         public static int WaktuBermain = 0;
         public static int Toleransi = 0;
-        public static string KodeBranch = "";
+        //public static string KodeBranch = "BSTCMR";
+        public static string KodeBranch = "JCITY";
 
         #region function
 

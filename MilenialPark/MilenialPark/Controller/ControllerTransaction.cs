@@ -525,10 +525,16 @@ namespace MilenialPark.Controller
                         int index = 1;
                         foreach (ClsTransactionTiketDetail transdet in trans.listtranstikdet)
                         {
-                            query2 = " Insert Into WHNPOS.dbo.TransaksiTiketDetail " +
-                                     " (TransactionID, TransactionDate, ItemID, ItemName, Price, Qty, NoUrut, OrderStatus, JamMasuk, JamKeluar, WaktuBermain, Toleransi) " +
-                                     " values " +
-                                     $"({ClsFungsi.C2Q(transdet.TransactionID)}, GETDATE(), {ClsFungsi.C2Q(transdet.ItemId)}, {ClsFungsi.C2Q(transdet.ItemName)}, {ClsFungsi.C2Q(transdet.Price)}, {ClsFungsi.C2Q(transdet.Qty)}, {ClsFungsi.C2Q(index)}, {ClsFungsi.C2Q(transdet.OrderStatus)}, {ClsFungsi.C2QTime(transdet.JamMasuk)}, {ClsFungsi.C2QTime(transdet.JamKeluar)}, {ClsFungsi.C2Q(transdet.WaktuBermain)}, {ClsFungsi.C2Q(transdet.Toleransi)})";
+                            // Build the insert for a ticket detail with RFID
+                            query2 = "INSERT INTO WHNPOS.dbo.TransaksiTiketDetail " +
+                                     "(TransactionID, TransactionDate, ItemID, ItemName, Price, Qty, NoUrut, " +
+                                     " OrderStatus, JamMasuk, JamKeluar, WaktuBermain, Toleransi, RFID) VALUES " +
+                                     $"({ClsFungsi.C2Q(transdet.TransactionID)}, GETDATE(), {ClsFungsi.C2Q(transdet.ItemId)}, " +
+                                     $"{ClsFungsi.C2Q(transdet.ItemName)}, {ClsFungsi.C2Q(transdet.Price)}, {ClsFungsi.C2Q(transdet.Qty)}, " +
+                                     $"{ClsFungsi.C2Q(index)}, {ClsFungsi.C2Q(transdet.OrderStatus)}, {ClsFungsi.C2QTime(transdet.JamMasuk)}, " +
+                                     $"{ClsFungsi.C2QTime(transdet.JamKeluar)}, {ClsFungsi.C2Q(transdet.WaktuBermain)}, " +
+                                     $"{ClsFungsi.C2Q(transdet.Toleransi)}, {ClsFungsi.C2Q(transdet.RFID)})";
+
 
                             index++;
                             try
@@ -1115,48 +1121,56 @@ namespace MilenialPark.Controller
             return ds;
         }
 
+        public DataTable GetTicketByRFID(string rfid, string orderStatus, DateTime start, DateTime end)
+        {
+            // Cari tiket hari ini berdasarkan RFID + status
+            query =
+                "SELECT TOP 1 TRD.*, TR.TransactionDate " +
+                "FROM WHNPOS.dbo.TransaksiTiketDetail TRD " +
+                "INNER JOIN WHNPOS.dbo.Transaksi TR ON TRD.TransactionID = TR.TransactionID " +
+                $"WHERE ISNULL(TRD.RFID,'') = {ClsFungsi.C2Q(rfid)} " +
+                $"AND TRD.OrderStatus = {ClsFungsi.C2Q(orderStatus)} " +
+                $"AND TR.TransactionDate >= {ClsFungsi.C2QTime(start)} " +
+                $"AND TR.TransactionDate <= {ClsFungsi.C2QTime(end)} " +
+                "ORDER BY TR.TransactionDate DESC, TRD.NoUrut ASC";
 
+            return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        }
 
-        //public string ExtendOvertime(ClsExtend data2, ClsTransaction trans, ClsCard card)
-        //{
-        //    try
-        //    {
-        //        this.InsertTransactionTicket(trans, card); 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        string logmessage = "Data Ticket gagal di Extend , pesan error = " + ex.Message;
-        //        string queryy = $" Insert Into WHNPOS.dbo.DataLog (TransactionID, LogMessage, LogType) values ({ClsFungsi.C2Q(data2.TransactionID)}, {ClsFungsi.C2Q(logmessage)}, {ClsFungsi.C2Q("ERROR")})";
-        //        ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(queryy);
-        //        return "Data Ticket gagal di Extend , pesan error = " + ex.Message;
-        //    }
+        // untuk OUT scan (actual exit): set JamKeluar = NOW + status
+        public void UpdateOrderStatusTiketOut(string transactionID, int noUrut, string orderStatus)
+        {
+            DateTime now = DateTime.Now;
 
-        //    query = $"Update WHNPOS.dbo.TransaksiTiketDetail set OrderStatus = 'ENTER-IN', JamKeluar = {ClsFungsi.C2QTime(data2.JamKeluarAkhir)} where TransactionID = {ClsFungsi.C2Q(data2.TransactionID)} and NoUrut = {ClsFungsi.C2Q(data2.NoUrut)}";
-        //    query2 = $"Insert Into WHNPOS.dbo.TblExtend(TransactionID, TransactionDate, NoUrut, ItemID, ItemIDExtend, Price, WaktuBermain, JamKeluarAwal, JamKeluarAkhir, TransactIDExt) values " + 
-        //             $" ({ClsFungsi.C2Q(data2.TransactionID)}, {ClsFungsi.C2Q(DateTime.Now)}, {ClsFungsi.C2Q(data2.NoUrut)}, {ClsFungsi.C2Q(data2.ItemID)}, {ClsFungsi.C2Q(data2.ItemIDExtend)}, {ClsFungsi.C2Q(data2.Price)}, {ClsFungsi.C2Q(data2.WaktuBermain)}, {ClsFungsi.C2QTime(data2.JamKeluarAwal)}, {ClsFungsi.C2QTime(data2.JamKeluarAwal)}, {ClsFungsi.C2Q(data2.TransactIDExtend)}) ";
+            query =
+                $"UPDATE WHNPOS.dbo.TransaksiTiketDetail " +
+                $"SET JamKeluar = {ClsFungsi.C2QTime(now)}, OrderStatus = {ClsFungsi.C2Q(orderStatus)} " +
+                $"WHERE TransactionID = {ClsFungsi.C2Q(transactionID)} AND NoUrut = {ClsFungsi.C2Q(noUrut)}";
 
-        //    try
-        //    {
-        //        string logmessage = "Update WHNPOS.dbo.TransaksiTiketDetail, query = " + query;
-        //        string queryy = $" Insert Into WHNPOS.dbo.DataLog (TransactionID, LogMessage, LogType) values ({ClsFungsi.C2Q(data2.TransactionID)}, {ClsFungsi.C2Q(logmessage)}, {ClsFungsi.C2Q("INFO")})";
-        //        ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(queryy);
-        //        ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query);
-        //        logmessage = "Insert WHNPOS.dbo.TransaksiTiketDetail, query = " + query2;
-        //        queryy = $" Insert Into WHNPOS.dbo.DataLog (TransactionID, LogMessage, LogType) values ({ClsFungsi.C2Q(data2.TransactionID)}, {ClsFungsi.C2Q(logmessage)}, {ClsFungsi.C2Q("INFO")})";
-        //        ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(queryy);
-        //        ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query2);
-        //        return "Extend Ticket Berhasil Dilakukan, Jam Keluar anda adalah : " + data2.JamKeluarAkhir.ToString();
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        string logmessage = "5. !!! Extend Transaction Tiket FAILED ";
-        //        string queryy = $" Insert Into WHNPOS.dbo.DataLog (TransactionID, LogMessage, LogType) values ({ClsFungsi.C2Q(data2.TransactionID)}, {ClsFungsi.C2Q(logmessage)}, {ClsFungsi.C2Q("ERROR")})";
-        //        ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(queryy);
-        //        return "Data Transaksi Tiket Gagal Diextend !!! error message = " + ex.Message;
-        //    }
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query);
 
-            
-        //}
+            string logmessage = $"Update OUT: JamKeluar={now}, OrderStatus={orderStatus}, TID={transactionID}, NoUrut={noUrut}";
+            string qlog = $"INSERT INTO WHNPOS.dbo.Datalog (TransactionID, LogMessage, LogType) " +
+                          $"VALUES ({ClsFungsi.C2Q(transactionID)}, {ClsFungsi.C2Q(logmessage)}, 'INFO')";
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(qlog);
+        }
+
+        // list reminder: semua ENTER-IN hari ini
+        public DataTable GetReminderEnterIn(DateTime start, DateTime end)
+        {
+            query =
+                "SELECT TRD.TransactionID, TRD.NoUrut, TRD.RFID, TRD.ItemID, TRD.ItemName, " +
+                "TRD.JamMasuk, TRD.JamKeluar, TRD.WaktuBermain, TRD.Toleransi, TRD.OrderStatus, TR.TransactionDate " +
+                "FROM WHNPOS.dbo.TransaksiTiketDetail TRD " +
+                "INNER JOIN WHNPOS.dbo.Transaksi TR ON TRD.TransactionID = TR.TransactionID " +
+                $"WHERE TRD.OrderStatus = 'ENTER-IN' " +
+                $"AND TR.TransactionDate >= {ClsFungsi.C2QTime(start)} " +
+                $"AND TR.TransactionDate <= {ClsFungsi.C2QTime(end)} " +
+                "ORDER BY TRD.JamKeluar ASC";
+
+            return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        }
+
 
         #endregion
     }
