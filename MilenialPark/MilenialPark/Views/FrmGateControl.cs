@@ -61,7 +61,7 @@ namespace MilenialPark.Views
             SetupReminderGrid();
             RefreshReminderCore();
 
-            reminderTimer.Interval = 5 * 60 * 1000; // 1 menit (kamu tulis 5 menit tapi nilainya 1)
+            reminderTimer.Interval = 1 * 60 * 1000; // 1 menit (kamu tulis 5 menit tapi nilainya 1)
             reminderTimer.Tick += reminderTimer_Tick;
             reminderTimer.Start();
 
