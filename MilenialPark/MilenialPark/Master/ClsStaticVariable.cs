@@ -24,7 +24,7 @@ namespace MilenialPark.Master
         public static UCOrderItem ucOrderItem = new UCOrderItem();
         public static Mainform mainForm;
         public static bool sukses = false;
-        public static string ShopID = "";
+        public static string ShopID = "JOYLAND";
         public static string CardID = "";
         public static string TransactionID = "";
         public static string currentID = "";

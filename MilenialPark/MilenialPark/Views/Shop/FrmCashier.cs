@@ -35,17 +35,81 @@ namespace MilenialPark.Views.Shop
 
         private void FrmCashier_Load(object sender, EventArgs e)
         {
-            hasShop();
+            // If a universal shop ID is configured, load it directly; otherwise fall back to per-user logic
+            if (!string.IsNullOrEmpty(ClsStaticVariable.ShopID))
+            {
+                LoadUniversalShop(ClsStaticVariable.ShopID);
+            }
+            else
+            {
+                hasShop();
+            }
+
+            DataGridViewHelper.ApplyPOSStyle(dgvShopItem);
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvShopItem, 100, 420);
+
+            DataGridViewHelper.ApplyPOSStyle(dgvShopItemTiket);
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvShopItemTiket, 100, 420);
+
+            DataGridViewHelper.ApplyPOSStyle(dgvActivity);
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvActivity, 100, 420);
         }
 
+        private void LoadUniversalShop(string shopId)
+        {
+            // Load the shop information by ShopID
+            controllerShop.getcashier2(shopId);
+            if (!string.IsNullOrEmpty(controllerShop.objShop.ShopName?.Trim()))
+            {
+                // Populate labels and text boxes
+                parentfrm.lblShopID.Visible = true;
+                parentfrm.lblShopName.Visible = true;
+                parentfrm.lblMainProduct.Visible = true;
+                parentfrm.lblAddress.Visible = true;
+
+                parentfrm.lblShopID.Text = controllerShop.objShop.ShopID;
+                parentfrm.lblShopName.Text = controllerShop.objShop.ShopName;
+                parentfrm.lblMainProduct.Text = controllerShop.objShop.MainProduct;
+                parentfrm.lblAddress.Text = controllerShop.objShop.Address;
+
+                lblShopID2.Text = controllerShop.objShop.ShopID;
+                txtShopName.Text = controllerShop.objShop.ShopName;
+                txtMainProduct.Text = controllerShop.objShop.MainProduct;
+                txtAddress.Text = controllerShop.objShop.Address;
+
+                // Load items for the shop
+                getShop();
+
+                // Enable relevant buttons
+                btnEdit.Enabled = true;
+                btnCreateShopItem.Enabled = true;
+                btnEditShopItem.Enabled = true;
+                btnDelete.Enabled = true;
+            }
+            else
+            {
+                // If no shop data found, disable item management
+                btnEdit.Enabled = false;
+                btnCreateShopItem.Enabled = false;
+                btnEditShopItem.Enabled = false;
+                btnDelete.Enabled = false;
+            }
+        }
+
+        // Original per-user shop check (optional if you still support separate cashier shops)
         public void hasShop()
         {
             if (controllerShop.checkCashier(ClsStaticVariable.controllerUser.objUser.UserID))
             {
-                //btnCreate.Enabled = false;
                 btnEdit.Enabled = true;
                 controllerShop.getcashier(ClsStaticVariable.controllerUser.objUser.UserID);
-                if (controllerShop.objShop.ShopName.Trim() != "")
+                if (!string.IsNullOrEmpty(controllerShop.objShop.ShopName?.Trim()))
                 {
                     parentfrm.lblShopID.Visible = true;
                     parentfrm.lblShopName.Visible = true;
@@ -56,6 +120,7 @@ namespace MilenialPark.Views.Shop
                     parentfrm.lblShopName.Text = controllerShop.objShop.ShopName;
                     parentfrm.lblMainProduct.Text = controllerShop.objShop.MainProduct;
                     parentfrm.lblAddress.Text = controllerShop.objShop.Address;
+
                     lblShopID2.Text = controllerShop.objShop.ShopID;
                     txtShopName.Text = controllerShop.objShop.ShopName;
                     txtMainProduct.Text = controllerShop.objShop.MainProduct;
@@ -64,16 +129,13 @@ namespace MilenialPark.Views.Shop
                 }
                 btnCreateShopItem.Enabled = true;
                 btnEditShopItem.Enabled = true;
-                //btnImport.Enabled = true;
                 btnDelete.Enabled = true;
             }
             else
             {
-                //btnCreate.Enabled = true;
                 btnEdit.Enabled = false;
                 btnCreateShopItem.Enabled = false;
                 btnEditShopItem.Enabled = false;
-                //btnImport.Enabled = false;
                 btnDelete.Enabled = false;
             }
         }
@@ -105,7 +167,7 @@ namespace MilenialPark.Views.Shop
 
         private void btnEditShopItem_Click(object sender, EventArgs e)
         {
-            if(dgvShopItem.Rows.Count != 0)
+            if (dgvShopItem.Rows.Count != 0)
             {
                 FrmNEShopItem frmNEShopItem = new FrmNEShopItem(lblShopID2.Text, dgvShopItem.CurrentRow.Cells["ItemID"].Value.ToString());
                 frmNEShopItem.Tag = "EDIT";
@@ -123,22 +185,19 @@ namespace MilenialPark.Views.Shop
 
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            if (txtShopName.Text.Trim() == "")
+            if (string.IsNullOrWhiteSpace(txtShopName.Text))
             {
                 ClsFungsi.Pesan("Nama Supervisor kosong!!!, mohon di isi terlebih dahulu", "INFO");
+                return;
             }
-            else
-            {
-                //set Shop
-                controllerShop.setShop(lblShopID2.Text, txtShopName.Text, txtMainProduct.Text, txtAddress.Text, ClsStaticVariable.controllerUser.objUser.UserID);
 
-                //Update Shop 
-                ClsFungsi.Pesan(controllerShop.UpdateShop(controllerShop.objShop), "INFO");
+            // Preserve the original shop UserID from objShop
+            string originalUserId = controllerShop.objShop.UserID;
 
-                //check shop 
-                hasShop();
+            controllerShop.setShop(lblShopID2.Text, txtShopName.Text, txtMainProduct.Text, txtAddress.Text, originalUserId);
+            ClsFungsi.Pesan(controllerShop.UpdateShop(controllerShop.objShop), "INFO");
 
-            }
+            LoadUniversalShop(lblShopID2.Text); // Refresh data after update
         }
 
         private void btnCreateShopItemTiket_Click(object sender, EventArgs e)
@@ -158,9 +217,9 @@ namespace MilenialPark.Views.Shop
 
         private void btnEditShopItemTiket_Click(object sender, EventArgs e)
         {
-            if(dgvShopItemTiket.Rows.Count !=0)
+            if (dgvShopItemTiket.Rows.Count != 0)
             {
-                if(ClsStaticVariable.controllerUser.objUser.TipeUser == "Admin")
+                if (ClsStaticVariable.controllerUser.objUser.TipeUser == "Admin")
                 {
                     FrmNEShopItemTiket frmNEShopItemT = new FrmNEShopItemTiket(lblShopID2.Text, dgvShopItemTiket.CurrentRow.Cells["ItemID"].Value.ToString());
                     frmNEShopItemT.Tag = "EDIT";
@@ -218,7 +277,6 @@ namespace MilenialPark.Views.Shop
                 {
                     MessageBox.Show("Maaf Anda Bukan Admin");
                 }
-                
             }
         }
 
@@ -228,12 +286,12 @@ namespace MilenialPark.Views.Shop
             {
                 if (ClsStaticVariable.controllerUser.objUser.TipeUser == "Admin")
                 {
-                    DialogResult dialogResult = MessageBox.Show("Apakah anda yakin ingin menghapus data Item Ticket  " + dgvActivity.CurrentRow.Cells["ItemName"].Value.ToString() + " ? ", "Warning", MessageBoxButtons.YesNo);
+                    DialogResult dialogResult = MessageBox.Show("Apakah anda yakin ingin menghapus data Item Ticket  " +
+                        dgvActivity.CurrentRow.Cells["ItemName"].Value.ToString() + " ? ", "Warning", MessageBoxButtons.YesNo);
                     if (dialogResult == DialogResult.Yes)
                     {
                         ClsFungsi.Pesan(controllerShop.DeleteShopActivity(dgvActivity.CurrentRow.Cells["ItemID"].Value.ToString()), "INFO");
                     }
-                    else if (dialogResult == DialogResult.No) { }
                 }
                 else
                 {
@@ -254,18 +312,18 @@ namespace MilenialPark.Views.Shop
             {
                 if (ClsStaticVariable.controllerUser.objUser.TipeUser == "Admin")
                 {
-                    DialogResult dialogResult = MessageBox.Show("Apakah anda yakin ingin menghapus data Transaksi Item  " + dgvShopItemTiket.CurrentRow.Cells["ItemName"].Value.ToString() + " ? ", "Warning", MessageBoxButtons.YesNo);
+                    DialogResult dialogResult = MessageBox.Show("Apakah anda yakin ingin menghapus data Transaksi Item  " +
+                        dgvShopItemTiket.CurrentRow.Cells["ItemName"].Value.ToString() + " ? ", "Warning", MessageBoxButtons.YesNo);
                     if (dialogResult == DialogResult.Yes)
                     {
-                        ClsFungsi.Pesan(controllerShop.DeleteShopItemTiket(dgvShopItemTiket.CurrentRow.Cells["ItemID"].Value.ToString()), "INFO");
+                        ClsFungsi.Pesan(controllerShop.DeleteShopItemTiket(
+                            dgvShopItemTiket.CurrentRow.Cells["ItemID"].Value.ToString()), "INFO");
                     }
-                    else if (dialogResult == DialogResult.No) { }
                 }
                 else
                 {
                     MessageBox.Show("Maaf Anda Bukan Admin");
                 }
-
 
                 getShop();
             }
@@ -273,24 +331,19 @@ namespace MilenialPark.Views.Shop
             {
                 ClsFungsi.Pesan("Toko / Stand masih belum memiliki item");
             }
-            getShop();
-
-            
         }
-
-        
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
             if (dgvShopItem.Rows.Count > 0)
             {
-
-                DialogResult dialogResult = MessageBox.Show("Apakah anda yakin ingin menghapus data Item  " + dgvShopItem.CurrentRow.Cells["ItemName"].Value.ToString() + " ? ", "Warning", MessageBoxButtons.YesNo);
+                DialogResult dialogResult = MessageBox.Show("Apakah anda yakin ingin menghapus data Item  " +
+                    dgvShopItem.CurrentRow.Cells["ItemName"].Value.ToString() + " ? ", "Warning", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
-                    ClsFungsi.Pesan(controllerShop.DeleteShopItem(dgvShopItem.CurrentRow.Cells["ItemID"].Value.ToString()), "INFO");
+                    ClsFungsi.Pesan(controllerShop.DeleteShopItem(
+                        dgvShopItem.CurrentRow.Cells["ItemID"].Value.ToString()), "INFO");
                 }
-                else if (dialogResult == DialogResult.No) { }
                 getShop();
             }
             else
@@ -301,40 +354,12 @@ namespace MilenialPark.Views.Shop
 
         private void btnBrowse_Click(object sender, EventArgs e)
         {
-            FrmChooseShop frmChooseShop = new FrmChooseShop();
-            frmChooseShop.ShowDialog(); 
-
-            if(ClsStaticVariable.ShopID.Trim().Length > 0)
-            {
-                controllerShop.getcashier2(ClsStaticVariable.ShopID);
-                if (controllerShop.objShop.ShopName.Trim().Length > 0)
-                {
-                    parentfrm.lblShopID.Visible = true;
-                    parentfrm.lblShopName.Visible = true;
-                    parentfrm.lblMainProduct.Visible = true;
-                    parentfrm.lblAddress.Visible = true;
-
-                    parentfrm.lblShopID.Text = controllerShop.objShop.ShopID;
-                    parentfrm.lblShopName.Text = controllerShop.objShop.ShopName;
-                    parentfrm.lblMainProduct.Text = controllerShop.objShop.MainProduct;
-                    parentfrm.lblAddress.Text = controllerShop.objShop.Address;
-                    lblShopID2.Text = controllerShop.objShop.ShopID;
-                    txtShopName.Text = controllerShop.objShop.ShopName;
-                    txtMainProduct.Text = controllerShop.objShop.MainProduct;
-                    txtAddress.Text = controllerShop.objShop.Address;
-                    getShop();
-
-                    btnCreateShopItem.Enabled = true;
-                    btnEditShopItem.Enabled = true;
-                    //btnImport.Enabled = true;
-                    btnDelete.Enabled = true;
-                }
-            }
+            // Browse button is hidden in this version; no action needed
         }
 
         private void dgvShopItemTiket_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-
+            // No special action on cell click
         }
     }
 }

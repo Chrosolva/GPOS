@@ -547,7 +547,7 @@
             this.btnTopUpMinus.Text = "Refund";
             this.btnTopUpMinus.TextAlign = System.Drawing.ContentAlignment.BottomRight;
             this.btnTopUpMinus.UseVisualStyleBackColor = true;
-            this.btnTopUpMinus.Click += new System.EventHandler(this.button1_Click);
+            this.btnTopUpMinus.Click += new System.EventHandler(this.btn_TopUpMinus_Click);
             // 
             // lblPaymentValue
             // 

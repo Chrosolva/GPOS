@@ -269,13 +269,21 @@ namespace MilenialPark.Controller
 
         public DataTable getShopItem(string ShopID)
         {
-            query = "Select ItemID, ItemName, Price, ItemDesc, ImageFilePath, Category ,TopUpAmount from WHNPOS.dbo.ShopItem where ShopID = " + ClsFungsi.C2Q(ShopID) + $" and ItemID like '{ShopID + "_SI%"}'";
+            query = "Select ItemID, ItemName, Price, ItemDesc, ImageFilePath, Category " +
+        "from WHNPOS.dbo.ShopItem " +
+        "where ShopID = " + ClsFungsi.C2Q(ShopID) +
+        " and Category like '%TOPUP%'";
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
 
         public DataTable getShopItemActivity(string ShopID)
         {
-            query = "Select ItemID, ItemName, Price, ItemDesc, ImageFilePath, Category from WHNPOS.dbo.ShopItem where ShopID = " + ClsFungsi.C2Q(ShopID) + $" and ItemID like '{ShopID + "_AC%"}'";
+            //query = "Select ItemID, ItemName, Price, ItemDesc, ImageFilePath, Category from WHNPOS.dbo.ShopItem where ShopID = " + ClsFungsi.C2Q(ShopID) + $" and ItemID like '{ShopID + "_AC%"}'";
+            query = "Select ItemID, ItemName, Price, ItemDesc, ImageFilePath, Category " +
+        "from WHNPOS.dbo.ShopItem " +
+        "where ShopID = " + ClsFungsi.C2Q(ShopID) +
+        " and Category not like '%TOPUP%'";
+
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
 
@@ -303,20 +311,20 @@ namespace MilenialPark.Controller
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
 
-        public void autogenerateShopItemID(string ShopID)
-        {
-            query = $"Select top 1 ItemID from WHNPOS.dbo.ShopItem where ShopID = {ClsFungsi.C2Q(ShopID)} and ItemID like '{ShopID + "_SI%"}' Order By ItemID desc";
-            dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
-            if (dt.Rows.Count > 0)
-            {
-                int tmp = Convert.ToInt32(dt.Rows[0]["ItemID"].ToString().Substring(dt.Rows[0]["ItemID"].ToString().Length-3, 3));
-                ShopItemID = ShopID + "_" + "SI" + "-" + (tmp + 1).ToString("D3");
-            }
-            else
-            {
-                ShopItemID = ShopID + "_" + "SI" + "-" + 1.ToString("D3");
-            }
-        }
+        //public void autogenerateShopItemID(string ShopID)
+        //{
+        //    query = $"Select top 1 ItemID from WHNPOS.dbo.ShopItem where ShopID = {ClsFungsi.C2Q(ShopID)} and ItemID like '{ShopID + "_SI%"}' Order By ItemID desc";
+        //    dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        //    if (dt.Rows.Count > 0)
+        //    {
+        //        int tmp = Convert.ToInt32(dt.Rows[0]["ItemID"].ToString().Substring(dt.Rows[0]["ItemID"].ToString().Length-3, 3));
+        //        ShopItemID = ShopID + "_" + "SI" + "-" + (tmp + 1).ToString("D3");
+        //    }
+        //    else
+        //    {
+        //        ShopItemID = ShopID + "_" + "SI" + "-" + 1.ToString("D3");
+        //    }
+        //}
 
         public void autogenerateShopItemIDActivity(string ShopID)
         {
@@ -333,20 +341,58 @@ namespace MilenialPark.Controller
             }
         }
 
-        public void autogenerateShopItemTiketID(string ShopID)
+        public void autogenerateShopItemID(string shopId)
         {
-            query = $"Select top 1 ItemID from WHNPOS.dbo.ShopItemTiket where ShopID = {ClsFungsi.C2Q(ShopID)} Order By ItemID desc";
+            query = "SELECT TOP 1 ItemID FROM WHNPOS.dbo.ShopItem WHERE ShopID = " +
+                    ClsFungsi.C2Q(shopId) + " ORDER BY ItemID DESC";
             dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+
+            int nextNumber = 1;
             if (dt.Rows.Count > 0)
             {
-                int tmp = Convert.ToInt32(dt.Rows[0]["ItemID"].ToString().Substring(dt.Rows[0]["ItemID"].ToString().Length - 3, 3));
-                ShopItemID = ShopID + "_" + "SI" + "-" + (tmp + 1).ToString("D3");
+                // assume ItemID is of the form ITEM123, extract the numeric part
+                string lastId = dt.Rows[0]["ItemID"].ToString();
+                int pos = lastId.Length - 3;
+                int.TryParse(lastId.Substring(pos), out nextNumber);
+                nextNumber++;
             }
-            else
-            {
-                ShopItemID = ShopID + "_" + "SI" + "-" + 1.ToString("D3");
-            }
+            ShopItemID = "JL-UI-" + nextNumber.ToString("D3");
         }
+
+        public void autogenerateShopItemTiketID(string shopId)
+        {
+            query = "SELECT TOP 1 ItemID FROM WHNPOS.dbo.ShopItemTiket WHERE ShopID = " +
+                    ClsFungsi.C2Q(shopId) + " ORDER BY ItemID DESC";
+            dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+
+            int nextNumber = 1;
+            if (dt.Rows.Count > 0)
+            {
+                // assume ItemID is of the form ITEM123, extract the numeric part
+                string lastId = dt.Rows[0]["ItemID"].ToString();
+                int pos = lastId.Length - 3;
+                int.TryParse(lastId.Substring(pos), out nextNumber);
+                nextNumber++;
+            }
+            ShopItemID = "JL-UI-" + nextNumber.ToString("D3");
+        }
+
+
+
+        //public void autogenerateShopItemTiketID(string ShopID)
+        //{
+        //    query = $"Select top 1 ItemID from WHNPOS.dbo.ShopItemTiket where ShopID = {ClsFungsi.C2Q(ShopID)} Order By ItemID desc";
+        //    dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        //    if (dt.Rows.Count > 0)
+        //    {
+        //        int tmp = Convert.ToInt32(dt.Rows[0]["ItemID"].ToString().Substring(dt.Rows[0]["ItemID"].ToString().Length - 3, 3));
+        //        ShopItemID = ShopID + "_" + "SI" + "-" + (tmp + 1).ToString("D3");
+        //    }
+        //    else
+        //    {
+        //        ShopItemID = ShopID + "_" + "SI" + "-" + 1.ToString("D3");
+        //    }
+        //}
 
         public void getShopandShopItem( string UserID)
         {
@@ -488,10 +534,17 @@ namespace MilenialPark.Controller
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
 
-        public DataTable getAllShopV2(string UserID) 
+        //public DataTable getAllShopV2(string UserID) 
+        //{
+        //    query = " Select SH.*, U.UserName, U.TipeUser, U.HakAkses, U.[Password] from WHNPOS.dbo.Shop as SH left join WHNPOS.dbo.TblUser as U on SH.UserID = U.UserID " +
+        //            $" where SH.UserID like {ClsFungsi.C2Q(UserID)} ";
+        //    return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        //}
+
+        public DataTable getAllShopV2(string ShopID)
         {
             query = " Select SH.*, U.UserName, U.TipeUser, U.HakAkses, U.[Password] from WHNPOS.dbo.Shop as SH left join WHNPOS.dbo.TblUser as U on SH.UserID = U.UserID " +
-                    $" where SH.UserID like {ClsFungsi.C2Q(UserID)} ";
+                    $" where SH.ShopID like {ClsFungsi.C2Q(ShopID)} ";
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
 

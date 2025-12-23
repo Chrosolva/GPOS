@@ -40,7 +40,7 @@ namespace MilenialPark.Views.Shop
         public void getShopList(object sender, EventArgs e)
         {
             FLShopList.Controls.Clear();
-            controllerShop.dt = controllerShop.getAllShopV2(ClsStaticVariable.controllerUser.objUser.UserID);
+            controllerShop.dt = controllerShop.getAllShopV2(ClsStaticVariable.ShopID);
             if (controllerShop.dt.Rows.Count != 0)
             {
                 foreach (DataRow row in controllerShop.dt.Rows)
@@ -70,6 +70,16 @@ namespace MilenialPark.Views.Shop
             bind.DataSource = controllerShop.getShopItem(ShopID);
             dgvShopItem.DataSource = bind;
             lblrowcount.Text = "Row Count: " + bind.Count.ToString();
+
+            dgvShopItem.Columns["ItemID"].FillWeight = 80;
+            dgvShopItem.Columns["ItemName"].FillWeight = 220;
+            dgvShopItem.Columns["Price"].FillWeight = 90;
+            dgvShopItem.Columns["Category"].FillWeight = 100;
+
+            dgvShopItem.Columns["ItemID"].MinimumWidth = 90;
+            dgvShopItem.Columns["ItemName"].MinimumWidth = 220;
+            dgvShopItem.Columns["Price"].MinimumWidth = 90;
+            dgvShopItem.Columns["Category"].MinimumWidth = 120;
         }
 
         private void FrmShopV2_Load(object sender, EventArgs e)
@@ -80,6 +90,16 @@ namespace MilenialPark.Views.Shop
             parentfrm.cbxCategory.Items.Add("ItemName");
             parentfrm.cbxCategory.Items.Add("ItemDesc");
             parentfrm.cbxCategory.SelectedIndex = 0;
+
+            DataGridViewHelper.ApplyPOSStyle(dgvShopItem);
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvShopItem, 80, 420);
+
+            // Optional: mark some columns readonly look
+            DataGridViewHelper.MarkReadOnlyColumns(dgvShopItem, "ItemID", "ShopID");
+            dgvShopItem.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
         }
 
         private void btnCreate_Click(object sender, EventArgs e)

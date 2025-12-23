@@ -52,6 +52,44 @@ namespace MilenialPark.Views.Transaction
             InitializeComponent();
         }
 
+        private void LoadUniversalShop()
+        {
+            // Ensure ShopID is set
+            if (string.IsNullOrEmpty(ClsStaticVariable.ShopID))
+            {
+                ClsFungsi.Pesan("Maaf, belum ada shop yang dipilih!", "ERROR");
+                // Disable editing and deleting if no shop
+                btnEdit.Enabled = false;
+                btnDelete.Enabled = false;
+                return;
+            }
+
+            // Get shop info by ShopID
+            controllerShop.getcashier2(ClsStaticVariable.ShopID);
+            if (string.IsNullOrEmpty(controllerShop.objShop.ShopName?.Trim()))
+            {
+                ClsFungsi.Pesan("Maaf, shop universal tidak ditemukan!", "ERROR");
+                btnEdit.Enabled = false;
+                btnDelete.Enabled = false;
+                return;
+            }
+
+            // Update labels in the main form
+            parentfrm.lblShopID.Visible = true;
+            parentfrm.lblShopName.Visible = true;
+            parentfrm.lblMainProduct.Visible = true;
+            parentfrm.lblAddress.Visible = true;
+
+            parentfrm.lblShopID.Text = controllerShop.objShop.ShopID;
+            parentfrm.lblShopName.Text = controllerShop.objShop.ShopName;
+            parentfrm.lblMainProduct.Text = controllerShop.objShop.MainProduct;
+            parentfrm.lblAddress.Text = controllerShop.objShop.Address;
+
+            // Enable editing and deleting tickets
+            btnEdit.Enabled = true;
+            btnDelete.Enabled = true;
+        }
+
         private void btnCreate_Click(object sender, EventArgs e)
         {
             FrmNEOrderTiket frmNEOrderTiket = new FrmNEOrderTiket(parentfrm.lblShopID.Text);
@@ -96,7 +134,8 @@ namespace MilenialPark.Views.Transaction
             to = dtpTo.Value;
             cbxOption.SelectedIndex = 0;
             cbxTransType.SelectedIndex = 0;
-            hasShop();
+            //hasShop();
+            LoadUniversalShop();
             btnFilter_Click(null, null);
         }
 

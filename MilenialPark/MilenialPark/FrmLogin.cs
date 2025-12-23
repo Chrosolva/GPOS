@@ -110,5 +110,10 @@ namespace MilenialPark
         {
             ClsStaticVariable.KodeBranch = Convert.ToString((cbxCategory.SelectedItem as dynamic).Value);
         }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

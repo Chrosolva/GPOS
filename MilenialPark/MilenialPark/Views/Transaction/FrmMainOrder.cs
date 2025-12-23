@@ -63,7 +63,7 @@ namespace MilenialPark.Views.Transaction
             frmOrderTiket.FormBorderStyle = FormBorderStyle.None;
             frmOrderTiket.Dock = DockStyle.Fill;
 
-            controllerShop.getShop(ClsStaticVariable.controllerUser.objUser.UserID);
+            controllerShop.getShop2(ClsStaticVariable.ShopID);
             frmOrder = new Transaction.FrmOrder(parentfrm, controllerShop.objShop);
             frmOrder.Text = "Order";
             frmOrder.TopLevel = false;

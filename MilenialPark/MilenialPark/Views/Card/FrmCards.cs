@@ -137,9 +137,39 @@ namespace MilenialPark.Views.Card
             cbxJenisTopUp.SelectedIndex = selected;
         }
 
+        public void LoadShopForCards()
+        {
+            if (string.IsNullOrEmpty(ClsStaticVariable.ShopID))
+            {
+                ClsFungsi.Pesan("Maaf, belum ada shop yang dipilih!", "ERROR");
+                close = true;
+                return;
+            }
+
+            controllerShop.getcashier2(ClsStaticVariable.ShopID);
+            if (string.IsNullOrEmpty(controllerShop.objShop.ShopName))
+            {
+                ClsFungsi.Pesan("Maaf, shop universal tidak ditemukan!", "ERROR");
+                close = true;
+                return;
+            }
+
+            // show the shop information on the parent form
+            parentfrm.lblShopID.Visible = true;
+            parentfrm.lblShopName.Visible = true;
+            parentfrm.lblMainProduct.Visible = true;
+            parentfrm.lblAddress.Visible = true;
+
+            parentfrm.lblShopID.Text = controllerShop.objShop.ShopID;
+            parentfrm.lblShopName.Text = controllerShop.objShop.ShopName;
+            parentfrm.lblMainProduct.Text = controllerShop.objShop.MainProduct;
+            parentfrm.lblAddress.Text = controllerShop.objShop.Address;
+        }
+
+
         private void FrmCards_Load(object sender, EventArgs e)
         {
-            hasShop();
+            LoadShopForCards();
             setcbxJenisTopUp();
             txtCardID.Focus();
 
@@ -553,7 +583,7 @@ namespace MilenialPark.Views.Card
                     //btnImport.Enabled = true;
                 }
             }
-            hasShop2(controllerShop.objShop.ShopID);
+            LoadShopForCards();
             setcbxJenisTopUp(); 
 
         }
@@ -653,7 +683,7 @@ namespace MilenialPark.Views.Card
             calculatefinalbalance();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btn_TopUpMinus_Click(object sender, EventArgs e)
         {
             if (!close)
             {

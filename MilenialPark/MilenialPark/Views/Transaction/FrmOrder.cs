@@ -194,8 +194,12 @@ namespace MilenialPark.Views.Transaction
 
         public void hasShop()
         {
-            if (controllerShop.checkShop2(ClsStaticVariable.controllerUser.objUser.UserID, objShop.ShopID))
+            // Load the shop by its ID rather than checking user ownership
+            controllerShop.getShop2(objShop.ShopID);
+
+            if (!string.IsNullOrEmpty(controllerShop.objShop.ShopName?.Trim()))
             {
+                // Show the shop details on the parent form
                 parentfrm.lblShopID.Visible = true;
                 parentfrm.lblShopName.Visible = true;
                 parentfrm.lblMainProduct.Visible = true;
@@ -208,10 +212,11 @@ namespace MilenialPark.Views.Transaction
             }
             else
             {
-                ClsFungsi.Pesan("Maaf, akun anda belum memiliki data Toko / Shop !!! silahkan dibuat terlebih dahulu ", "ERROR");
-
+                ClsFungsi.Pesan("Maaf, shop universal tidak ditemukan atau belum dibuat.", "ERROR");
             }
         }
+
+
 
         private void FrmOrder_Load(object sender, EventArgs e)
         {

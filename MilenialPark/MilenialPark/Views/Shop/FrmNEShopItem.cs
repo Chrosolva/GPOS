@@ -137,7 +137,8 @@ namespace MilenialPark.Views.Shop
                 }
                 else
                 {
-                    controllerShop.autogenerateShopItemIDActivity(this.ShopID);
+                    //controllerShop.autogenerateShopItemIDActivity(this.ShopID);
+                    controllerShop.autogenerateShopItemID(this.ShopID);
                     controllerShop.setShopItem2(controllerShop.ShopItemID, ShopID, txtItemName.Text, Convert.ToDecimal(NUDprice.Value), txtItemDesc.Text, txtImageFilePath.Text, cbxCategory.Text);
                     ClsFungsi.Pesan(controllerShop.InsertShopItem(controllerShop.objShopItem), "INFO");
                 }

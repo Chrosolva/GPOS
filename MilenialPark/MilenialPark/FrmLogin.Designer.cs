@@ -153,7 +153,7 @@
             this.iconButton2.IconChar = FontAwesome.Sharp.IconChar.None;
             this.iconButton2.IconColor = System.Drawing.Color.Black;
             this.iconButton2.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.iconButton2.Location = new System.Drawing.Point(850, 304);
+            this.iconButton2.Location = new System.Drawing.Point(850, 372);
             this.iconButton2.Name = "iconButton2";
             this.iconButton2.Size = new System.Drawing.Size(123, 50);
             this.iconButton2.TabIndex = 20;
@@ -183,7 +183,7 @@
             // 
             this.lblserveraddress.AutoSize = true;
             this.lblserveraddress.Font = new System.Drawing.Font("Segoe UI", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblserveraddress.Location = new System.Drawing.Point(795, 387);
+            this.lblserveraddress.Location = new System.Drawing.Point(795, 455);
             this.lblserveraddress.Name = "lblserveraddress";
             this.lblserveraddress.Size = new System.Drawing.Size(145, 23);
             this.lblserveraddress.TabIndex = 21;
@@ -196,7 +196,7 @@
             this.btngear.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.btngear.IconSize = 40;
             this.btngear.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.btngear.Location = new System.Drawing.Point(747, 431);
+            this.btngear.Location = new System.Drawing.Point(747, 499);
             this.btngear.Name = "btngear";
             this.btngear.Size = new System.Drawing.Size(34, 41);
             this.btngear.TabIndex = 22;
@@ -206,17 +206,17 @@
             // 
             this.lblversion.AutoSize = true;
             this.lblversion.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblversion.Location = new System.Drawing.Point(796, 481);
+            this.lblversion.Location = new System.Drawing.Point(796, 549);
             this.lblversion.Name = "lblversion";
             this.lblversion.Size = new System.Drawing.Size(87, 15);
             this.lblversion.TabIndex = 23;
-            this.lblversion.Text = "Version 1.2.2.18";
+            this.lblversion.Text = "Version 1.2.2.19";
             // 
             // txtServer
             // 
             this.txtServer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtServer.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtServer.Location = new System.Drawing.Point(785, 434);
+            this.txtServer.Location = new System.Drawing.Point(785, 502);
             this.txtServer.Name = "txtServer";
             this.txtServer.Size = new System.Drawing.Size(263, 26);
             this.txtServer.TabIndex = 24;
@@ -230,7 +230,7 @@
             this.cbxCategory.Items.AddRange(new object[] {
             "CustomerName",
             "NoIdentitas"});
-            this.cbxCategory.Location = new System.Drawing.Point(785, 547);
+            this.cbxCategory.Location = new System.Drawing.Point(785, 301);
             this.cbxCategory.Name = "cbxCategory";
             this.cbxCategory.Size = new System.Drawing.Size(263, 29);
             this.cbxCategory.TabIndex = 38;
@@ -240,11 +240,12 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(795, 510);
+            this.label3.Location = new System.Drawing.Point(787, 266);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 23);
             this.label3.TabIndex = 39;
             this.label3.Text = "BRANCH";
+            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // FormLogin
             // 
