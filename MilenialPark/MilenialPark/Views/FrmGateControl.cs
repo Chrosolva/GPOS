@@ -299,7 +299,27 @@ namespace MilenialPark.Views
         public void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
             SerialPort port = (SerialPort)sender;
-            string s = port.ReadLine();
+            string s = null;
+            try
+            {
+                s = port.ReadLine(); // can timeout
+            }
+            catch (TimeoutException)
+            {
+                // normal when device sends partial line / no newline yet
+                return;
+            }
+            catch (InvalidOperationException)
+            {
+                // port closed while receiving
+                return;
+            }
+            catch (IOException)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(s)) return;
 
             BeginInvoke(new Action(() =>
             {

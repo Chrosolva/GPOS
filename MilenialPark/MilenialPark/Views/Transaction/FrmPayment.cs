@@ -188,6 +188,7 @@ namespace MilenialPark.Views.Transaction
                     int waktu = ToIntSafe(row.Cells["WaktuBermain"].Value);
                     int toleransi = ToIntSafe(row.Cells["Toleransi"].Value);
                     string rfid = Convert.ToString(row.Cells["RFID"].Value); // may be null / empty
+                    string keterangan = Convert.ToString(row.Cells["Keterangan"].Value); // may be null / empty
 
                     var det = new ClsTransactionTiketDetail(
                         controllerTran.TransactionID,
@@ -206,6 +207,7 @@ namespace MilenialPark.Views.Transaction
 
                     // if your constructor doesn't include RFID, set property like this:
                     det.RFID = rfid;
+                    det.Keterangan = keterangan;
 
                     controllerTran.objTransaction.listtranstikdet.Add(det);
                     nourut++;
@@ -279,6 +281,7 @@ namespace MilenialPark.Views.Transaction
                 try
                 {
                     controllerTran.InsertTransactionTicket(controllerTran.objTransaction, controllerTran.objCard);
+                    ClsStaticVariable.sukses = true;
                     PrintStruck(controllerTran); // always print receipt
                 }
                 catch (Exception ex)
@@ -446,17 +449,18 @@ namespace MilenialPark.Views.Transaction
                 DataGridViewRow row = (DataGridViewRow)dgvTransacTiketDet.Rows[0].Clone();
                 row.Cells[0].Value = lblTransactionID.Text;
                 row.Cells[1].Value = "";
-                row.Cells[2].Value = DateTime.Now;
-                row.Cells[3].Value = det.ItemId;
-                row.Cells[4].Value = det.ItemName;
-                row.Cells[5].Value = det.Price;
-                row.Cells[6].Value = 1;               // Always 1
-                row.Cells[7].Value = i + 1;           // NoUrut increments
-                row.Cells[8].Value = "TMP";
-                row.Cells[9].Value = DateTime.Now;    // JamMasuk
-                row.Cells[10].Value = DateTime.Now;    // JamKeluar
-                row.Cells[11].Value = det.WaktuBermain;
-                row.Cells[12].Value = det.Toleransi;
+                row.Cells[2].Value = "";
+                row.Cells[3].Value = DateTime.Now;
+                row.Cells[4].Value = det.ItemId;
+                row.Cells[5].Value = det.ItemName;
+                row.Cells[6].Value = det.Price;
+                row.Cells[7].Value = 1;               // Always 1
+                row.Cells[8].Value = i + 1;           // NoUrut increments
+                row.Cells[9].Value = "TMP";
+                row.Cells[10].Value = DateTime.Now;    // JamMasuk
+                row.Cells[11].Value = DateTime.Now;    // JamKeluar
+                row.Cells[12].Value = det.WaktuBermain;
+                row.Cells[13].Value = det.Toleransi;
                 dgvTransacTiketDet.Rows.Add(row);
             }
         }
@@ -493,7 +497,7 @@ namespace MilenialPark.Views.Transaction
             cbxRemarks.SelectedIndex = 0;
             cbxRemarks.Enabled = false;
 
-            DataGridViewHelper.ApplyPOSStyle(dgvTransacTiketDet);
+            DataGridViewHelper.ApplyPOSStyle(dgvTransacTiketDet, false, true);
 
             // For your POS “compact list” feel:
             DataGridViewHelper.SizeCompact(dgvTransacTiketDet, 100, 420);
@@ -503,7 +507,12 @@ namespace MilenialPark.Views.Transaction
             // For your POS “compact list” feel:
             DataGridViewHelper.SizeCompact(dgvTransaksiDetail, 100, 420);
 
+            // At initialization time (e.g. in FrmPayment_Load or after InitializeComponent)
+            dgvTransacTiketDet.ReadOnly = false;
 
+            // Assuming the RFID column has the name "RFID" and Keterangan is "Keterangan"
+            dgvTransacTiketDet.Columns["RFID"].ReadOnly = true;
+            dgvTransacTiketDet.Columns["Keterangan"].ReadOnly = false; // Make sure it's not read‑only
         }
 
         private void txtRFIDScan_KeyPress(object sender, KeyPressEventArgs e)
@@ -535,6 +544,23 @@ namespace MilenialPark.Views.Transaction
                 return;
             }
 
+            // ----- New check: ensure this RFID is not already used in a persisted transaction -----
+            DateTime startDay = DateTime.Today;
+            DateTime endDay = DateTime.Today.AddDays(1).AddTicks(-1);
+
+            // Check both BOUGHT and ENTER‑IN statuses
+            bool usedInDb =
+                (controllerTran.GetTicketByRFID(rfid, "BOUGHT", startDay, endDay)?.Rows.Count ?? 0) > 0 ||
+                (controllerTran.GetTicketByRFID(rfid, "ENTER-IN", startDay, endDay)?.Rows.Count ?? 0) > 0;
+
+            if (usedInDb)
+            {
+                ClsFungsi.Pesan("RFID telah digunakan di transaksi lain!", "INFO");
+                FocusRFIDScan();
+                return;
+            }
+            // ------------------------------------------------------------------------------
+
             // Assign RFID to current row
             dgvTransacTiketDet.CurrentRow.Cells["RFID"].Value = rfid;
 
@@ -553,8 +579,19 @@ namespace MilenialPark.Views.Transaction
 
         private void dgvTransacTiketDet_SelectionChanged(object sender, EventArgs e)
         {
-            // Delay focus slightly so DataGridView finishes its internal processing
-            BeginInvoke(new Action(FocusRFIDScan));
+            // Make sure there is a valid current cell
+            var cell = dgvTransacTiketDet.CurrentCell;
+            if (cell == null)
+            {
+                return;
+            }
+
+            // Option 1: check by column name
+            if (cell.OwningColumn != null && cell.OwningColumn.Name == "RFID")
+            {
+                BeginInvoke(new Action(FocusRFIDScan));
+            }
+
         }
 
     }

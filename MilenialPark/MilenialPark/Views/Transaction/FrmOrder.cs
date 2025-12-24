@@ -363,10 +363,8 @@ namespace MilenialPark.Views.Transaction
                 }
 
                 FrmPayment frmPayment = new FrmPayment(controllerTrans);
-                //FormBlank frmBlank = new FormBlank();
-                //frmBlank.Show();
+                ClsStaticVariable.sukses = false;
                 frmPayment.ShowDialog();
-                //frmBlank.Close();
 
                 // Auto Print Ticket 
 

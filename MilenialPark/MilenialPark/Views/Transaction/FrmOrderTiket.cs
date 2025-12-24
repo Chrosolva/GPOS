@@ -190,20 +190,44 @@ namespace MilenialPark.Views.Transaction
                             Convert.ToString((cbxUserID.SelectedItem as dynamic).Value)// ← ALL UserID
                         );
             //controllerTrans.dt = controllerTrans.getTransaction2(parentfrm.lblShopID.Text, new DateTime(dtpFrom.Value.Year, dtpFrom.Value.Month, dtpFrom.Value.Day, 0, 0, 0), new DateTime(dtpTo.Value.Year, dtpTo.Value.Month, dtpTo.Value.Day, 23, 59, 59), SearchCard, cbxOption.Text, cbxTransType.Text.Replace("ALL", "%%"));
-            if (controllerTrans.dt.Rows.Count != 0)
+            if (controllerTrans.dt.Rows.Count > 0)
             {
-                lblrow.Text = "Row Count :" + controllerTrans.dt.Rows.Count.ToString();
                 bind.DataSource = controllerTrans.dt;
                 dgvTransTiket.DataSource = bind;
-                dt2 = controllerTrans.gettransactionTiketDetail(dgvTransTiket.CurrentRow.Cells["TransactionID"].Value.ToString());
-                bind2.DataSource = dt2;
-                dgvTransTiketDetail.DataSource = bind2;
+
+                if (dgvTransTiket.CurrentRow != null && dgvTransTiket.CurrentRow.Cells["TransactionID"].Value != null)
+                {
+                    dt2 = controllerTrans.gettransactionTiketDetail(dgvTransTiket.CurrentRow.Cells["TransactionID"].Value.ToString());
+                    bind2.DataSource = dt2;
+                    dgvTransTiketDetail.DataSource = bind2;
+                }
+            }
+
+            // Disable sorting for all columns so header clicks don't change CurrentRow
+            foreach (DataGridViewColumn col in dgvTransTiket.Columns)
+            {
+                col.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
         }
 
         private void dgvTransTiket_SelectionChanged(object sender, EventArgs e)
         {
-            dt2 = controllerTrans.gettransactionTiketDetail(dgvTransTiket.CurrentRow.Cells["TransactionID"].Value.ToString());
+            // Bail out if there is no row selected
+            if (dgvTransTiket.CurrentRow == null || dgvTransTiket.CurrentRow.IsNewRow)
+            {
+                return;
+            }
+
+            // Bail out if the cell value is null
+            object val = dgvTransTiket.CurrentRow.Cells["TransactionID"].Value;
+            if (val == null)
+            {
+                return;
+            }
+
+            // Safe to use the value now
+            string transactionID = val.ToString();
+            dt2 = controllerTrans.gettransactionTiketDetail(transactionID);
             bind2.DataSource = dt2;
             dgvTransTiketDetail.DataSource = bind2;
         }

@@ -528,12 +528,12 @@ namespace MilenialPark.Controller
                             // Build the insert for a ticket detail with RFID
                             query2 = "INSERT INTO WHNPOS.dbo.TransaksiTiketDetail " +
                                      "(TransactionID, TransactionDate, ItemID, ItemName, Price, Qty, NoUrut, " +
-                                     " OrderStatus, JamMasuk, JamKeluar, WaktuBermain, Toleransi, RFID) VALUES " +
+                                     " OrderStatus, JamMasuk, JamKeluar, WaktuBermain, Toleransi, RFID, Keterangan) VALUES " +
                                      $"({ClsFungsi.C2Q(transdet.TransactionID)}, GETDATE(), {ClsFungsi.C2Q(transdet.ItemId)}, " +
                                      $"{ClsFungsi.C2Q(transdet.ItemName)}, {ClsFungsi.C2Q(transdet.Price)}, {ClsFungsi.C2Q(transdet.Qty)}, " +
                                      $"{ClsFungsi.C2Q(index)}, {ClsFungsi.C2Q(transdet.OrderStatus)}, {ClsFungsi.C2QTime(transdet.JamMasuk)}, " +
                                      $"{ClsFungsi.C2QTime(transdet.JamKeluar)}, {ClsFungsi.C2Q(transdet.WaktuBermain)}, " +
-                                     $"{ClsFungsi.C2Q(transdet.Toleransi)}, {ClsFungsi.C2Q(transdet.RFID)})";
+                                     $"{ClsFungsi.C2Q(transdet.Toleransi)}, {ClsFungsi.C2Q(transdet.RFID)}, {ClsFungsi.C2Q(transdet.Keterangan)})";
 
 
                             index++;
