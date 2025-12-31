@@ -179,7 +179,7 @@ namespace MilenialPark.Controller
             query =
                 " SELECT TR.TransactionID, TR.KodeCabang, BR.NamaCabang, TR.TransactionDate, TR.TotalAmount," +
                 " TR.PaymentType, TR.CardID, TR.ShopID, TR.TransactionStatus, TR.TransactionType, TR.Remarks," +
-                " TR.Subtotal, TR.InitialBalance, TR.FinalBalance" +
+                " TR.Subtotal, TR.InitialBalance, TR.FinalBalance, TR.UserID " +
                 " FROM WHNPOS.dbo.Transaksi AS TR" +
                 " LEFT JOIN WHNPOS.dbo.TblCabang AS BR ON TR.KodeCabang = BR.KodeCabang" +
                 " INNER JOIN WHNPOS.dbo.Shop AS S ON TR.ShopID = S.ShopID" + // ← bridge to UserID
@@ -494,9 +494,9 @@ namespace MilenialPark.Controller
                 //Insert Transaction
 
                 query = " Insert Into WHNPOS.dbo.Transaksi " +
-                    " (TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, ShopID, Remarks, Subtotal, PPN, InitialBalance, FinalBalance, TransactionStatus, TransactionType, KodeCabang) " +
+                    " (TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, ShopID, Remarks, Subtotal, PPN, InitialBalance, FinalBalance, TransactionStatus, TransactionType, KodeCabang, UserID) " +
                     " values " +
-                    $" ({ClsFungsi.C2Q(trans.TransactionID)}, GETDATE() , {ClsFungsi.C2Q(trans.totalAmount)}, {ClsFungsi.C2Q(trans.PaymentType)}, {ClsFungsi.C2Q(trans.CardID)}, {ClsFungsi.C2Q(trans.ShopId)}, {ClsFungsi.C2Q(trans.Remarks)}, {ClsFungsi.C2Q(trans.Subtotal)}, {ClsFungsi.C2Q(trans.PPN)}, {ClsFungsi.C2Q(trans.InitialBalance)}, {ClsFungsi.C2Q(trans.finalBalance)}, {ClsFungsi.C2Q("PAID")}, {ClsFungsi.C2Q(trans.TransactionType)}, {ClsFungsi.C2Q(ClsStaticVariable.KodeBranch)})";
+                    $" ({ClsFungsi.C2Q(trans.TransactionID)}, GETDATE() , {ClsFungsi.C2Q(trans.totalAmount)}, {ClsFungsi.C2Q(trans.PaymentType)}, {ClsFungsi.C2Q(trans.CardID)}, {ClsFungsi.C2Q(trans.ShopId)}, {ClsFungsi.C2Q(trans.Remarks)}, {ClsFungsi.C2Q(trans.Subtotal)}, {ClsFungsi.C2Q(trans.PPN)}, {ClsFungsi.C2Q(trans.InitialBalance)}, {ClsFungsi.C2Q(trans.finalBalance)}, {ClsFungsi.C2Q("PAID")}, {ClsFungsi.C2Q(trans.TransactionType)}, {ClsFungsi.C2Q(ClsStaticVariable.KodeBranch)}, {ClsFungsi.C2Q(ClsStaticVariable.controllerUser.objUser.UserID)})";
 
                 try
                 {
@@ -628,9 +628,9 @@ namespace MilenialPark.Controller
                 // Insert Transaksi 
                 ClsStaticVariable.sukses = false;
                 query = " Insert Into WHNPOS.dbo.Transaksi " +
-                        " (TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, ShopID, Remarks, Subtotal, PPN, InitialBalance, FinalBalance, TransactionStatus, TransactionType) " +
+                        " (TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, ShopID, Remarks, Subtotal, PPN, InitialBalance, FinalBalance, TransactionStatus, TransactionType, KodeCabang, UserID) " +
                         " values " +
-                        $" ({ClsFungsi.C2Q(trans.TransactionID)}, GETDATE() , {ClsFungsi.C2Q(trans.totalAmount)}, {ClsFungsi.C2Q(trans.PaymentType)}, {ClsFungsi.C2Q(trans.CardID)}, {ClsFungsi.C2Q(trans.ShopId)}, {ClsFungsi.C2Q(trans.Remarks)}, {ClsFungsi.C2Q(trans.Subtotal)}, {ClsFungsi.C2Q(trans.PPN)}, {ClsFungsi.C2Q(trans.InitialBalance)}, {ClsFungsi.C2Q(trans.finalBalance)}, 'COMPLETE', {ClsFungsi.C2Q(trans.TransactionType)})";
+                        $" ({ClsFungsi.C2Q(trans.TransactionID)}, GETDATE() , {ClsFungsi.C2Q(trans.totalAmount)}, {ClsFungsi.C2Q(trans.PaymentType)}, {ClsFungsi.C2Q(trans.CardID)}, {ClsFungsi.C2Q(trans.ShopId)}, {ClsFungsi.C2Q(trans.Remarks)}, {ClsFungsi.C2Q(trans.Subtotal)}, {ClsFungsi.C2Q(trans.PPN)}, {ClsFungsi.C2Q(trans.InitialBalance)}, {ClsFungsi.C2Q(trans.finalBalance)}, 'COMPLETE', {ClsFungsi.C2Q(trans.TransactionType)}, {ClsFungsi.C2Q(ClsStaticVariable.KodeBranch)}, {ClsFungsi.C2Q( ClsStaticVariable.controllerUser.objUser.UserID)})";
 
                 try
                 {
@@ -1159,7 +1159,7 @@ namespace MilenialPark.Controller
         public DataTable GetReminderEnterIn(DateTime start, DateTime end)
         {
             query =
-                "SELECT TRD.TransactionID, TRD.NoUrut, TRD.RFID, TRD.ItemID, TRD.ItemName, " +
+                "SELECT TRD.TransactionID, TRD.NoUrut, TRD.RFID, TRD.Keterangan, TRD.ItemID, TRD.ItemName, " +
                 "TRD.JamMasuk, TRD.JamKeluar, TRD.WaktuBermain, TRD.Toleransi, TRD.OrderStatus, TR.TransactionDate " +
                 "FROM WHNPOS.dbo.TransaksiTiketDetail TRD " +
                 "INNER JOIN WHNPOS.dbo.Transaksi TR ON TRD.TransactionID = TR.TransactionID " +

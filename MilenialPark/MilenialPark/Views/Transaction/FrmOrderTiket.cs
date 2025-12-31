@@ -137,7 +137,57 @@ namespace MilenialPark.Views.Transaction
             //hasShop();
             LoadUniversalShop();
             btnFilter_Click(null, null);
+
+            DataGridViewHelper.ApplyPOSStyle(dgvTransTiket);
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvTransTiket, 100, 420);
+
+            DataGridViewHelper.ApplyPOSStyle(dgvTransTiketDetail);
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvTransTiketDetail, 100, 420);
+            FormatDgvTransTiket();
+            FormatDgvTransTiketDetail();
         }
+
+        private void FormatDgvTransTiket()
+        {
+            string[] decimalCols =
+            {
+        "TotalAmount",
+        "Subtotal",
+        "InitialBalance",
+        "FinalBalance"
+    };
+
+            foreach (string col in decimalCols)
+            {
+                if (!dgvTransTiket.Columns.Contains(col)) continue;
+
+                dgvTransTiket.Columns[col].DefaultCellStyle.Format = "#,##0.00";
+                dgvTransTiket.Columns[col].DefaultCellStyle.Alignment =
+                    DataGridViewContentAlignment.MiddleRight;
+            }
+        }
+
+        private void FormatDgvTransTiketDetail()
+        {
+            string[] decimalCols =
+            {
+        "Price"
+    };
+
+            foreach (string col in decimalCols)
+            {
+                if (!dgvTransTiketDetail.Columns.Contains(col)) continue;
+
+                dgvTransTiketDetail.Columns[col].DefaultCellStyle.Format = "#,##0.00";
+                dgvTransTiketDetail.Columns[col].DefaultCellStyle.Alignment =
+                    DataGridViewContentAlignment.MiddleRight;
+            }
+        }
+
 
         public void hasShop()
         {
@@ -214,20 +264,25 @@ namespace MilenialPark.Views.Transaction
         {
             // Bail out if there is no row selected
             if (dgvTransTiket.CurrentRow == null || dgvTransTiket.CurrentRow.IsNewRow)
-            {
                 return;
-            }
 
-            // Bail out if the cell value is null
             object val = dgvTransTiket.CurrentRow.Cells["TransactionID"].Value;
-            if (val == null)
-            {
-                return;
-            }
+            if (val == null) return;
 
-            // Safe to use the value now
             string transactionID = val.ToString();
-            dt2 = controllerTrans.gettransactionTiketDetail(transactionID);
+            if (transactionID.Length < 3) return;
+
+            string prefix = transactionID.Substring(0, 3).ToUpper();
+
+            // TRD/TRK -> TransaksiDetail
+            // TRT     -> TransaksiTiketDetail
+            if (prefix == "TRD" || prefix == "TRK")
+                dt2 = controllerTrans.gettransactionDetail(transactionID);
+            else if (prefix == "TRT")
+                dt2 = controllerTrans.gettransactionTiketDetail(transactionID);
+            else
+                dt2 = new DataTable(); // fallback (optional)
+
             bind2.DataSource = dt2;
             dgvTransTiketDetail.DataSource = bind2;
         }

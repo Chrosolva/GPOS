@@ -286,7 +286,8 @@ namespace MilenialPark.Views
             {
                 if (sp.IsOpen)
                 {
-                    string reply = "*" + txtGateCode.Text.Replace("\r", "") + "," + "buka" + "," + "ADMIN ACCESS" + "#";
+                    //string reply = "*" + txtGateCode.Text.Replace("\r", "") + "," + "buka" + "," + "ADMIN ACCESS" + "#";
+                    string reply = "*" + txtGateCode.Text.Replace("\r", "") + "#";
                     sp.WriteLine(reply);
                 }
             }
@@ -434,8 +435,9 @@ namespace MilenialPark.Views
 
             string cmd = open ? "buka" : "tutup";
             string reply = "*" + gateCode.ToString().Replace("\r", "") + "," + cmd + "," + message + "#";
+            string reply2 = "*" + gateCode.ToString().Replace("\r", "") + message + "#";
             rtxDataIO.Text += "\n>> " + reply;
-            port.WriteLine(reply);
+            port.WriteLine(reply2);
         }
 
         private bool TryParseGatePacket(string raw, out string payload, out int gateCode)
@@ -443,7 +445,8 @@ namespace MilenialPark.Views
             payload = "";
             gateCode = 0;
 
-            if (!raw.Contains("(") || !raw.Contains(")") || !raw.Contains(",")) return false;
+            //if (!raw.Contains("(") || !raw.Contains(")") || !raw.Contains(",")) return false;
+            if (!raw.Contains("[") || !raw.Contains("]") || !raw.Contains(",")) return false;
 
             // ambil isi dalam ()
             int i1 = raw.IndexOf("(");
