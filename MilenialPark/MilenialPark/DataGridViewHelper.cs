@@ -85,6 +85,7 @@ namespace MilenialPark // change namespace to your project if needed
         public static void ApplyPOSStyle(DataGridView dgv)
         {
             ApplyPOSStyle(dgv, PosLightPink, true, false);
+            RemoveFocusRectangle(dgv);
         }
 
         public static void ApplyPOSStyle(DataGridView dgv, bool readOnly, bool multiSelect)
@@ -319,5 +320,16 @@ namespace MilenialPark // change namespace to your project if needed
                 try { dgv.LostFocus -= fh.FocusHandler; } catch { }
             };
         }
+
+        private static void RemoveFocusRectangle(DataGridView dgv)
+        {
+            dgv.CellPainting += (s, e) =>
+            {
+                if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+                e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.Focus);
+                e.Handled = true;
+            };
+        }
+
     }
 }

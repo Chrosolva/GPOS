@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,6 +41,7 @@ namespace MilenialPark.Views.Transaction
 
         public ReportDocument reportDoc = new ReportDocument();
         public string substring3;
+        private static readonly CultureInfo _id = new CultureInfo("id-ID");
 
         public FrmOrderTiket()
         {
@@ -136,8 +138,6 @@ namespace MilenialPark.Views.Transaction
             cbxTransType.SelectedIndex = 0;
             //hasShop();
             LoadUniversalShop();
-            btnFilter_Click(null, null);
-
             DataGridViewHelper.ApplyPOSStyle(dgvTransTiket);
 
             // For your POS “compact list” feel:
@@ -147,45 +147,27 @@ namespace MilenialPark.Views.Transaction
 
             // For your POS “compact list” feel:
             DataGridViewHelper.SizeCompact(dgvTransTiketDetail, 100, 420);
-            FormatDgvTransTiket();
-            FormatDgvTransTiketDetail();
+
+            btnFilter_Click(null, null);
         }
 
-        private void FormatDgvTransTiket()
+        private void ApplyMoneyFormat(DataGridView dgv, params string[] dataProps)
         {
-            string[] decimalCols =
+            foreach (DataGridViewColumn c in dgv.Columns)
             {
-        "TotalAmount",
-        "Subtotal",
-        "InitialBalance",
-        "FinalBalance"
-    };
+                // match ke field DataTable, bukan ke Name kolom designer
+                if (!dataProps.Contains(c.DataPropertyName)) continue;
 
-            foreach (string col in decimalCols)
-            {
-                if (!dgvTransTiket.Columns.Contains(col)) continue;
-
-                dgvTransTiket.Columns[col].DefaultCellStyle.Format = "#,##0.00";
-                dgvTransTiket.Columns[col].DefaultCellStyle.Alignment =
-                    DataGridViewContentAlignment.MiddleRight;
+                c.DefaultCellStyle.Format = "#,##0";            // 2 decimal + thousand separator
+                c.DefaultCellStyle.FormatProvider = _id;     // 135.000,00
+                c.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             }
         }
 
-        private void FormatDgvTransTiketDetail()
+        private void FormatAllMoney()
         {
-            string[] decimalCols =
-            {
-        "Price"
-    };
-
-            foreach (string col in decimalCols)
-            {
-                if (!dgvTransTiketDetail.Columns.Contains(col)) continue;
-
-                dgvTransTiketDetail.Columns[col].DefaultCellStyle.Format = "#,##0.00";
-                dgvTransTiketDetail.Columns[col].DefaultCellStyle.Alignment =
-                    DataGridViewContentAlignment.MiddleRight;
-            }
+            ApplyMoneyFormat(dgvTransTiket, "TotalAmount", "Subtotal", "InitialBalance", "FinalBalance");
+            ApplyMoneyFormat(dgvTransTiketDetail, "Price");
         }
 
 
@@ -258,6 +240,8 @@ namespace MilenialPark.Views.Transaction
             {
                 col.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
+
+            FormatAllMoney();
         }
 
         private void dgvTransTiket_SelectionChanged(object sender, EventArgs e)
@@ -285,6 +269,8 @@ namespace MilenialPark.Views.Transaction
 
             bind2.DataSource = dt2;
             dgvTransTiketDetail.DataSource = bind2;
+
+            FormatAllMoney();
         }
 
         private void btnPrintQR_Click(object sender, EventArgs e)

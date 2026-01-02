@@ -111,6 +111,20 @@ namespace MilenialPark.Controller
                     TransactionID = "TRT." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
                 }
             }
+            else if (type == "SANKSI") // <-- ADD
+            {
+                query = $"Select top 1 TransactionID from WHNPOS.dbo.Transaksi where TransactionID like 'TRS.{ID}%'  Order By TransactionID desc";
+                dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+                if (dt.Rows.Count > 0)
+                {
+                    int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
+                    TransactionID = "TRS." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
+                }
+                else
+                {
+                    TransactionID = "TRS." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
+                }
+            }
         } 
 
         public DataTable getCard(string CardID)
@@ -147,7 +161,7 @@ namespace MilenialPark.Controller
         public DataTable getTransaction(string ShopID, DateTime from, DateTime to, string Value, string Option, string TransactionType, string ID)
         {
             query = $" Select TR.TransactionID, TR.KodeCabang, BR.NamaCabang , TR.TransactionDate, TR.TotalAmount, TR.PaymentType, TR.CardID, TR.ShopID, TR.TransactionStatus, TR.TransactionType , TR.Remarks, " +
-                    " TR.Subtotal, TR.InitialBalance, TR.FInalBalance from WHNPOS.dbo.Transaksi as TR left join WHNPOS.dbo.TblCabang as BR on TR.KodeCabang = BR.KodeCabang " + 
+                    " TR.Subtotal, TR.InitialBalance, TR.FinalBalance from WHNPOS.dbo.Transaksi as TR left join WHNPOS.dbo.TblCabang as BR on TR.KodeCabang = BR.KodeCabang " + 
                     $" where TR.ShopID = {ClsFungsi.C2Q(ShopID)} and TR.TransactionID like '%{ID}%' and TR.TransactionType like {ClsFungsi.C2Q(TransactionType)} " +
                     $" and TR.TransactionDate >= {ClsFungsi.C2QTime(Convert.ToDateTime(from.ToString("dd/M/yyyy HH:mm:ss tt")))} and TR.TransactionDate <= {ClsFungsi.C2QTime(Convert.ToDateTime(to.ToString("dd/M/yyyy HH:mm:ss tt")))} and TR.{Option} like '%{Value}%' " +
                     " Order By TR.TransactionDate desc;";
@@ -1145,7 +1159,7 @@ namespace MilenialPark.Controller
             query =
                 $"UPDATE WHNPOS.dbo.TransaksiTiketDetail " +
                 $"SET JamKeluar = {ClsFungsi.C2QTime(now)}, OrderStatus = {ClsFungsi.C2Q(orderStatus)} " +
-                $"WHERE TransactionID = {ClsFungsi.C2Q(transactionID)} AND NoUrut = {ClsFungsi.C2Q(noUrut)}";
+                $"WHERE TransactionID = {ClsFungsi.C2Q(transactionID)} AND NoUrut = {ClsFungsi.C2Q(noUrut)} AND OrderStatus = 'ENTER-IN'";
 
             ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query);
 
@@ -1170,6 +1184,236 @@ namespace MilenialPark.Controller
 
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
+
+        public void AddLateFineToTiketDetail(string transactionID, string rfid, string keterangan, decimal fineAmount)
+        {
+            // Next NoUrut untuk TransaksiTiketDetail
+            query =
+                "SELECT ISNULL(MAX(NoUrut),0) + 1 AS NextNoUrut " +
+                "FROM WHNPOS.dbo.TransaksiTiketDetail " +
+                "WHERE TransactionID = " + ClsFungsi.C2Q(transactionID);
+
+            var dtn = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+            int nextNoUrut = Convert.ToInt32(dtn.Rows[0]["NextNoUrut"]);
+
+            // Item denda
+            string itemId = "JL-UI-013";
+            string itemName = "SANKSI KETERLAMBATAN";
+
+            query2 =
+                "INSERT INTO WHNPOS.dbo.TransaksiTiketDetail " +
+                "(TransactionID, TransactionDate, ItemID, ItemName, Price, Qty, NoUrut, OrderStatus, " +
+                "JamMasuk, JamKeluar, WaktuBermain, Toleransi, RFID, Keterangan) VALUES " +
+                $"({ClsFungsi.C2Q(transactionID)}, GETDATE(), {ClsFungsi.C2Q(itemId)}, {ClsFungsi.C2Q(itemName)}, " +
+                $"{DecToSql(fineAmount)}, 1, {ClsFungsi.C2Q(nextNoUrut)}, {ClsFungsi.C2Q("FINE")}, " +
+                $"NULL, NULL, 0, 0, {ClsFungsi.C2Q(rfid)}, {ClsFungsi.C2Q(keterangan)})";
+
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query2);
+        }
+
+
+
+        public DataTable GetCardInfo(string cardID)
+        {
+            query = "SELECT CardID, CustomerName, Saldo, Active " +
+                    "FROM WHNPOS.dbo.TblCard " +
+                    "WHERE CardID = " + ClsFungsi.C2Q(cardID);
+            return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        }
+
+        public bool IsMasterCardCustomer(string customerName)
+        {
+            return !string.IsNullOrWhiteSpace(customerName) &&
+                   customerName.Trim().StartsWith("MASTER_CARD", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public DataTable GetTransaksiHeader(string transactionID)
+        {
+            query = "SELECT TOP 1 TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, ShopID, Remarks, " +
+                    "Subtotal, PPN, InitialBalance, FinalBalance, TransactionStatus, TransactionType, KodeCabang, UserID " +
+                    "FROM WHNPOS.dbo.Transaksi " +
+                    "WHERE TransactionID = " + ClsFungsi.C2Q(transactionID);
+            return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        }
+
+        public bool IsLastTicketTransactionForCard(string cardID, string transactionID)
+        {
+            // ambil TRT terakhir berdasarkan TransactionDate
+            query =
+                "SELECT TOP 1 TransactionID " +
+                "FROM WHNPOS.dbo.Transaksi " +
+                "WHERE CardID = " + ClsFungsi.C2Q(cardID) + " " +
+                "AND (TransactionType = 'WEEKDAY' OR TransactionType = 'WEEKEND' OR TransactionID LIKE 'TRT.%') " +
+                "ORDER BY TransactionDate DESC";
+
+            var dtLast = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+            if (dtLast.Rows.Count == 0) return false;
+
+            string lastTid = Convert.ToString(dtLast.Rows[0]["TransactionID"]);
+            return string.Equals(lastTid, transactionID, StringComparison.OrdinalIgnoreCase);
+        }
+
+
+        public void DeductCardBalance(string cardID, decimal amount)
+        {
+            if (amount <= 0) return;
+
+            query =
+                "UPDATE WHNPOS.dbo.TblCard " +
+                "SET Saldo = ISNULL(Saldo,0) - " + DecToSql(amount) + " " +
+                "WHERE CardID = " + ClsFungsi.C2Q(cardID);
+
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query);
+        }
+
+
+        private string DecToSql(decimal v)
+        {
+            return v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        public void RecalculateHeaderAndSetBalances(
+    string transactionID,
+    decimal newInitialBalance,
+    decimal newFinalBalance,
+    string paymentType,
+    string cardIDToSet = ""
+)
+        {
+            // total tiket
+            string qTicket =
+                "SELECT ISNULL(SUM(ISNULL(Price,0) * ISNULL(Qty,0)),0) AS TotalTicket " +
+                "FROM WHNPOS.dbo.TransaksiTiketDetail " +
+                "WHERE TransactionID = " + ClsFungsi.C2Q(transactionID);
+
+            var dtTicket = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(qTicket);
+            decimal totalTicket = Convert.ToDecimal(dtTicket.Rows[0]["TotalTicket"]);
+
+            // total detail (kalau ada)
+            string qDetail =
+                "SELECT ISNULL(SUM(ISNULL(Price,0) * ISNULL(Qty,0)),0) AS TotalDetail " +
+                "FROM WHNPOS.dbo.TransaksiDetail " +
+                "WHERE TransactionID = " + ClsFungsi.C2Q(transactionID);
+
+            var dtDetail = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(qDetail);
+            decimal totalDetail = Convert.ToDecimal(dtDetail.Rows[0]["TotalDetail"]);
+
+            decimal subtotal = totalTicket + totalDetail;
+            decimal totalAmount = subtotal; // kalau kamu ada PPN/discount, adjust di sini
+
+            // update header
+            query =
+                "UPDATE WHNPOS.dbo.Transaksi SET " +
+                "Subtotal = " + DecToSql(subtotal) + ", " +
+                "TotalAmount = " + DecToSql(totalAmount) + ", " +
+                "InitialBalance = " + DecToSql(newInitialBalance) + ", " +
+                "FinalBalance = " + DecToSql(newFinalBalance) + ", " +
+                "PaymentType = " + ClsFungsi.C2Q(paymentType) + " " +
+                (string.IsNullOrWhiteSpace(cardIDToSet) ? "" : (", CardID = " + ClsFungsi.C2Q(cardIDToSet) + " ")) +
+                "WHERE TransactionID = " + ClsFungsi.C2Q(transactionID);
+
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query);
+        }
+
+        public DataRow GetCardRow(string cardId)
+        {
+            if (string.IsNullOrWhiteSpace(cardId)) return null;
+            string q = "SELECT TOP 1 * FROM WHNPOS.dbo.TblCard WHERE CardID = " + ClsFungsi.C2Q(cardId);
+            var t = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(q);
+            return (t.Rows.Count > 0) ? t.Rows[0] : null;
+        }
+
+        public string InsertTransactionSanksi(
+    string refTrtTransactionId,
+    int refNoUrut,
+    string refRfid,
+    string shopId,
+    string cardIdOrEmpty,
+    string remarksUser // tambahan remarks dari form
+)
+        {
+            // === KONFIG ITEM DENDA ===
+            string fineItemId = "JL-UI-013";
+            string fineItemName = "SANKSI KETERLAMBATAN";
+            decimal finePrice = 5000m;
+            int qty = 1;
+            decimal total = finePrice * qty;
+
+            // Build remarks wajib (referensi)
+            string remarksRef = $"SANKSI for TRT={refTrtTransactionId}; NoUrut={refNoUrut}; RFID={refRfid}";
+            string remarks = (remarksUser ?? "").Trim();
+            if (!string.IsNullOrEmpty(remarks)) remarksRef += $"; Note={remarks}";
+
+            // Payment decision
+            string paymentType = "CASH";
+            decimal initialBalance = 0m;
+            decimal finalBalance = 0m;
+
+            bool payWithCard = !string.IsNullOrWhiteSpace(cardIdOrEmpty);
+            bool isMasterCard = false;
+
+            if (payWithCard)
+            {
+                DataRow cardRow = GetCardRow(cardIdOrEmpty);
+                if (cardRow == null) return "CARDID tidak ditemukan!";
+
+                string custName = Convert.ToString(cardRow["CustomerName"] ?? "");
+                isMasterCard = custName.StartsWith("MASTER_CARD", StringComparison.OrdinalIgnoreCase);
+
+                // MASTER_CARD => abaikan cek saldo & jangan potong saldo (anggap CASH)
+                if (!isMasterCard)
+                {
+                    decimal saldo = cardRow["Saldo"] == DBNull.Value ? 0m : Convert.ToDecimal(cardRow["Saldo"]);
+
+                    if (saldo < total)
+                        return $"Saldo tidak cukup. Saldo={saldo} butuh={total}";
+
+                    paymentType = "CARD";
+                    initialBalance = saldo;
+                    finalBalance = saldo - total;
+                }
+            }
+
+            // Generate TRS ID
+            AutogenereateTransactionID("SANKSI", shopId);
+            string trsId = this.TransactionID; // pakai property kamu
+
+            // Insert header
+            string qHeader =
+                "INSERT INTO WHNPOS.dbo.Transaksi " +
+                "(TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, ShopID, Remarks, Subtotal, PPN, InitialBalance, FinalBalance, TransactionStatus, TransactionType, KodeCabang, UserID) VALUES " +
+                $"({ClsFungsi.C2Q(trsId)}, GETDATE(), {ClsFungsi.C2Q(total)}, {ClsFungsi.C2Q(paymentType)}, {ClsFungsi.C2Q(payWithCard ? cardIdOrEmpty : "")}, {ClsFungsi.C2Q(shopId)}, " +
+                $"{ClsFungsi.C2Q(remarksRef)}, {ClsFungsi.C2Q(total)}, {ClsFungsi.C2Q(0)}, {ClsFungsi.C2Q(initialBalance)}, {ClsFungsi.C2Q(finalBalance)}, " +
+                $"{ClsFungsi.C2Q("COMPLETE")}, {ClsFungsi.C2Q("SANKSI")}, {ClsFungsi.C2Q(ClsStaticVariable.KodeBranch)}, {ClsFungsi.C2Q(ClsStaticVariable.controllerUser.objUser.UserID)})";
+
+            // Insert detail (TransaksiDetail)
+            string qDetail =
+                "INSERT INTO WHNPOS.dbo.TransaksiDetail " +
+                "(TransactionID, TransactionDate, ItemID, ItemName, Price, Qty, NoUrut, OrderStatus) VALUES " +
+                $"({ClsFungsi.C2Q(trsId)}, GETDATE(), {ClsFungsi.C2Q(fineItemId)}, {ClsFungsi.C2Q(fineItemName)}, {ClsFungsi.C2Q(finePrice)}, {ClsFungsi.C2Q(qty)}, {ClsFungsi.C2Q(1)}, {ClsFungsi.C2Q("DONE")})";
+
+            try
+            {
+                // kalau kamu punya transaction SQL, lebih bagus pakai BeginTransaction
+                ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(qHeader);
+                ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(qDetail);
+
+                // Update saldo kartu jika bayar CARD & bukan MASTER_CARD
+                if (payWithCard && !isMasterCard)
+                {
+                    string qSaldo =
+                        $"UPDATE WHNPOS.dbo.TblCard SET Saldo = {ClsFungsi.C2Q(finalBalance)} WHERE CardID = {ClsFungsi.C2Q(cardIdOrEmpty)}";
+                    ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(qSaldo);
+                }
+
+                return ""; // sukses => return empty string
+            }
+            catch (Exception ex)
+            {
+                return "Gagal insert sanksi: " + ex.Message;
+            }
+        }
+
 
 
         #endregion

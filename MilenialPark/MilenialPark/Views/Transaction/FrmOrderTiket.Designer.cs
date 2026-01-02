@@ -35,6 +35,8 @@
             this.leftbottompanel = new System.Windows.Forms.Panel();
             this.dgvTransTiket = new System.Windows.Forms.DataGridView();
             this.leftuppanel = new System.Windows.Forms.Panel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cbxUserID = new System.Windows.Forms.ComboBox();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnChkTicket = new System.Windows.Forms.Button();
             this.btnPreview = new System.Windows.Forms.Button();
@@ -64,8 +66,6 @@
             this.rightuppanel = new System.Windows.Forms.Panel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label13 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.cbxUserID = new System.Windows.Forms.ComboBox();
             this.leftpanel.SuspendLayout();
             this.leftbottompanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTransTiket)).BeginInit();
@@ -156,6 +156,34 @@
             this.leftuppanel.Name = "leftuppanel";
             this.leftuppanel.Size = new System.Drawing.Size(1748, 192);
             this.leftuppanel.TabIndex = 18;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(1122, 95);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(75, 28);
+            this.label3.TabIndex = 80;
+            this.label3.Text = "User ID";
+            // 
+            // cbxUserID
+            // 
+            this.cbxUserID.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxUserID.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxUserID.FormattingEnabled = true;
+            this.cbxUserID.Items.AddRange(new object[] {
+            "ALL",
+            "WEEKDAY",
+            "WEEKEND",
+            "ACTIVITY",
+            "TOP-UP"});
+            this.cbxUserID.Location = new System.Drawing.Point(1126, 125);
+            this.cbxUserID.Margin = new System.Windows.Forms.Padding(4);
+            this.cbxUserID.Name = "cbxUserID";
+            this.cbxUserID.Size = new System.Drawing.Size(177, 36);
+            this.cbxUserID.TabIndex = 79;
             // 
             // btnCancel
             // 
@@ -344,7 +372,7 @@
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(1376, 91);
+            this.label9.Location = new System.Drawing.Point(1319, 91);
             this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(56, 28);
@@ -359,7 +387,7 @@
             this.btnFilter.Font = new System.Drawing.Font("Segoe UI Light", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnFilter.ForeColor = System.Drawing.Color.Gray;
             this.btnFilter.Image = ((System.Drawing.Image)(resources.GetObject("btnFilter.Image")));
-            this.btnFilter.Location = new System.Drawing.Point(1381, 117);
+            this.btnFilter.Location = new System.Drawing.Point(1324, 117);
             this.btnFilter.Margin = new System.Windows.Forms.Padding(4);
             this.btnFilter.Name = "btnFilter";
             this.btnFilter.Padding = new System.Windows.Forms.Padding(9);
@@ -576,34 +604,6 @@
             this.label13.Size = new System.Drawing.Size(210, 32);
             this.label13.TabIndex = 35;
             this.label13.Text = "Transaction Detail";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(1122, 95);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(75, 28);
-            this.label3.TabIndex = 80;
-            this.label3.Text = "User ID";
-            // 
-            // cbxUserID
-            // 
-            this.cbxUserID.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbxUserID.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbxUserID.FormattingEnabled = true;
-            this.cbxUserID.Items.AddRange(new object[] {
-            "ALL",
-            "WEEKDAY",
-            "WEEKEND",
-            "ACTIVITY",
-            "TOP-UP"});
-            this.cbxUserID.Location = new System.Drawing.Point(1126, 125);
-            this.cbxUserID.Margin = new System.Windows.Forms.Padding(4);
-            this.cbxUserID.Name = "cbxUserID";
-            this.cbxUserID.Size = new System.Drawing.Size(244, 36);
-            this.cbxUserID.TabIndex = 79;
             // 
             // FrmOrderTiket
             // 

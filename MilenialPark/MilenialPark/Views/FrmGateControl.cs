@@ -12,6 +12,7 @@ using System.IO.Ports;
 using MilenialPark.Controller;
 using MilenialPark.Master;
 using MilenialPark.Views;
+using MilenialPark.Views.Transaction;
 
 namespace MilenialPark.Views
 {
@@ -132,7 +133,6 @@ namespace MilenialPark.Views
 
             try
             {
-                // ✅ jangan Rows.Clear() kalau pakai DataSource
                 dgvReminder.DataSource = null;
 
                 var raw = controllerTrans.GetReminderEnterIn(startDay, endDay);
@@ -144,28 +144,41 @@ namespace MilenialPark.Views
 
                 foreach (DataRow row in raw.Rows)
                 {
-                    int waktuBermain = row["WaktuBermain"] == DBNull.Value ? 0 : Convert.ToInt32(row["WaktuBermain"]);
+                    DateTime jamKeluar = row["JamKeluar"] == DBNull.Value
+                        ? DateTime.MinValue
+                        : Convert.ToDateTime(row["JamKeluar"]);
 
-                    if (waktuBermain == 15)
+                    int toleransi = row["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(row["Toleransi"]);
+
+                    if (jamKeluar == DateTime.MinValue)
                     {
                         row["SisaMenit"] = 9999;
                         row["Urgency"] = "GREEN";
                         continue;
                     }
 
-                    DateTime jamKeluar = row["JamKeluar"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["JamKeluar"]);
-                    int sisaMenit = (int)Math.Round((jamKeluar - now).TotalMinutes);
+                    // batas toleransi
+                    DateTime batasToleransi = jamKeluar.AddMinutes(toleransi);
 
+                    int sisaMenit = (int)Math.Floor((jamKeluar - now).TotalMinutes);
                     row["SisaMenit"] = sisaMenit;
 
-                    if (jamKeluar == DateTime.MinValue)
-                        row["Urgency"] = "GREEN";
-                    else if (now >= jamKeluar)
-                        row["Urgency"] = "RED";
-                    else if (sisaMenit <= 15)
-                        row["Urgency"] = "YELLOW";
+                    // --- RULES ---
+                    if (now < jamKeluar)
+                    {
+                        // sebelum jam keluar
+                        row["Urgency"] = (sisaMenit <= 15) ? "YELLOW" : "GREEN";
+                    }
+                    else if (now >= jamKeluar && now <= batasToleransi)
+                    {
+                        // sudah lewat jam keluar tapi masih dalam toleransi
+                        row["Urgency"] = "ORANGE";
+                    }
                     else
-                        row["Urgency"] = "GREEN";
+                    {
+                        // lewat batas toleransi
+                        row["Urgency"] = "RED";
+                    }
                 }
 
                 dgvReminder.DataSource = raw;
@@ -173,11 +186,17 @@ namespace MilenialPark.Views
                 foreach (DataGridViewRow r in dgvReminder.Rows)
                 {
                     if (r.IsNewRow) continue;
+
                     string urg = Convert.ToString(r.Cells["Urgency"].Value);
 
-                    if (urg == "RED") r.DefaultCellStyle.BackColor = Color.Red;
-                    else if (urg == "YELLOW") r.DefaultCellStyle.BackColor = Color.Yellow;
-                    else r.DefaultCellStyle.BackColor = Color.LightGreen;
+                    if (urg == "RED")
+                        r.DefaultCellStyle.BackColor = Color.Red;
+                    else if (urg == "ORANGE")
+                        r.DefaultCellStyle.BackColor = Color.Orange;
+                    else if (urg == "YELLOW")
+                        r.DefaultCellStyle.BackColor = Color.Yellow;
+                    else
+                        r.DefaultCellStyle.BackColor = Color.LightGreen;
                 }
             }
             catch (Exception ex)
@@ -185,6 +204,7 @@ namespace MilenialPark.Views
                 rtxDataIO.Text += "\n[Reminder Error] " + ex.Message;
             }
         }
+
 
 
         private void RefreshReminderWithPopup()
@@ -396,38 +416,93 @@ namespace MilenialPark.Views
 
         private void HandleExit(string rfid, int gateCode, SerialPort port)
         {
+            _suppressReminderPopup = true;
+
             try
             {
-                _suppressReminderPopup = true;
-                // Cari tiket yang sedang bermain (ENTER-IN)
+                // 1) Ambil tiket yang sedang ENTER-IN hari ini
                 dt = controllerTrans.GetTicketByRFID(rfid, "ENTER-IN", startDay, endDay);
 
-                if (dt.Rows.Count == 1)
+                if (dt == null || dt.Rows.Count != 1)
                 {
-                    string tid = dt.Rows[0]["TransactionID"].ToString();
-                    int noUrut = Convert.ToInt32(dt.Rows[0]["NoUrut"]);
-
-                    // OUT: set JamKeluar actual = now, status ENTER-OUT (kamu bisa rename sesuai kebutuhan)
-                    controllerTrans.UpdateOrderStatusTiketOut(tid, noUrut, "ENTER-OUT");
-
-                    SendGateReply(port, gateCode, true, "TERIMA KASIH");
-
-                    RefreshReminderCore();
-                }
-                else
-                {
-                    // kalau bukan ENTER-IN berarti invalid untuk keluar
                     SendGateReply(port, gateCode, false, "TIKET TIDAK VALID");
+                    RefreshReminderCore();
+                    return;
                 }
-                _suppressReminderPopup = false;
+
+                DataRow row = dt.Rows[0];
+
+                string tid = Convert.ToString(row["TransactionID"] ?? "").Trim();
+                if (string.IsNullOrEmpty(tid))
+                {
+                    SendGateReply(port, gateCode, false, "DATA TIDAK VALID");
+                    RefreshReminderCore();
+                    return;
+                }
+
+                int noUrut = row["NoUrut"] == DBNull.Value ? 0 : Convert.ToInt32(row["NoUrut"]);
+
+                DateTime jamKeluar = row["JamKeluar"] == DBNull.Value
+                    ? DateTime.MinValue
+                    : Convert.ToDateTime(row["JamKeluar"]);
+
+                int toleransi = row["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(row["Toleransi"]);
+
+                DateTime now = DateTime.Now;
+
+                // 2) Kalau jamKeluar belum ada (harusnya sudah ada saat ENTER-IN)
+                if (jamKeluar == DateTime.MinValue)
+                {
+                    // pilih behavior: tolak keluar atau izinkan keluar
+                    // aku sarankan tolak karena tidak ada patokan waktu
+                    SendGateReply(port, gateCode, false, "JAM KELUAR BELUM ADA");
+                    RefreshReminderCore();
+                    return;
+                }
+
+                // 3) Hitung RED: lewat jamKeluar + toleransi
+                DateTime batasToleransi = jamKeluar.AddMinutes(toleransi);
+                bool isRed = now > batasToleransi;
+
+                // 4) Jika RED => wajib bayar denda dulu
+                if (isRed)
+                {
+                    using (var frm = new FrmFinePunishment(tid, noUrut, rfid, jamKeluar, toleransi))
+                    {
+                        var result = frm.ShowDialog(this);
+
+                        if (result != DialogResult.OK)
+                        {
+                            // tidak bayar => gate tutup & status tidak berubah
+                            SendGateReply(port, gateCode, false, "BAYAR DENDA DULU");
+                            RefreshReminderCore();
+                            return;
+                        }
+
+                        // Optional: kalau kamu expose properti IsPaid / CreatedTRS di form, bisa dicek:
+                        // if (!frm.IsPaid) { ... return; }
+                    }
+                }
+
+                // 5) Boleh keluar (non-RED atau sudah bayar denda)
+                controllerTrans.UpdateOrderStatusTiketOut(tid, noUrut, "ENTER-OUT");
+
+                SendGateReply(port, gateCode, true, "TERIMA KASIH");
+                RefreshReminderCore();
             }
             catch (Exception ex)
             {
                 rtxDataIO.Text += "\n[EXIT Error] " + ex.Message;
                 SendGateReply(port, gateCode, false, "ERROR");
+                RefreshReminderCore();
+            }
+            finally
+            {
                 _suppressReminderPopup = false;
             }
         }
+
+
 
         private void SendGateReply(SerialPort port, int gateCode, bool open, string message)
         {
@@ -435,7 +510,7 @@ namespace MilenialPark.Views
 
             string cmd = open ? "buka" : "tutup";
             string reply = "*" + gateCode.ToString().Replace("\r", "") + "," + cmd + "," + message + "#";
-            string reply2 = "*" + gateCode.ToString().Replace("\r", "") + message + "#";
+            string reply2 = "*" + gateCode.ToString().Replace("\r", "") + "#";
             rtxDataIO.Text += "\n>> " + reply;
             port.WriteLine(reply2);
         }
@@ -449,8 +524,10 @@ namespace MilenialPark.Views
             if (!raw.Contains("[") || !raw.Contains("]") || !raw.Contains(",")) return false;
 
             // ambil isi dalam ()
-            int i1 = raw.IndexOf("(");
-            int i2 = raw.IndexOf(")");
+            //int i1 = raw.IndexOf("(");
+            //int i2 = raw.IndexOf(")");
+            int i1 = raw.IndexOf("[");
+            int i2 = raw.IndexOf("]");
             if (i2 <= i1) return false;
 
             string inside = raw.Substring(i1 + 1, i2 - i1 - 1); // "payload,2"
@@ -521,6 +598,9 @@ namespace MilenialPark.Views
             }
         }
 
+        private void label5_Click(object sender, EventArgs e)
+        {
 
+        }
     }
 }

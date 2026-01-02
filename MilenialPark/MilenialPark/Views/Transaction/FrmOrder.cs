@@ -174,8 +174,8 @@ namespace MilenialPark.Views.Transaction
                     UCShopItem ucShopItem = new UCShopItem(shopItem);
                     ucShopItem.outerpanel.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
                     ucShopItem.contentpanel.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
-                    ucShopItem.pbPanel.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
-                    ucShopItem.pbShopItem.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
+                    //ucShopItem.pbPanel.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
+                    //ucShopItem.pbShopItem.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
                     ucShopItem.lblItemName.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
                     ucShopItem.lblRP.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
                     ucShopItem.lblItemPrice.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);

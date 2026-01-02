@@ -30,7 +30,7 @@ namespace MilenialPark.UserControls
         {
             InitializeComponent();
             this.objShopItem = shopitem;
-            this.pbShopItem.Image = Image.FromFile(objShopItem.ImageFilePath);
+            //this.pbShopItem.Image = Image.FromFile(objShopItem.ImageFilePath);
             this.lblItemName.Text = objShopItem.ItemName;
             lblItemPrice.Text = objShopItem.Price.ToString("#,##0");
             lblCategory.Text = objShopItem.Category;
