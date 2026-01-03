@@ -1340,7 +1340,7 @@ namespace MilenialPark.Controller
             decimal total = finePrice * qty;
 
             // Build remarks wajib (referensi)
-            string remarksRef = $"SANKSI for TRT={refTrtTransactionId}; NoUrut={refNoUrut}; RFID={refRfid}";
+            string remarksRef = $"SANKSI for {refTrtTransactionId}; RFID={refRfid} ; NoUrut={refNoUrut}";
             string remarks = (remarksUser ?? "").Trim();
             if (!string.IsNullOrEmpty(remarks)) remarksRef += $"; Note={remarks}";
 

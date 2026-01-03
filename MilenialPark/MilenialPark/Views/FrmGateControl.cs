@@ -110,14 +110,16 @@ namespace MilenialPark.Views
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "TransactionID", HeaderText = "TransactionID", DataPropertyName = "TransactionID" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "NoUrut", HeaderText = "NoUrut", DataPropertyName = "NoUrut" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "RFID", HeaderText = "RFID", DataPropertyName = "RFID" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "Keterangan", HeaderText = "Katerangan", DataPropertyName = "Keterangan" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "ItemName", HeaderText = "ItemName", DataPropertyName = "ItemName" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "JamMasuk", HeaderText = "JamMasuk", DataPropertyName = "JamMasuk" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "JamKeluar", HeaderText = "JamKeluar", DataPropertyName = "JamKeluar" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "SisaMenit", HeaderText = "Sisa (Menit)", DataPropertyName = "SisaMenit" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "Urgency", HeaderText = "Urgency", DataPropertyName = "Urgency" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "Toleransi", HeaderText = "Toleransi", DataPropertyName = "Toleransi" });
 
             dgvReminder.ReadOnly = true;
-            dgvReminder.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvReminder.SelectionMode = DataGridViewSelectionMode.CellSelect;
         }
 
         private void reminderTimer_Tick(object sender, EventArgs e)
@@ -198,6 +200,8 @@ namespace MilenialPark.Views
                     else
                         r.DefaultCellStyle.BackColor = Color.LightGreen;
                 }
+
+                dgvReminder.SelectionMode = DataGridViewSelectionMode.CellSelect;
             }
             catch (Exception ex)
             {

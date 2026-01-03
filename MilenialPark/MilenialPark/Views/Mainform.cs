@@ -334,7 +334,8 @@ namespace MilenialPark.Views
 
         private void btnGate_Click(object sender, EventArgs e)
         {
-            frmGatectrl.Show();
+            var frmGateCtrl = new FrmGateControl();
+            frmGateCtrl.Show();
         }
 
         private void btnOrder_Click(object sender, EventArgs e)
