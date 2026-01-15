@@ -118,7 +118,7 @@ namespace MilenialPark
 
         private void FormLogin_Load(object sender, EventArgs e)
         {
-            ClsStaticVariable.setNewConnection("WHNPOS", txtServer.Text);
+            ClsStaticVariable.setNewConnection("WHNPOS", txtServer.Text, txtuidmysql.Text, txtpassmysql.Text);
             ClsStaticVariable.controllerUser.SetCabang();
 
             setcbxCategory();

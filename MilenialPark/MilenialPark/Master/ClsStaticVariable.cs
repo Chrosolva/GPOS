@@ -14,6 +14,8 @@ namespace MilenialPark.Master
     {
         public static string DataBase = "WHNPOS";
         public static string server = "localhost";
+        public static string dbmysql = "test_app";
+        public static string servermysql = "127.0.0.1";
         public static DBConnect objConnection = new DBConnect();
         public static ControllerUser controllerUser = new ControllerUser();
         public static ClsTransactionDetail objtransdet = new ClsTransactionDetail();
@@ -36,11 +38,12 @@ namespace MilenialPark.Master
 
         #region function
 
-        public static void setNewConnection(string Database, string Server)
+        public static void setNewConnection(string Database, string Server, string uidmysql, string passmysql)
         {
             objConnection.setConnectionString(Database, Server);
-            objConnection = new DBConnect(Database, Server);
+            objConnection = new DBConnect(Database, Server, dbmysql, servermysql, uidmysql, passmysql);
         }
+
 
         #endregion
     }

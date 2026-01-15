@@ -39,18 +39,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CrystalDecisions.CrystalReports.Design, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
-    <Reference Include="CrystalDecisions.CrystalReports.Engine">
-      <HintPath>c:\program files (x86)\sap businessobjects\crystal reports for .net framework 4.0\common\sap businessobjects enterprise xi 4.0\win32_x86\dotnet\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
-    </Reference>
-    <Reference Include="CrystalDecisions.ReportSource">
-      <HintPath>c:\program files (x86)\sap businessobjects\crystal reports for .net framework 4.0\common\sap businessobjects enterprise xi 4.0\win32_x86\dotnet\CrystalDecisions.ReportSource.dll</HintPath>
-    </Reference>
-    <Reference Include="CrystalDecisions.Shared">
-      <HintPath>c:\program files (x86)\sap businessobjects\crystal reports for .net framework 4.0\common\sap businessobjects enterprise xi 4.0\win32_x86\dotnet\CrystalDecisions.Shared.dll</HintPath>
-    </Reference>
-    <Reference Include="CrystalDecisions.Windows.Forms">
-      <HintPath>c:\program files (x86)\sap businessobjects\crystal reports for .net framework 4.0\common\sap businessobjects enterprise xi 4.0\win32_x86\dotnet\CrystalDecisions.Windows.Forms.dll</HintPath>
-    </Reference>
+    <Reference Include="CrystalDecisions.CrystalReports.Engine, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
+    <Reference Include="CrystalDecisions.ReportSource, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
+    <Reference Include="CrystalDecisions.Shared, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
+    <Reference Include="CrystalDecisions.Windows.Forms, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Data.Desktop.v20.1, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.Data.v20.1, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.Printing.v20.1.Core, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
@@ -232,7 +224,6 @@
     <Compile Include="Controller\ControllerShop.cs" />
     <Compile Include="Controller\ControllerTransaction.cs" />
     <Compile Include="Controller\ControllerUser.cs" />
-    <Compile Include="DataGridViewHelper.cs" />
     <Compile Include="FrmLogin.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -483,12 +474,6 @@
     <Compile Include="Views\Transaction\FrmChangeTicketStatus.Designer.cs">
       <DependentUpon>FrmChangeTicketStatus.cs</DependentUpon>
     </Compile>
-    <Compile Include="Views\Transaction\FrmFinePunishment.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Views\Transaction\FrmFinePunishment.Designer.cs">
-      <DependentUpon>FrmFinePunishment.cs</DependentUpon>
-    </Compile>
     <Compile Include="Views\Transaction\FrmMainOrder.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -561,9 +546,6 @@
     <EmbeddedResource Include="UserControls\UCShopItem.resx">
       <DependentUpon>UCShopItem.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\Admin\FrmAdminForm.resx">
-      <DependentUpon>FrmAdminForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Views\Admin\FrmCardChange.resx">
       <DependentUpon>FrmCardChange.cs</DependentUpon>
     </EmbeddedResource>
@@ -602,9 +584,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Transaction\FrmChangeTicketStatus.resx">
       <DependentUpon>FrmChangeTicketStatus.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\Transaction\FrmFinePunishment.resx">
-      <DependentUpon>FrmFinePunishment.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Transaction\FrmMainOrder.resx">
       <DependentUpon>FrmMainOrder.cs</DependentUpon>

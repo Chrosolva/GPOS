@@ -1,0 +1,11 @@
+FIX TOMORROw
+
+nominal top up DONE
+cancel order list hilang DONE
+auto print DONE
+Tambah nama / Keterangan DONE
+Tambah user ID di Tbl Transaksi 
+TOP UP Kode Cabang = null 
+
+Sediakan Menu Sanksi 
+

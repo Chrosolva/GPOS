@@ -11,6 +11,7 @@ using MilenialPark.Controller;
 using MilenialPark.Master;
 using MilenialPark.Models;
 using MilenialPark.UserControls;
+using MySql.Data.MySqlClient;
 
 namespace MilenialPark.Views.Admin
 {
@@ -25,18 +26,45 @@ namespace MilenialPark.Views.Admin
         public List<UCShopItem> listShopItem = new List<UCShopItem>();
         public ControllerTransaction controllerTrans = new ControllerTransaction();
         public BindingSource bind = new BindingSource();
+        private DBConnect db;
 
         #endregion
 
         public FrmAdminForm()
         {
             InitializeComponent();
+            db = ClsStaticVariable.objConnection;
         }
 
         public FrmAdminForm(Mainform main)
         {
             InitializeComponent();
             parentfrm = main;
+        }
+
+        private void FrmAdminForm_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                // Open the MySQL connection using the DBConnect helper
+                db.OpenMySqlConnection();
+
+                // Query the users table
+                using (var cmd = new MySqlCommand(
+                    "SELECT id, username, full_name, email, is_active, created_at FROM users",
+                    db.conn))
+                {
+                    DataTable table = new DataTable();
+                    table.Load(cmd.ExecuteReader());
+                    dgvTest.DataSource = table;
+                }
+
+                db.CloseMySqlConnection();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to load users: " + ex.Message);
+            }
         }
     }
 }
