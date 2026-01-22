@@ -33,32 +33,50 @@ namespace MilenialPark.Views.Admin
         public FrmAdminForm()
         {
             InitializeComponent();
-            db = ClsStaticVariable.objConnection;
+            db = ClsStaticVariable.objConnection;  // assign db here
         }
 
         public FrmAdminForm(Mainform main)
         {
             InitializeComponent();
             parentfrm = main;
+            db = ClsStaticVariable.objConnection;  // assign db here
         }
 
         private void FrmAdminForm_Load(object sender, EventArgs e)
         {
             try
             {
-                // Open the MySQL connection using the DBConnect helper
-                db.OpenMySqlConnection();
+                // Defensive check: ensure db is not null and has a connection string
+                if (db == null || string.IsNullOrEmpty(db.connectionstring2))
+                {
+                    MessageBox.Show("MySQL connection has not been initialised.");
+                    return;
+                }
 
-                // Query the users table
+                db.OpenMySqlConnection();
                 using (var cmd = new MySqlCommand(
-                    "SELECT id, username, full_name, email, is_active, created_at FROM users",
+                    "SELECT " + 
+   " i.id          AS item_id, " + 
+   " i.code, " + 
+   " i.name, " + 
+   " c.id      AS category_id, " + 
+   " c.name        AS category, " + 
+   " i.price1      AS price " +     
+   " FROM tbl_items i " + 
+   " JOIN tbl_categories c ON c.id = i.category_id " + 
+   " WHERE i.active = 1 " + 
+   " AND i.price1 > 0 " + 
+   " AND i.type = 0 " + 
+   " AND(c.id = 5 OR c.`id` = 9) " + 
+   " ORDER BY c.priority, c.name, i.name; ",
+
                     db.conn))
                 {
                     DataTable table = new DataTable();
                     table.Load(cmd.ExecuteReader());
                     dgvTest.DataSource = table;
                 }
-
                 db.CloseMySqlConnection();
             }
             catch (Exception ex)

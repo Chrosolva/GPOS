@@ -87,9 +87,9 @@ namespace MilenialPark.Master
         /// Sets the MySQL connection string for this instance without opening the connection.
         /// Call this when you need to read from or write to a MySQL database.
         /// </summary>
-        public void SetMySqlConnectionString(string database, string server, string uid, string password)
+        public void SetMySqlConnectionString(string database, string server, string uid, string password, string port)
         {
-            connectionstring2 = $"Uid={uid};Pwd={password};Database={database};Server={server}";
+            connectionstring2 = $"Server={server};Port={port};Database={database};Uid={uid};Pwd={password}";
             conn.ConnectionString = connectionstring2;
         }
 
@@ -155,7 +155,7 @@ namespace MilenialPark.Master
             this.DataBase = Database;
             this.Server = Server;
             this.setConnectionString(Database, Server);
-            this.SetMySqlConnectionString(dbmysql, servermysql, uidmysql, passmysql);
+            this.SetMySqlConnectionString(dbmysql, servermysql, uidmysql, passmysql, "3306");
             objsqlconnectionNew = new MySqlServerClass(this);
             objSqlServerIUDClassNew = new MySqlServerIUDClass(this);
             objsqlconnection = new SqlServerClass(this);

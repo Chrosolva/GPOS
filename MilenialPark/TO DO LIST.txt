@@ -1,4 +1,12 @@
 1. Universal SHop  => Create Universal Shop => Insert All Shop Items and Ticket Items. 
-2. Delete All Shop Items
-3. Rename previous Form to Old and Create New Form 
-4. Revamped business process and logic on Buying Ticket , adding watch and also tap Out. 
+2. Delete All Shop Items Done
+3. Rename previous Form to Old and Create New Form Done
+4. Revamped business process and logic on Buying Ticket , adding watch and also tap Out. Done
+
+
+
+newest to do list : 
+
+tambah response ke mesin ko kui hao utk alarm / buzzer 
+tarik data dari table sales_line via MySql => baru lanjut ke scan RFID per tiket. Auto fill Keterangan. 
+

@@ -14,7 +14,7 @@ namespace MilenialPark.Master
     {
         public static string DataBase = "WHNPOS";
         public static string server = "localhost";
-        public static string dbmysql = "test_app";
+        public static string dbmysql = "db_testing";
         public static string servermysql = "127.0.0.1";
         public static DBConnect objConnection = new DBConnect();
         public static ControllerUser controllerUser = new ControllerUser();
@@ -41,6 +41,7 @@ namespace MilenialPark.Master
         public static void setNewConnection(string Database, string Server, string uidmysql, string passmysql)
         {
             objConnection.setConnectionString(Database, Server);
+            objConnection.SetMySqlConnectionString(dbmysql, servermysql, uidmysql, passmysql, "3306");
             objConnection = new DBConnect(Database, Server, dbmysql, servermysql, uidmysql, passmysql);
         }
 
