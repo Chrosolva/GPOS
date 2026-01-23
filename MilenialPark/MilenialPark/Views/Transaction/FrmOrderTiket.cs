@@ -284,7 +284,7 @@ namespace MilenialPark.Views.Transaction
                 // get list ticket and 
                 foreach (DataGridViewRow row in dgvTransTiketDetail.Rows)
                 {
-                    if(row.Cells["category"].Value.ToString() != "ACTIVITY")
+                    if(row.Cells["category"].Value.ToString() != "ACTIVITY" || row.Cells["category"].Value.ToString() == "PLAYTIME")
                     {
                         tmp = "(&" + row.Cells["TransactionID"].Value.ToString() + "&" + row.Cells["NoUrut"].Value.ToString() + ")";
                         tmp2 = row.Cells["ItemName"].Value.ToString();

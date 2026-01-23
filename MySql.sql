@@ -4,7 +4,19 @@ SELECT * FROM tbl_sales_lines ORDER BY sales_id;
 SELECT * FROM tbl_categories;
 SELECT * FROM tbl_items;
 
+-- UPDATE tbl_items
+-- SET Duration = 1
+-- WHERE `code` = 'PG0001';
+-- 
+-- UPDATE tbl_items
+-- SET Duration = 2
+-- WHERE `code` = 'PG0002';
+
+
+
 SELECT VERSION();
+SHOW VARIABLES LIKE 'lower_case_table_names';
+
 
 
 SELECT
@@ -13,7 +25,7 @@ SELECT
     i.plu                         AS plu,
     i.name                        AS item_name,
     i.name2                       AS item_name_2,
-
+    i.duration 			  AS WaktuBermain,
     i.category_id,
     c.code                        AS category_code,
     c.name                        AS category_name,
@@ -53,7 +65,9 @@ SELECT
     i.name,
     c.id 	  AS category_id,
     c.name        AS category,
-    i.price1      AS price
+    i.price1      AS price, 
+    i.duration    AS WaktuBermain
+    
 FROM tbl_items i
 JOIN tbl_categories c ON c.id = i.category_id
 WHERE i.active = 1
@@ -61,6 +75,8 @@ WHERE i.active = 1
   AND i.type = 0
   AND (c.id = 5 OR c.`id` = 9)
 ORDER BY c.priority, c.name, i.name; 
+
+
 
 
 -- Inventory Menu Version

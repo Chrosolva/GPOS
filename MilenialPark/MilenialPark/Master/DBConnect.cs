@@ -89,7 +89,7 @@ namespace MilenialPark.Master
         /// </summary>
         public void SetMySqlConnectionString(string database, string server, string uid, string password, string port)
         {
-            connectionstring2 = $"Server={server};Port={port};Database={database};Uid={uid};Pwd={password}";
+            connectionstring2 = $"Server={server};Port={port};Database={database};Uid={uid};Pwd={password};";
             conn.ConnectionString = connectionstring2;
         }
 

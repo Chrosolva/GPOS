@@ -15,6 +15,7 @@ namespace MilenialPark.Controller
         #region properties
 
         public ClsTransaction objTransaction = new ClsTransaction();
+        public ControllerShop controllerShop = new ControllerShop();
         public ClsCard objCard = new ClsCard();
         public ClsTransactionDetail objTransactionDetail = new ClsTransactionDetail();
         public ClsTransactionTiketDetail objTransactionTiketDetail = new ClsTransactionTiketDetail();
@@ -222,12 +223,44 @@ namespace MilenialPark.Controller
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
 
+        //public DataTable gettransactionTiketDetail(string TransactionID)
+        //{
+        //    query = $" Select TRD.*, isNULL(SHT.Category, 'ACTIVITY') as category from WHNPOS.dbo.TransaksiTiketDetail as TRD left join WHNPOS.dbo.ShopItemTiket as SHT " +
+        //            $" on TRD.ItemID = SHT.ItemID where TRD.TransactionID = {ClsFungsi.C2Q(TransactionID)} Order By TRD.NoUrut asc";
+        //    return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        //}
+
         public DataTable gettransactionTiketDetail(string TransactionID)
         {
-            query = $" Select TRD.*, isNULL(SHT.Category, 'ACTIVITY') as category from WHNPOS.dbo.TransaksiTiketDetail as TRD left join WHNPOS.dbo.ShopItemTiket as SHT " + 
-                    $" on TRD.ItemID = SHT.ItemID where TRD.TransactionID = {ClsFungsi.C2Q(TransactionID)} Order By TRD.NoUrut asc";
-            return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+            // your existing query to get ticket detail + category from ShopItemTiket
+            query = @"Select TRD.*, isNULL(SHT.Category, 'ACTIVITY') as category 
+              from WHNPOS.dbo.TransaksiTiketDetail TRD
+              left join WHNPOS.dbo.ShopItemTiket SHT on TRD.ItemID = SHT.ItemID
+              where TRD.TransactionID = " + ClsFungsi.C2Q(TransactionID) + @"
+              Order By TRD.NoUrut asc";
+
+            DataTable dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+
+            // Cross-reference with Quinos items
+            foreach (DataRow row in dt.Rows)
+            {
+                // If category is still 'ACTIVITY', try looking up from MySQL
+                if (Convert.ToString(row["category"]) == "ACTIVITY")
+                {
+                    string itemId = Convert.ToString(row["ItemID"]);
+                    // GetQuinosItems() returns your MySQL items, including the Category field
+                    var quinosItem = controllerShop.GetQuinosItems()
+                                                   .FirstOrDefault(i => i.ItemID == itemId);
+                    if (quinosItem != null)
+                    {
+                        row["category"] = quinosItem.Category;
+                    }
+                }
+            }
+
+            return dt;
         }
+
 
         public DataTable getOnetransactionTiketDetail(string TransactionID, int NoUrut)
         {

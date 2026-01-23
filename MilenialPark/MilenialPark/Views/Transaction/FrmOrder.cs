@@ -164,33 +164,31 @@ namespace MilenialPark.Views.Transaction
 
         public void FillFLPanel(object sender, EventArgs e)
         {
-            controllerShop.getShopandShopItem2Union(objShop.ShopID, excludecategory);
+            // Instead of loading from SQL Server, get the items from MySQL
+            List<ClsShopItem> items = controllerShop.GetQuinosItems();
+
             FLMenu.Controls.Clear();
             listShopItem.Clear();
-            if (controllerShop.objShop.listShopitem.Count != 0)
-            {
-                foreach (ClsShopItem shopItem in controllerShop.objShop.listShopitem)
-                {
-                    UCShopItem ucShopItem = new UCShopItem(shopItem);
-                    ucShopItem.outerpanel.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
-                    ucShopItem.contentpanel.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
-                    //ucShopItem.pbPanel.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
-                    //ucShopItem.pbShopItem.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
-                    ucShopItem.lblItemName.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
-                    ucShopItem.lblRP.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
-                    ucShopItem.lblItemPrice.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
 
-                    listShopItem.Add(ucShopItem);
-                }
-            }
-            if (listShopItem.Count != 0)
+            foreach (ClsShopItem shopItem in items)
             {
-                for (int i = 0; i < listShopItem.Count; i++)
-                {
-                    FLMenu.Controls.Add(listShopItem[i]);
-                }
+                UCShopItem ucShopItem = new UCShopItem(shopItem);
+                ucShopItem.outerpanel.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
+                ucShopItem.contentpanel.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
+                ucShopItem.lblItemName.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
+                ucShopItem.lblRP.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
+                ucShopItem.lblItemPrice.Click += (se, ev) => this.UserControlClick(sender, e, ucShopItem);
+
+                listShopItem.Add(ucShopItem);
+            }
+
+            // add controls to flow panel
+            foreach (var uc in listShopItem)
+            {
+                FLMenu.Controls.Add(uc);
             }
         }
+
 
         public void hasShop()
         {

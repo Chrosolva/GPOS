@@ -7,6 +7,8 @@ using System.Data.SqlClient;
 using System.Data;
 using MilenialPark.Models;
 using MilenialPark.Master;
+using MySql.Data.MySqlClient;
+using System.Collections.Generic;
 
 namespace MilenialPark.Controller
 {
@@ -745,6 +747,61 @@ namespace MilenialPark.Controller
             {
                 return " Data Item Toko Gagal diHapus !!! error Message = " + e.Message;
             }
+        }
+
+        public List<ClsShopItem> GetQuinosItems()
+        {
+            var results = new List<ClsShopItem>();
+
+            // This SQL remains the same – it filters active items of type 0 
+            // where category id is 5 or 9 and sorts them.
+            string sql = @"
+        SELECT i.id AS item_id,
+               i.code,
+               i.name,
+               c.id AS category_id,
+               c.name AS category,
+               i.price1 AS price, 
+               i.duration    AS WaktuBermain
+
+        FROM tbl_items i
+        JOIN tbl_categories c ON c.id = i.category_id
+        WHERE i.active = 1
+          AND i.price1 > 0
+          AND i.type = 0
+          AND (c.id = 5 OR c.id = 9)
+        ORDER BY c.priority, c.name, i.name;";
+
+            // Use the MySQL connection string from ClsStaticVariables 
+            // (adjust the property name to match your code).
+            string connStr = ClsStaticVariable.objConnection.connectionstring2;
+
+            using (var conn = new MySqlConnection(connStr))
+            {
+                conn.Open();
+                using (var cmd = new MySqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var item = new ClsShopItem
+                        {
+                            ItemID = reader["item_id"].ToString(),
+                            ShopID = reader["code"].ToString(),
+                            ItemName = reader["name"].ToString(),
+                            ItemDesc = reader["name"].ToString(),
+                            CategoryId = reader["category_id"].ToString(),
+                            Category = reader["category"].ToString(),
+                            Price = Convert.ToDecimal(reader["price"]),
+                            WaktuBermain = Convert.ToInt32(reader["WaktuBermain"]),
+                            Toleransi = 10
+                        };
+                        results.Add(item);
+                    }
+                }
+            }
+
+            return results;
         }
 
         #endregion

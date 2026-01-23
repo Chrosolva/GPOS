@@ -4,8 +4,15 @@ nominal top up DONE
 cancel order list hilang DONE
 auto print DONE
 Tambah nama / Keterangan DONE
-Tambah user ID di Tbl Transaksi 
+
+
+Tambah user ID di Tbl Transaksi Done
 TOP UP Kode Cabang = null 
+
+FrmOrderTiket not load detail for transactiondetail (top up refund) DONE
+show UserID in FrmOrderTiket 
+Show Keterangan in GateControl 
+
 
 Sediakan Menu Sanksi 
 
