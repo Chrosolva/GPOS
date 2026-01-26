@@ -1,4 +1,4 @@
-SELECT * FROM tbl_sales;
+SELECT * FROM tbl_sales ORDER BY sales_id;
 SELECT * FROM tbl_sales_lines ORDER BY sales_id;
 
 SELECT * FROM tbl_categories;

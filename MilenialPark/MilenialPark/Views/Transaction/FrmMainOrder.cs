@@ -26,6 +26,7 @@ namespace MilenialPark.Views.Transaction
         public Admin.FrmCardManagement frmCardManagement;
         public Transaction.FrmOrderTiket frmOrderTiket;
         public Transaction.FrmOrder frmOrder;
+        public Transaction.FrmGetQuinosSales frmQuinosSales;
 
 
         #endregion
@@ -69,6 +70,14 @@ namespace MilenialPark.Views.Transaction
             frmOrder.TopLevel = false;
             frmOrder.FormBorderStyle = FormBorderStyle.None;
             frmOrder.Dock = DockStyle.Fill;
+
+            frmQuinosSales = new Transaction.FrmGetQuinosSales();
+            frmQuinosSales.Text = "QUINOS SALES";
+            frmQuinosSales.TopLevel = false;
+            frmQuinosSales.FormBorderStyle = FormBorderStyle.None;
+            frmQuinosSales.Dock = DockStyle.Fill;
+
+
 
             TPOrders.Controls.Add(frmOrderTiket);
             frmOrderTiket.Show();
