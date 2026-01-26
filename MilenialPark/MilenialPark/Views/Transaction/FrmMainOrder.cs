@@ -87,6 +87,10 @@ namespace MilenialPark.Views.Transaction
             frmCard.Show();
             TPDaftarKartu.Controls.Add(frmCardManagement);
             frmCardManagement.Show();
+            TPQuinosSales.Controls.Add(frmQuinosSales);
+            frmQuinosSales.Show();
+
+
         }
 
         private void TCMainOrder_SelectedIndexChanged(object sender, EventArgs e)

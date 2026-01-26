@@ -32,7 +32,7 @@
             this.leftuppanel = new System.Windows.Forms.Panel();
             this.btnSelect = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.txtCardID = new System.Windows.Forms.TextBox();
+            this.txtKeyWord = new System.Windows.Forms.TextBox();
             this.lblrow = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.btnFilter = new System.Windows.Forms.Button();
@@ -55,7 +55,7 @@
             // 
             this.leftuppanel.Controls.Add(this.btnSelect);
             this.leftuppanel.Controls.Add(this.label1);
-            this.leftuppanel.Controls.Add(this.txtCardID);
+            this.leftuppanel.Controls.Add(this.txtKeyWord);
             this.leftuppanel.Controls.Add(this.lblrow);
             this.leftuppanel.Controls.Add(this.label9);
             this.leftuppanel.Controls.Add(this.btnFilter);
@@ -97,14 +97,14 @@
             this.label1.TabIndex = 55;
             this.label1.Text = "Keyword";
             // 
-            // txtCardID
+            // txtKeyWord
             // 
-            this.txtCardID.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtCardID.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtCardID.Location = new System.Drawing.Point(400, 41);
-            this.txtCardID.Name = "txtCardID";
-            this.txtCardID.Size = new System.Drawing.Size(202, 29);
-            this.txtCardID.TabIndex = 50;
+            this.txtKeyWord.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtKeyWord.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtKeyWord.Location = new System.Drawing.Point(400, 41);
+            this.txtKeyWord.Name = "txtKeyWord";
+            this.txtKeyWord.Size = new System.Drawing.Size(202, 29);
+            this.txtKeyWord.TabIndex = 50;
             // 
             // lblrow
             // 
@@ -235,6 +235,7 @@
             this.Controls.Add(this.leftuppanel);
             this.Name = "FrmGetQuinosSales";
             this.Text = "FrmGetQuinosSales";
+            this.Load += new System.EventHandler(this.FrmGetQuinosSales_Load_1);
             this.leftuppanel.ResumeLayout(false);
             this.leftuppanel.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -249,7 +250,7 @@
 
         private System.Windows.Forms.Panel leftuppanel;
         public System.Windows.Forms.Label label1;
-        public System.Windows.Forms.TextBox txtCardID;
+        public System.Windows.Forms.TextBox txtKeyWord;
         public System.Windows.Forms.Label lblrow;
         public System.Windows.Forms.Label label9;
         public System.Windows.Forms.Button btnFilter;

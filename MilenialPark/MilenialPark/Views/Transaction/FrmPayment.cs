@@ -47,6 +47,7 @@ namespace MilenialPark.Views.Transaction
             lblTransactionID.Text = controllerTran.objTransaction.TransactionID;
             cbxPaymentType.SelectedIndex = 0;
             cbxTransType.Text = controllerTran.objTransaction.TransactionType;
+            txtRemarks.Text = controllerTran.objTransaction.Remarks;
         }
 
         private void cbxPaymentType_SelectedIndexChanged(object sender, EventArgs e)
@@ -267,13 +268,13 @@ namespace MilenialPark.Views.Transaction
                               Convert.ToDecimal(r.Cells["Qty2"].Value));
 
                 // Check if combined total matches the transaction total
-                decimal sumCheck = sumTickets + sumDetails;
-                if (sumCheck != controllerTran.objTransaction.totalAmount)
-                {
-                    ClsFungsi.Pesan("Total tidak cocok dengan detail tiket dan detail item.", "ERROR");
-                    btnSave.Enabled = true;
-                    return;
-                }
+                //decimal sumCheck = sumTickets + sumDetails;
+                //if (sumCheck != controllerTran.objTransaction.totalAmount)
+                //{
+                //    ClsFungsi.Pesan("Total tidak cocok dengan detail tiket dan detail item.", "ERROR");
+                //    btnSave.Enabled = true;
+                //    return;
+                //}
 
 
                 // Log and insert
@@ -449,7 +450,7 @@ namespace MilenialPark.Views.Transaction
                 DataGridViewRow row = (DataGridViewRow)dgvTransacTiketDet.Rows[0].Clone();
                 row.Cells[0].Value = lblTransactionID.Text;
                 row.Cells[1].Value = "";
-                row.Cells[2].Value = "";
+                row.Cells[2].Value = det.Keterangan;
                 row.Cells[3].Value = DateTime.Now;
                 row.Cells[4].Value = det.ItemId;
                 row.Cells[5].Value = det.ItemName;
@@ -513,6 +514,17 @@ namespace MilenialPark.Views.Transaction
             // Assuming the RFID column has the name "RFID" and Keterangan is "Keterangan"
             dgvTransacTiketDet.Columns["RFID"].ReadOnly = true;
             dgvTransacTiketDet.Columns["Keterangan"].ReadOnly = false; // Make sure it's not read‑only
+
+            txtCardID.Text = "777";
+            scan();
+            txtCardID.Enabled = false;
+
+            if (dgvTransacTiketDet.Rows.Count > 0)
+            {
+                dgvTransacTiketDet.CurrentCell = dgvTransacTiketDet.Rows[0].Cells["RFID"]; // or any cell you want
+                SyncKeteranganFromCurrentRow();
+            }
+
         }
 
         private void txtRFIDScan_KeyPress(object sender, KeyPressEventArgs e)
@@ -564,6 +576,13 @@ namespace MilenialPark.Views.Transaction
             // Assign RFID to current row
             dgvTransacTiketDet.CurrentRow.Cells["RFID"].Value = rfid;
 
+            // also fill Keterangan from textbox
+            if (dgvTransacTiketDet.Columns.Contains("Keterangan"))
+            {
+                dgvTransacTiketDet.CurrentRow.Cells["Keterangan"].Value = (txtKeterangan.Text ?? "").Trim();
+            }
+
+
             // Auto move to next row
             int nextIndex = dgvTransacTiketDet.CurrentRow.Index + 1;
             if (nextIndex < dgvTransacTiketDet.Rows.Count)
@@ -572,6 +591,8 @@ namespace MilenialPark.Views.Transaction
                     dgvTransacTiketDet.Rows[nextIndex].Cells["RFID"];
             }
 
+            SyncKeteranganFromCurrentRow();
+
             txtRFIDScan.Clear();
             FocusRFIDScan();
         }
@@ -579,6 +600,8 @@ namespace MilenialPark.Views.Transaction
 
         private void dgvTransacTiketDet_SelectionChanged(object sender, EventArgs e)
         {
+            SyncKeteranganFromCurrentRow();
+
             // Make sure there is a valid current cell
             var cell = dgvTransacTiketDet.CurrentCell;
             if (cell == null)
@@ -589,10 +612,28 @@ namespace MilenialPark.Views.Transaction
             // Option 1: check by column name
             if (cell.OwningColumn != null && cell.OwningColumn.Name == "RFID")
             {
+                txtKeterangan.Text = dgvTransacTiketDet.CurrentRow.Cells["Keterangan"].Value.ToString();
                 BeginInvoke(new Action(FocusRFIDScan));
             }
 
         }
 
+        private void SyncKeteranganFromCurrentRow()
+        {
+            if (dgvTransacTiketDet.CurrentRow == null)
+            {
+                txtKeterangan.Text = "";
+                return;
+            }
+
+            object v = dgvTransacTiketDet.CurrentRow.Cells["Keterangan"].Value;
+            txtKeterangan.Text = (v == null) ? "" : v.ToString();
+        }
+
+        private void txtKeterangan_TextChanged(object sender, EventArgs e)
+        {
+            if (dgvTransacTiketDet.CurrentRow == null) return;
+            dgvTransacTiketDet.CurrentRow.Cells["Keterangan"].Value = txtKeterangan.Text;
+        }
     }
 }

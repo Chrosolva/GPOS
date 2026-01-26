@@ -80,6 +80,8 @@
             this.lblCustomerName = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.lblCardID2 = new System.Windows.Forms.Label();
+            this.txtKeterangan = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTransaksiDetail)).BeginInit();
@@ -92,25 +94,25 @@
             this.panel1.Controls.Add(this.lblFormTitle);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1688, 63);
+            this.panel1.Size = new System.Drawing.Size(1266, 51);
             this.panel1.TabIndex = 7;
             // 
             // lblFormTitle
             // 
             this.lblFormTitle.AutoSize = true;
             this.lblFormTitle.Font = new System.Drawing.Font("Segoe UI Semibold", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFormTitle.Location = new System.Drawing.Point(8, 18);
-            this.lblFormTitle.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblFormTitle.Location = new System.Drawing.Point(6, 15);
             this.lblFormTitle.Name = "lblFormTitle";
-            this.lblFormTitle.Size = new System.Drawing.Size(203, 32);
+            this.lblFormTitle.Size = new System.Drawing.Size(160, 25);
             this.lblFormTitle.TabIndex = 35;
             this.lblFormTitle.Text = "Payment Method";
             // 
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(246)))), ((int)(((byte)(250)))));
+            this.panel2.Controls.Add(this.txtKeterangan);
+            this.panel2.Controls.Add(this.label8);
             this.panel2.Controls.Add(this.txtRFIDScan);
             this.panel2.Controls.Add(this.label7);
             this.panel2.Controls.Add(this.dgvTransaksiDetail);
@@ -134,20 +136,18 @@
             this.panel2.Controls.Add(this.label1);
             this.panel2.Controls.Add(this.lblCardID2);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 63);
-            this.panel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panel2.Location = new System.Drawing.Point(0, 51);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1688, 561);
+            this.panel2.Size = new System.Drawing.Size(1266, 456);
             this.panel2.TabIndex = 8;
             // 
             // txtRFIDScan
             // 
             this.txtRFIDScan.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtRFIDScan.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtRFIDScan.Location = new System.Drawing.Point(660, 21);
-            this.txtRFIDScan.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtRFIDScan.Location = new System.Drawing.Point(804, 13);
             this.txtRFIDScan.Name = "txtRFIDScan";
-            this.txtRFIDScan.Size = new System.Drawing.Size(253, 34);
+            this.txtRFIDScan.Size = new System.Drawing.Size(190, 29);
             this.txtRFIDScan.TabIndex = 99;
             this.txtRFIDScan.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtRFIDScan_KeyDown);
             this.txtRFIDScan.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtRFIDScan_KeyPress);
@@ -156,10 +156,9 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(545, 23);
-            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Location = new System.Drawing.Point(718, 15);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(99, 28);
+            this.label7.Size = new System.Drawing.Size(80, 21);
             this.label7.TabIndex = 98;
             this.label7.Text = "RFID Scan";
             // 
@@ -182,11 +181,10 @@
             this.dataGridViewTextBoxColumn10,
             this.dataGridViewTextBoxColumn11,
             this.dataGridViewTextBoxColumn12});
-            this.dgvTransaksiDetail.Location = new System.Drawing.Point(536, 331);
-            this.dgvTransaksiDetail.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dgvTransaksiDetail.Location = new System.Drawing.Point(402, 269);
             this.dgvTransaksiDetail.Name = "dgvTransaksiDetail";
             this.dgvTransaksiDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvTransaksiDetail.Size = new System.Drawing.Size(1099, 226);
+            this.dgvTransaksiDetail.Size = new System.Drawing.Size(824, 184);
             this.dgvTransaksiDetail.TabIndex = 97;
             // 
             // dataGridViewTextBoxColumn1
@@ -271,11 +269,10 @@
             this.WaktuBermain,
             this.Toleransi});
             this.dgvTransacTiketDet.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
-            this.dgvTransacTiketDet.Location = new System.Drawing.Point(536, 64);
-            this.dgvTransacTiketDet.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dgvTransacTiketDet.Location = new System.Drawing.Point(402, 52);
             this.dgvTransacTiketDet.Name = "dgvTransacTiketDet";
             this.dgvTransacTiketDet.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvTransacTiketDet.Size = new System.Drawing.Size(1099, 260);
+            this.dgvTransacTiketDet.Size = new System.Drawing.Size(824, 211);
             this.dgvTransacTiketDet.TabIndex = 96;
             this.dgvTransacTiketDet.SelectionChanged += new System.EventHandler(this.dgvTransacTiketDet_SelectionChanged);
             // 
@@ -354,10 +351,9 @@
             // 
             this.label12.AutoSize = true;
             this.label12.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.Location = new System.Drawing.Point(23, 90);
-            this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label12.Location = new System.Drawing.Point(17, 73);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(151, 28);
+            this.label12.Size = new System.Drawing.Size(121, 21);
             this.label12.TabIndex = 95;
             this.label12.Text = "TransactionType";
             // 
@@ -368,11 +364,11 @@
             this.cbxTransType.FormattingEnabled = true;
             this.cbxTransType.Items.AddRange(new object[] {
             "WEEKDAY",
-            "WEEKEND"});
-            this.cbxTransType.Location = new System.Drawing.Point(192, 86);
-            this.cbxTransType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            "WEEKEND",
+            "QUINOS"});
+            this.cbxTransType.Location = new System.Drawing.Point(144, 70);
             this.cbxTransType.Name = "cbxTransType";
-            this.cbxTransType.Size = new System.Drawing.Size(272, 36);
+            this.cbxTransType.Size = new System.Drawing.Size(205, 29);
             this.cbxTransType.TabIndex = 94;
             // 
             // cbxRemarks
@@ -385,10 +381,9 @@
             "QRIS",
             "DEBIT",
             "CASH"});
-            this.cbxRemarks.Location = new System.Drawing.Point(24, 366);
-            this.cbxRemarks.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cbxRemarks.Location = new System.Drawing.Point(18, 297);
             this.cbxRemarks.Name = "cbxRemarks";
-            this.cbxRemarks.Size = new System.Drawing.Size(137, 36);
+            this.cbxRemarks.Size = new System.Drawing.Size(104, 29);
             this.cbxRemarks.TabIndex = 93;
             this.cbxRemarks.SelectedIndexChanged += new System.EventHandler(this.cbxRemarks_SelectedIndexChanged);
             // 
@@ -399,11 +394,10 @@
             this.btnSave.ForeColor = System.Drawing.Color.OrangeRed;
             this.btnSave.Image = ((System.Drawing.Image)(resources.GetObject("btnSave.Image")));
             this.btnSave.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.btnSave.Location = new System.Drawing.Point(117, 433);
-            this.btnSave.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnSave.Location = new System.Drawing.Point(88, 352);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Padding = new System.Windows.Forms.Padding(9, 9, 9, 9);
-            this.btnSave.Size = new System.Drawing.Size(225, 66);
+            this.btnSave.Padding = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.btnSave.Size = new System.Drawing.Size(169, 54);
             this.btnSave.TabIndex = 89;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
@@ -413,20 +407,18 @@
             // 
             this.txtRemarks.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtRemarks.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtRemarks.Location = new System.Drawing.Point(171, 366);
-            this.txtRemarks.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtRemarks.Location = new System.Drawing.Point(128, 297);
             this.txtRemarks.Name = "txtRemarks";
-            this.txtRemarks.Size = new System.Drawing.Size(294, 34);
+            this.txtRemarks.Size = new System.Drawing.Size(221, 29);
             this.txtRemarks.TabIndex = 88;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(20, 331);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Location = new System.Drawing.Point(15, 269);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(85, 28);
+            this.label5.Size = new System.Drawing.Size(71, 21);
             this.label5.TabIndex = 87;
             this.label5.Text = "Remarks";
             // 
@@ -434,10 +426,9 @@
             // 
             this.lblCardBalance.AutoSize = true;
             this.lblCardBalance.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCardBalance.Location = new System.Drawing.Point(191, 289);
-            this.lblCardBalance.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCardBalance.Location = new System.Drawing.Point(143, 235);
             this.lblCardBalance.Name = "lblCardBalance";
-            this.lblCardBalance.Size = new System.Drawing.Size(23, 28);
+            this.lblCardBalance.Size = new System.Drawing.Size(19, 21);
             this.lblCardBalance.TabIndex = 86;
             this.lblCardBalance.Text = "0";
             // 
@@ -445,10 +436,9 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(20, 289);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Location = new System.Drawing.Point(15, 235);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(78, 28);
+            this.label4.Size = new System.Drawing.Size(63, 21);
             this.label4.TabIndex = 85;
             this.label4.Text = "Balance";
             // 
@@ -456,10 +446,9 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(19, 52);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Location = new System.Drawing.Point(14, 42);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(59, 28);
+            this.label6.Size = new System.Drawing.Size(46, 21);
             this.label6.TabIndex = 84;
             this.label6.Text = "Total ";
             // 
@@ -468,10 +457,9 @@
             this.lblTotal.AutoSize = true;
             this.lblTotal.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTotal.ForeColor = System.Drawing.Color.OrangeRed;
-            this.lblTotal.Location = new System.Drawing.Point(187, 52);
-            this.lblTotal.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblTotal.Location = new System.Drawing.Point(140, 42);
             this.lblTotal.Name = "lblTotal";
-            this.lblTotal.Size = new System.Drawing.Size(23, 28);
+            this.lblTotal.Size = new System.Drawing.Size(19, 21);
             this.lblTotal.TabIndex = 83;
             this.lblTotal.Text = "0";
             // 
@@ -479,10 +467,9 @@
             // 
             this.txtCardID.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtCardID.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtCardID.Location = new System.Drawing.Point(24, 201);
-            this.txtCardID.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtCardID.Location = new System.Drawing.Point(18, 163);
             this.txtCardID.Name = "txtCardID";
-            this.txtCardID.Size = new System.Drawing.Size(441, 34);
+            this.txtCardID.Size = new System.Drawing.Size(331, 29);
             this.txtCardID.TabIndex = 82;
             this.txtCardID.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtCardID_KeyUp);
             // 
@@ -490,10 +477,9 @@
             // 
             this.lblTransactionID.AutoSize = true;
             this.lblTransactionID.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTransactionID.Location = new System.Drawing.Point(187, 18);
-            this.lblTransactionID.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblTransactionID.Location = new System.Drawing.Point(140, 15);
             this.lblTransactionID.Name = "lblTransactionID";
-            this.lblTransactionID.Size = new System.Drawing.Size(20, 28);
+            this.lblTransactionID.Size = new System.Drawing.Size(16, 21);
             this.lblTransactionID.TabIndex = 81;
             this.lblTransactionID.Text = "-";
             // 
@@ -501,10 +487,9 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(19, 18);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(14, 15);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(134, 28);
+            this.label2.Size = new System.Drawing.Size(108, 21);
             this.label2.TabIndex = 80;
             this.label2.Text = "Transaction ID";
             // 
@@ -517,10 +502,9 @@
             this.cbxPaymentType.Items.AddRange(new object[] {
             "CARD",
             "MASTER_CARD"});
-            this.cbxPaymentType.Location = new System.Drawing.Point(192, 129);
-            this.cbxPaymentType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cbxPaymentType.Location = new System.Drawing.Point(144, 105);
             this.cbxPaymentType.Name = "cbxPaymentType";
-            this.cbxPaymentType.Size = new System.Drawing.Size(272, 36);
+            this.cbxPaymentType.Size = new System.Drawing.Size(205, 29);
             this.cbxPaymentType.TabIndex = 79;
             this.cbxPaymentType.SelectedIndexChanged += new System.EventHandler(this.cbxPaymentType_SelectedIndexChanged);
             // 
@@ -528,10 +512,9 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(19, 133);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(14, 108);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(133, 28);
+            this.label3.Size = new System.Drawing.Size(106, 21);
             this.label3.TabIndex = 78;
             this.label3.Text = "Payment Type";
             // 
@@ -539,10 +522,9 @@
             // 
             this.lblCustomerName.AutoSize = true;
             this.lblCustomerName.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCustomerName.Location = new System.Drawing.Point(187, 252);
-            this.lblCustomerName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCustomerName.Location = new System.Drawing.Point(140, 205);
             this.lblCustomerName.Name = "lblCustomerName";
-            this.lblCustomerName.Size = new System.Drawing.Size(20, 28);
+            this.lblCustomerName.Size = new System.Drawing.Size(16, 21);
             this.lblCustomerName.TabIndex = 61;
             this.lblCustomerName.Text = "-";
             // 
@@ -550,10 +532,9 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(20, 252);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(15, 205);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(153, 28);
+            this.label1.Size = new System.Drawing.Size(124, 21);
             this.label1.TabIndex = 48;
             this.label1.Text = "Customer Name";
             // 
@@ -561,21 +542,39 @@
             // 
             this.lblCardID2.AutoSize = true;
             this.lblCardID2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCardID2.Location = new System.Drawing.Point(19, 166);
-            this.lblCardID2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCardID2.Location = new System.Drawing.Point(14, 135);
             this.lblCardID2.Name = "lblCardID2";
-            this.lblCardID2.Size = new System.Drawing.Size(77, 28);
+            this.lblCardID2.Size = new System.Drawing.Size(62, 21);
             this.lblCardID2.TabIndex = 46;
             this.lblCardID2.Text = "Card ID";
             // 
+            // txtKeterangan
+            // 
+            this.txtKeterangan.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtKeterangan.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtKeterangan.Location = new System.Drawing.Point(514, 13);
+            this.txtKeterangan.Name = "txtKeterangan";
+            this.txtKeterangan.Size = new System.Drawing.Size(190, 29);
+            this.txtKeterangan.TabIndex = 101;
+            this.txtKeterangan.TextChanged += new System.EventHandler(this.txtKeterangan_TextChanged);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(409, 15);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(89, 21);
+            this.label8.TabIndex = 100;
+            this.label8.Text = "Keterangan";
+            // 
             // FrmPayment
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1688, 624);
+            this.ClientSize = new System.Drawing.Size(1266, 507);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "FrmPayment";
             this.Text = "FrmPayment";
             this.Load += new System.EventHandler(this.FrmPayment_Load);
@@ -642,5 +641,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn JamKeluar;
         private System.Windows.Forms.DataGridViewTextBoxColumn WaktuBermain;
         private System.Windows.Forms.DataGridViewTextBoxColumn Toleransi;
+        public System.Windows.Forms.TextBox txtKeterangan;
+        public System.Windows.Forms.Label label8;
     }
 }
