@@ -257,6 +257,12 @@
     <Compile Include="Models\ClsUser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reports\LaporanDenda.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LaporanDenda.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Reports\LaporanPenjualan.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -536,6 +542,10 @@
       <DependentUpon>FrmTransactionHistory.cs</DependentUpon>
     </Compile>
     <Content Include="GPOS bg-white.ico" />
+    <EmbeddedResource Include="Reports\LaporanDenda.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>LaporanDenda.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Reports\LaporanPenjualan.rpt">
       <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
       <LastGenOutput>LaporanPenjualan.cs</LastGenOutput>

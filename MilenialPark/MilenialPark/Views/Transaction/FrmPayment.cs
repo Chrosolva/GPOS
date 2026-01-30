@@ -155,6 +155,13 @@ namespace MilenialPark.Views.Transaction
             }
             else
             {
+                if(dgvTransacTiketDet.Rows.Count <= 0)
+                {
+                    ClsFungsi.Pesan("Tidak Ada Tiket untuk ditambah!", "ERROR");
+                    btnSave.Enabled = true;
+                    return;
+                }
+
                 if (MessageBox.Show($"Simpan transaksi {lblTransactionID.Text} dengan jumlah {totalAmount} ?",
                                 "Confirm", MessageBoxButtons.YesNo) == DialogResult.No)
                 {

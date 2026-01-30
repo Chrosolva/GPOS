@@ -208,7 +208,7 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
   <xs:element name="WHNPOS" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="WHNPOS" msprop:Generator_UserDSName="WHNPOS">
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="Transaksi" msprop:Generator_TableClassName="TransaksiDataTable" msprop:Generator_TableVarName="tableTransaksi" msprop:Generator_TablePropName="Transaksi" msprop:Generator_RowDeletingName="TransaksiRowDeleting" msprop:Generator_RowChangingName="TransaksiRowChanging" msprop:Generator_RowEvHandlerName="TransaksiRowChangeEventHandler" msprop:Generator_RowDeletedName="TransaksiRowDeleted" msprop:Generator_UserTableName="Transaksi" msprop:Generator_RowChangedName="TransaksiRowChanged" msprop:Generator_RowEvArgName="TransaksiRowChangeEvent" msprop:Generator_RowClassName="TransaksiRow">
+        <xs:element name="Transaksi" msprop:Generator_TableClassName="TransaksiDataTable" msprop:Generator_TableVarName="tableTransaksi" msprop:Generator_RowChangedName="TransaksiRowChanged" msprop:Generator_TablePropName="Transaksi" msprop:Generator_RowDeletingName="TransaksiRowDeleting" msprop:Generator_RowChangingName="TransaksiRowChanging" msprop:Generator_RowEvHandlerName="TransaksiRowChangeEventHandler" msprop:Generator_RowDeletedName="TransaksiRowDeleted" msprop:Generator_RowClassName="TransaksiRow" msprop:Generator_UserTableName="Transaksi" msprop:Generator_RowEvArgName="TransaksiRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="TransactionID" msprop:Generator_ColumnVarNameInTable="columnTransactionID" msprop:Generator_ColumnPropNameInRow="TransactionID" msprop:Generator_ColumnPropNameInTable="TransactionIDColumn" msprop:Generator_UserColumnName="TransactionID">
@@ -269,7 +269,7 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="TransaksiDetail" msprop:Generator_TableClassName="TransaksiDetailDataTable" msprop:Generator_TableVarName="tableTransaksiDetail" msprop:Generator_TablePropName="TransaksiDetail" msprop:Generator_RowDeletingName="TransaksiDetailRowDeleting" msprop:Generator_RowChangingName="TransaksiDetailRowChanging" msprop:Generator_RowEvHandlerName="TransaksiDetailRowChangeEventHandler" msprop:Generator_RowDeletedName="TransaksiDetailRowDeleted" msprop:Generator_UserTableName="TransaksiDetail" msprop:Generator_RowChangedName="TransaksiDetailRowChanged" msprop:Generator_RowEvArgName="TransaksiDetailRowChangeEvent" msprop:Generator_RowClassName="TransaksiDetailRow">
+        <xs:element name="TransaksiDetail" msprop:Generator_TableClassName="TransaksiDetailDataTable" msprop:Generator_TableVarName="tableTransaksiDetail" msprop:Generator_RowChangedName="TransaksiDetailRowChanged" msprop:Generator_TablePropName="TransaksiDetail" msprop:Generator_RowDeletingName="TransaksiDetailRowDeleting" msprop:Generator_RowChangingName="TransaksiDetailRowChanging" msprop:Generator_RowEvHandlerName="TransaksiDetailRowChangeEventHandler" msprop:Generator_RowDeletedName="TransaksiDetailRowDeleted" msprop:Generator_RowClassName="TransaksiDetailRow" msprop:Generator_UserTableName="TransaksiDetail" msprop:Generator_RowEvArgName="TransaksiDetailRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="TransactionID" msprop:Generator_ColumnVarNameInTable="columnTransactionID" msprop:Generator_ColumnPropNameInRow="TransactionID" msprop:Generator_ColumnPropNameInTable="TransactionIDColumn" msprop:Generator_UserColumnName="TransactionID">
@@ -307,7 +307,7 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="DailyTenantPerShopID" msprop:Generator_TableClassName="DailyTenantPerShopIDDataTable" msprop:Generator_TableVarName="tableDailyTenantPerShopID" msprop:Generator_TablePropName="DailyTenantPerShopID" msprop:Generator_RowDeletingName="DailyTenantPerShopIDRowDeleting" msprop:Generator_RowChangingName="DailyTenantPerShopIDRowChanging" msprop:Generator_RowEvHandlerName="DailyTenantPerShopIDRowChangeEventHandler" msprop:Generator_RowDeletedName="DailyTenantPerShopIDRowDeleted" msprop:Generator_UserTableName="DailyTenantPerShopID" msprop:Generator_RowChangedName="DailyTenantPerShopIDRowChanged" msprop:Generator_RowEvArgName="DailyTenantPerShopIDRowChangeEvent" msprop:Generator_RowClassName="DailyTenantPerShopIDRow">
+        <xs:element name="DailyTenantPerShopID" msprop:Generator_TableClassName="DailyTenantPerShopIDDataTable" msprop:Generator_TableVarName="tableDailyTenantPerShopID" msprop:Generator_RowChangedName="DailyTenantPerShopIDRowChanged" msprop:Generator_TablePropName="DailyTenantPerShopID" msprop:Generator_RowDeletingName="DailyTenantPerShopIDRowDeleting" msprop:Generator_RowChangingName="DailyTenantPerShopIDRowChanging" msprop:Generator_RowEvHandlerName="DailyTenantPerShopIDRowChangeEventHandler" msprop:Generator_RowDeletedName="DailyTenantPerShopIDRowDeleted" msprop:Generator_RowClassName="DailyTenantPerShopIDRow" msprop:Generator_UserTableName="DailyTenantPerShopID" msprop:Generator_RowEvArgName="DailyTenantPerShopIDRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="TransactionID" msprop:Generator_ColumnVarNameInTable="columnTransactionID" msprop:Generator_ColumnPropNameInRow="TransactionID" msprop:Generator_ColumnPropNameInTable="TransactionIDColumn" msprop:Generator_UserColumnName="TransactionID">
@@ -385,7 +385,7 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="TblQRCode" msprop:Generator_TableClassName="TblQRCodeDataTable" msprop:Generator_TableVarName="tableTblQRCode" msprop:Generator_TablePropName="TblQRCode" msprop:Generator_RowDeletingName="TblQRCodeRowDeleting" msprop:Generator_RowChangingName="TblQRCodeRowChanging" msprop:Generator_RowEvHandlerName="TblQRCodeRowChangeEventHandler" msprop:Generator_RowDeletedName="TblQRCodeRowDeleted" msprop:Generator_UserTableName="TblQRCode" msprop:Generator_RowChangedName="TblQRCodeRowChanged" msprop:Generator_RowEvArgName="TblQRCodeRowChangeEvent" msprop:Generator_RowClassName="TblQRCodeRow">
+        <xs:element name="TblQRCode" msprop:Generator_TableClassName="TblQRCodeDataTable" msprop:Generator_TableVarName="tableTblQRCode" msprop:Generator_RowChangedName="TblQRCodeRowChanged" msprop:Generator_TablePropName="TblQRCode" msprop:Generator_RowDeletingName="TblQRCodeRowDeleting" msprop:Generator_RowChangingName="TblQRCodeRowChanging" msprop:Generator_RowEvHandlerName="TblQRCodeRowChangeEventHandler" msprop:Generator_RowDeletedName="TblQRCodeRowDeleted" msprop:Generator_RowClassName="TblQRCodeRow" msprop:Generator_UserTableName="TblQRCode" msprop:Generator_RowEvArgName="TblQRCodeRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="TicketID" msprop:Generator_ColumnVarNameInTable="columnTicketID" msprop:Generator_ColumnPropNameInRow="TicketID" msprop:Generator_ColumnPropNameInTable="TicketIDColumn" msprop:Generator_UserColumnName="TicketID" type="xs:string" />
@@ -394,7 +394,7 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="GetUnionTransaction" msprop:Generator_TableClassName="GetUnionTransactionDataTable" msprop:Generator_TableVarName="tableGetUnionTransaction" msprop:Generator_RowChangedName="GetUnionTransactionRowChanged" msprop:Generator_TablePropName="GetUnionTransaction" msprop:Generator_RowDeletingName="GetUnionTransactionRowDeleting" msprop:Generator_RowChangingName="GetUnionTransactionRowChanging" msprop:Generator_RowEvHandlerName="GetUnionTransactionRowChangeEventHandler" msprop:Generator_RowDeletedName="GetUnionTransactionRowDeleted" msprop:Generator_RowClassName="GetUnionTransactionRow" msprop:Generator_UserTableName="GetUnionTransaction" msprop:Generator_RowEvArgName="GetUnionTransactionRowChangeEvent">
+        <xs:element name="GetUnionTransaction" msprop:Generator_TableClassName="GetUnionTransactionDataTable" msprop:Generator_TableVarName="tableGetUnionTransaction" msprop:Generator_TablePropName="GetUnionTransaction" msprop:Generator_RowDeletingName="GetUnionTransactionRowDeleting" msprop:Generator_RowChangingName="GetUnionTransactionRowChanging" msprop:Generator_RowEvHandlerName="GetUnionTransactionRowChangeEventHandler" msprop:Generator_RowDeletedName="GetUnionTransactionRowDeleted" msprop:Generator_UserTableName="GetUnionTransaction" msprop:Generator_RowChangedName="GetUnionTransactionRowChanged" msprop:Generator_RowEvArgName="GetUnionTransactionRowChangeEvent" msprop:Generator_RowClassName="GetUnionTransactionRow">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="TransactionID" msprop:Generator_ColumnVarNameInTable="columnTransactionID" msprop:Generator_ColumnPropNameInRow="TransactionID" msprop:Generator_ColumnPropNameInTable="TransactionIDColumn" msprop:Generator_UserColumnName="TransactionID">
@@ -493,7 +493,7 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="GetGroupTransaction" msprop:Generator_TableClassName="GetGroupTransactionDataTable" msprop:Generator_TableVarName="tableGetGroupTransaction" msprop:Generator_RowChangedName="GetGroupTransactionRowChanged" msprop:Generator_TablePropName="GetGroupTransaction" msprop:Generator_RowDeletingName="GetGroupTransactionRowDeleting" msprop:Generator_RowChangingName="GetGroupTransactionRowChanging" msprop:Generator_RowEvHandlerName="GetGroupTransactionRowChangeEventHandler" msprop:Generator_RowDeletedName="GetGroupTransactionRowDeleted" msprop:Generator_RowClassName="GetGroupTransactionRow" msprop:Generator_UserTableName="GetGroupTransaction" msprop:Generator_RowEvArgName="GetGroupTransactionRowChangeEvent">
+        <xs:element name="GetGroupTransaction" msprop:Generator_TableClassName="GetGroupTransactionDataTable" msprop:Generator_TableVarName="tableGetGroupTransaction" msprop:Generator_TablePropName="GetGroupTransaction" msprop:Generator_RowDeletingName="GetGroupTransactionRowDeleting" msprop:Generator_RowChangingName="GetGroupTransactionRowChanging" msprop:Generator_RowEvHandlerName="GetGroupTransactionRowChangeEventHandler" msprop:Generator_RowDeletedName="GetGroupTransactionRowDeleted" msprop:Generator_UserTableName="GetGroupTransaction" msprop:Generator_RowChangedName="GetGroupTransactionRowChanged" msprop:Generator_RowEvArgName="GetGroupTransactionRowChangeEvent" msprop:Generator_RowClassName="GetGroupTransactionRow">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="TransactionID" msprop:Generator_ColumnVarNameInTable="columnTransactionID" msprop:Generator_ColumnPropNameInRow="TransactionID" msprop:Generator_ColumnPropNameInTable="TransactionIDColumn" msprop:Generator_UserColumnName="TransactionID">
@@ -558,7 +558,7 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="GetSummaryTransaction" msprop:Generator_TableClassName="GetSummaryTransactionDataTable" msprop:Generator_TableVarName="tableGetSummaryTransaction" msprop:Generator_TablePropName="GetSummaryTransaction" msprop:Generator_RowDeletingName="GetSummaryTransactionRowDeleting" msprop:Generator_RowChangingName="GetSummaryTransactionRowChanging" msprop:Generator_RowEvHandlerName="GetSummaryTransactionRowChangeEventHandler" msprop:Generator_RowDeletedName="GetSummaryTransactionRowDeleted" msprop:Generator_UserTableName="GetSummaryTransaction" msprop:Generator_RowChangedName="GetSummaryTransactionRowChanged" msprop:Generator_RowEvArgName="GetSummaryTransactionRowChangeEvent" msprop:Generator_RowClassName="GetSummaryTransactionRow">
+        <xs:element name="GetSummaryTransaction" msprop:Generator_TableClassName="GetSummaryTransactionDataTable" msprop:Generator_TableVarName="tableGetSummaryTransaction" msprop:Generator_RowChangedName="GetSummaryTransactionRowChanged" msprop:Generator_TablePropName="GetSummaryTransaction" msprop:Generator_RowDeletingName="GetSummaryTransactionRowDeleting" msprop:Generator_RowChangingName="GetSummaryTransactionRowChanging" msprop:Generator_RowEvHandlerName="GetSummaryTransactionRowChangeEventHandler" msprop:Generator_RowDeletedName="GetSummaryTransactionRowDeleted" msprop:Generator_RowClassName="GetSummaryTransactionRow" msprop:Generator_UserTableName="GetSummaryTransaction" msprop:Generator_RowEvArgName="GetSummaryTransactionRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="TransactionType" msprop:Generator_ColumnVarNameInTable="columnTransactionType" msprop:Generator_ColumnPropNameInRow="TransactionType" msprop:Generator_ColumnPropNameInTable="TransactionTypeColumn" msprop:Generator_UserColumnName="TransactionType" minOccurs="0">
@@ -595,6 +595,30 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+        <xs:element name="FineDetail" msprop:Generator_TableClassName="FineDetailDataTable" msprop:Generator_TableVarName="tableFineDetail" msprop:Generator_TablePropName="FineDetail" msprop:Generator_RowDeletingName="FineDetailRowDeleting" msprop:Generator_RowChangingName="FineDetailRowChanging" msprop:Generator_RowEvHandlerName="FineDetailRowChangeEventHandler" msprop:Generator_RowDeletedName="FineDetailRowDeleted" msprop:Generator_UserTableName="FineDetail" msprop:Generator_RowChangedName="FineDetailRowChanged" msprop:Generator_RowEvArgName="FineDetailRowChangeEvent" msprop:Generator_RowClassName="FineDetailRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="FineRef" msprop:Generator_ColumnVarNameInTable="columnFineRef" msprop:Generator_ColumnPropNameInRow="FineRef" msprop:Generator_ColumnPropNameInTable="FineRefColumn" msprop:Generator_UserColumnName="FineRef" type="xs:string" minOccurs="0" />
+              <xs:element name="TransactionID" msprop:Generator_ColumnVarNameInTable="columnTransactionID" msprop:Generator_ColumnPropNameInRow="TransactionID" msprop:Generator_ColumnPropNameInTable="TransactionIDColumn" msprop:Generator_UserColumnName="TransactionID" type="xs:string" minOccurs="0" />
+              <xs:element name="NoUrut" msprop:Generator_ColumnVarNameInTable="columnNoUrut" msprop:Generator_ColumnPropNameInRow="NoUrut" msprop:Generator_ColumnPropNameInTable="NoUrutColumn" msprop:Generator_UserColumnName="NoUrut" type="xs:string" minOccurs="0" />
+              <xs:element name="RFID" msprop:Generator_ColumnVarNameInTable="columnRFID" msprop:Generator_ColumnPropNameInRow="RFID" msprop:Generator_ColumnPropNameInTable="RFIDColumn" msprop:Generator_UserColumnName="RFID" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemName" msprop:Generator_ColumnVarNameInTable="columnItemName" msprop:Generator_ColumnPropNameInRow="ItemName" msprop:Generator_ColumnPropNameInTable="ItemNameColumn" msprop:Generator_UserColumnName="ItemName" type="xs:string" minOccurs="0" />
+              <xs:element name="LateMinutes" msprop:Generator_ColumnVarNameInTable="columnLateMinutes" msprop:Generator_ColumnPropNameInRow="LateMinutes" msprop:Generator_ColumnPropNameInTable="LateMinutesColumn" msprop:Generator_UserColumnName="LateMinutes" type="xs:string" minOccurs="0" />
+              <xs:element name="FinePerTicket" msprop:Generator_ColumnVarNameInTable="columnFinePerTicket" msprop:Generator_ColumnPropNameInRow="FinePerTicket" msprop:Generator_ColumnPropNameInTable="FinePerTicketColumn" msprop:Generator_UserColumnName="FinePerTicket" type="xs:string" minOccurs="0" />
+              <xs:element name="Amount" msprop:Generator_ColumnVarNameInTable="columnAmount" msprop:Generator_ColumnPropNameInRow="Amount" msprop:Generator_ColumnPropNameInTable="AmountColumn" msprop:Generator_UserColumnName="Amount" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="FineSummary" msprop:Generator_TableClassName="FineSummaryDataTable" msprop:Generator_TableVarName="tableFineSummary" msprop:Generator_TablePropName="FineSummary" msprop:Generator_RowDeletingName="FineSummaryRowDeleting" msprop:Generator_RowChangingName="FineSummaryRowChanging" msprop:Generator_RowEvHandlerName="FineSummaryRowChangeEventHandler" msprop:Generator_RowDeletedName="FineSummaryRowDeleted" msprop:Generator_UserTableName="FineSummary" msprop:Generator_RowChangedName="FineSummaryRowChanged" msprop:Generator_RowEvArgName="FineSummaryRowChangeEvent" msprop:Generator_RowClassName="FineSummaryRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="FineRef" msprop:Generator_ColumnVarNameInTable="columnFineRef" msprop:Generator_ColumnPropNameInRow="FineRef" msprop:Generator_ColumnPropNameInTable="FineRefColumn" msprop:Generator_UserColumnName="FineRef" type="xs:string" minOccurs="0" />
+              <xs:element name="TransactionID" msprop:Generator_ColumnVarNameInTable="columnTransactionID" msprop:Generator_ColumnPropNameInRow="TransactionID" msprop:Generator_ColumnPropNameInTable="TransactionIDColumn" msprop:Generator_UserColumnName="TransactionID" type="xs:string" minOccurs="0" />
+              <xs:element name="Qty" msprop:Generator_ColumnVarNameInTable="columnQty" msprop:Generator_ColumnPropNameInRow="Qty" msprop:Generator_ColumnPropNameInTable="QtyColumn" msprop:Generator_UserColumnName="Qty" type="xs:string" minOccurs="0" />
+              <xs:element name="Amount" msprop:Generator_ColumnVarNameInTable="columnAmount" msprop:Generator_ColumnPropNameInRow="Amount" msprop:Generator_ColumnPropNameInTable="AmountColumn" msprop:Generator_UserColumnName="Amount" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
       </xs:choice>
     </xs:complexType>
     <xs:unique name="Constraint1" msdata:PrimaryKey="true">
@@ -614,7 +638,7 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
   </xs:element>
   <xs:annotation>
     <xs:appinfo>
-      <msdata:Relationship name="Transaksi_TransaksiDetail" msdata:parent="Transaksi" msdata:child="TransaksiDetail" msdata:parentkey="TransactionID" msdata:childkey="TransactionID" msprop:Generator_UserChildTable="TransaksiDetail" msprop:Generator_ChildPropName="GetTransaksiDetailRows" msprop:Generator_UserRelationName="Transaksi_TransaksiDetail" msprop:Generator_ParentPropName="TransaksiRow" msprop:Generator_RelationVarName="relationTransaksi_TransaksiDetail" msprop:Generator_UserParentTable="Transaksi" />
+      <msdata:Relationship name="Transaksi_TransaksiDetail" msdata:parent="Transaksi" msdata:child="TransaksiDetail" msdata:parentkey="TransactionID" msdata:childkey="TransactionID" msprop:Generator_UserChildTable="TransaksiDetail" msprop:Generator_ChildPropName="GetTransaksiDetailRows" msprop:Generator_UserRelationName="Transaksi_TransaksiDetail" msprop:Generator_RelationVarName="relationTransaksi_TransaksiDetail" msprop:Generator_UserParentTable="Transaksi" msprop:Generator_ParentPropName="TransaksiRow" />
     </xs:appinfo>
   </xs:annotation>
 </xs:schema>

@@ -95,32 +95,43 @@ namespace MilenialPark.Views
                 {
                     x.Visible = true;
                 }
+
+                btnCards.Visible = false;
+                btnHistory.Visible = false;
+                btnShop.Visible = false;
+                btnCashier.Visible = false;
+                btnOrderTiket.Visible = false;
+                btnOrders.Visible = false;
+                btnCardManagement.Visible = false;
             }
             else
             {
                 if (TipeUser == "Cashier")
                 {
-                    btnShop.Visible = true;
-                    btnOrders.Visible = true;
-                    btnHistory.Visible = true;
+                    btnShop.Visible = false;
+                    btnOrders.Visible = false;
+                    btnHistory.Visible = false;
                     btnReports.Visible = true;
                 }
 
                 if (TipeUser == "Supervisor")
                 {
-                    btnCashier.Visible = true;
-                    btnCards.Visible = true;
-                    btnHistory.Visible = true;
+                    btnCashier.Visible = false;
+                    btnCards.Visible = false;
+                    btnHistory.Visible = false;
                     btnReports.Visible = true;
-                    btnOrders.Visible = true;
+                    btnOrders.Visible = false;
+                    btnShop.Visible = false;
+                    btnCardManagement.Visible = false;
                 }
                 if (TipeUser == "Staf")
                 {
-                    btnHistory.Visible = true;
-                    btnCards.Visible = true;
+                    btnHistory.Visible = false;
+                    btnCards.Visible = false;
                     btnReports.Visible = true;
                     btnUserManagement.Visible = true;
                     btnCardManagement.Visible = true;
+                    btnShop.Visible = false;
                 }
             }
         }

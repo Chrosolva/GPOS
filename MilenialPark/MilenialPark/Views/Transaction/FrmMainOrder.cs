@@ -81,8 +81,8 @@ namespace MilenialPark.Views.Transaction
 
             TPOrders.Controls.Add(frmOrderTiket);
             frmOrderTiket.Show();
-            TPNEOrders.Controls.Add(frmOrder);
-            frmOrder.Show();
+            //TPNEOrders.Controls.Add(frmOrder);
+            //frmOrder.Show();
             TPTopUpCard.Controls.Add(frmCard);
             frmCard.Show();
             TPDaftarKartu.Controls.Add(frmCardManagement);
@@ -90,7 +90,9 @@ namespace MilenialPark.Views.Transaction
             TPQuinosSales.Controls.Add(frmQuinosSales);
             frmQuinosSales.Show();
 
-
+            TCMainOrder.TabPages.Remove(TPNEOrders);
+            TCMainOrder.TabPages.Remove(TPDaftarKartu);
+            TCMainOrder.TabPages.Remove(TPTopUpCard);
         }
 
         private void TCMainOrder_SelectedIndexChanged(object sender, EventArgs e)

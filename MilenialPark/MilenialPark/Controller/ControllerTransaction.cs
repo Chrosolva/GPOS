@@ -49,11 +49,11 @@ namespace MilenialPark.Controller
                 if (dt.Rows.Count > 0)
                 {
                     int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRK." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
+                    TransactionID = "TRK." + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
                 }
                 else
                 {
-                    TransactionID = "TRK." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
+                    TransactionID = "TRK." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
                 }
             }
             else if(type == "DEBIT")
@@ -63,11 +63,11 @@ namespace MilenialPark.Controller
                 if (dt.Rows.Count > 0)
                 {
                     int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRD." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
+                    TransactionID = "TRD." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
                 }
                 else
                 {
-                    TransactionID = "TRD." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
+                    TransactionID = "TRD." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
                 }
             }
             else if(type == "REFUND")
@@ -77,11 +77,11 @@ namespace MilenialPark.Controller
                 if (dt.Rows.Count > 0)
                 {
                     int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRR." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
+                    TransactionID = "TRR." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
                 }
                 else
                 {
-                    TransactionID = "TRR." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
+                    TransactionID = "TRR." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
                 }
             }
             else if(type == "CANCEL")
@@ -91,11 +91,11 @@ namespace MilenialPark.Controller
                 if (dt.Rows.Count > 0)
                 {
                     int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRC." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
+                    TransactionID = "TRC." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
                 }
                 else
                 {
-                    TransactionID = "TRC." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
+                    TransactionID = "TRC." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
                 }
             }
             else if(type == "TICKET")
@@ -105,11 +105,11 @@ namespace MilenialPark.Controller
                 if (dt.Rows.Count > 0)
                 {
                     int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRT." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
+                    TransactionID = "TRT." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
                 }
                 else
                 {
-                    TransactionID = "TRT." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
+                    TransactionID = "TRT." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
                 }
             }
             else if (type == "SANKSI") // <-- ADD
@@ -119,11 +119,11 @@ namespace MilenialPark.Controller
                 if (dt.Rows.Count > 0)
                 {
                     int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRS." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
+                    TransactionID = "TRS." + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
                 }
                 else
                 {
-                    TransactionID = "TRS." + ID + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
+                    TransactionID = "TRS." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
                 }
             }
         } 

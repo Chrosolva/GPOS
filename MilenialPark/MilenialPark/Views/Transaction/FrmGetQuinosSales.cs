@@ -405,26 +405,26 @@ ORDER BY l.idx ASC, l.id ASC;";
                 else
                 {
                     // Non-ticket -> WaktuBermain=0 agar masuk ke dgvTransaksiDetail
-                    ClsTransactionTiketDetail det = new ClsTransactionTiketDetail(
-                        "QUINOS_TMP",
-                        DateTime.Now,
-                        itemCode,
-                        itemName,
-                        price,
-                        qty,
-                        noUrut,
-                        "BOUGHT",
-                        DateTime.Now,
-                        DateTime.Now,
-                        0,
-                        0
-                    );
+                    //ClsTransactionTiketDetail det = new ClsTransactionTiketDetail(
+                    //    "QUINOS_TMP",
+                    //    DateTime.Now,
+                    //    itemCode,
+                    //    itemName,
+                    //    price,
+                    //    qty,
+                    //    noUrut,
+                    //    "BOUGHT",
+                    //    DateTime.Now,
+                    //    DateTime.Now,
+                    //    0,
+                    //    0
+                    //);
 
-                    det.Keterangan = remark;
-                    det.RFID = null;
+                    //det.Keterangan = remark;
+                    //det.RFID = null;
 
-                    tran.objTransaction.listtranstikdet.Add(det);
-                    noUrut++;
+                    //tran.objTransaction.listtranstikdet.Add(det);
+                    //noUrut++;
                 }
             }
 
@@ -532,5 +532,7 @@ ORDER BY l.idx ASC, l.id ASC;";
             // For your POS “compact list” feel:
             DataGridViewHelper.SizeCompact(dgvSalesDetail, 100, 420);
         }
+
+       
     }
 }

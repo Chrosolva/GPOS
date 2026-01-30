@@ -54,6 +54,7 @@ namespace MilenialPark.Views
 
         private void FrmGateControl_Load(object sender, EventArgs e)
         {
+            this.WindowState = FormWindowState.Maximized;
             btnRefrs_Click(null, null);
 
             InitBaudRate();
@@ -70,7 +71,7 @@ namespace MilenialPark.Views
             DataGridViewHelper.ApplyPOSStyle(dgvReminder);
 
             // For your POS “compact list” feel:
-            DataGridViewHelper.SizeCompact(dgvReminder, 100, 420);
+            DataGridViewHelper.SizeCompact(dgvReminder, 200, 420);
 
             this.FormClosing += FrmGateControl_FormClosing;
         }
@@ -244,12 +245,12 @@ namespace MilenialPark.Views
                 {
                     if (currentState == "RED")
                     {
-                        MessageBox.Show("⚠️ ADA TIKET SUDAH HABIS WAKTU!", "TIME OUT",
+                        MessageBox.Show("⚠️ ADA TIKET YANG SUDAH HABIS WAKTU!", "TIME OUT",
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     else if (currentState == "YELLOW")
                     {
-                        MessageBox.Show("⏰ ADA TIKET AKAN HABIS ≤ 15 MENIT!", "WARNING",
+                        MessageBox.Show("⏰ ADA TIKET YANG AKAN HABIS ≤ 15 MENIT!", "WARNING",
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
@@ -393,7 +394,8 @@ namespace MilenialPark.Views
                     string tid = dt.Rows[0]["TransactionID"].ToString();
                     int noUrut = Convert.ToInt32(dt.Rows[0]["NoUrut"]);
                     int waktuBermain = dt.Rows[0]["WaktuBermain"] == DBNull.Value ? 0 : Convert.ToInt32(dt.Rows[0]["WaktuBermain"]);
-                    int toleransi = dt.Rows[0]["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(dt.Rows[0]["Toleransi"]);
+                    //int toleransi = dt.Rows[0]["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(dt.Rows[0]["Toleransi"]);
+                    int toleransi = 10;
 
                     // Update JamMasuk & JamKeluar (expected end) + status ENTER-IN
                     controllerTrans.UpdateOrderStatusTiketandTime(tid, noUrut, waktuBermain, toleransi, "ENTER-IN");
@@ -424,7 +426,7 @@ namespace MilenialPark.Views
 
             try
             {
-                // 1) Ambil tiket yang sedang ENTER-IN hari ini
+                // 1) Ambil tiket ENTER-IN hari ini
                 dt = controllerTrans.GetTicketByRFID(rfid, "ENTER-IN", startDay, endDay);
 
                 if (dt == null || dt.Rows.Count != 1)
@@ -454,41 +456,55 @@ namespace MilenialPark.Views
 
                 DateTime now = DateTime.Now;
 
-                // 2) Kalau jamKeluar belum ada (harusnya sudah ada saat ENTER-IN)
                 if (jamKeluar == DateTime.MinValue)
                 {
-                    // pilih behavior: tolak keluar atau izinkan keluar
-                    // aku sarankan tolak karena tidak ada patokan waktu
                     SendGateReply(port, gateCode, false, "JAM KELUAR BELUM ADA");
                     RefreshReminderCore();
                     return;
                 }
 
-                // 3) Hitung RED: lewat jamKeluar + toleransi
                 DateTime batasToleransi = jamKeluar.AddMinutes(toleransi);
                 bool isRed = now > batasToleransi;
 
-                // 4) Jika RED => wajib bayar denda dulu
                 if (isRed)
                 {
-                    using (var frm = new FrmFinePunishment(tid, noUrut, rfid, jamKeluar, toleransi))
+                    SendGateReply(port, 1, true, "ALARM");
+
+                    using (var frm = new FrmFinePunishment(tid))
                     {
                         var result = frm.ShowDialog(this);
-
                         if (result != DialogResult.OK)
                         {
-                            // tidak bayar => gate tutup & status tidak berubah
                             SendGateReply(port, gateCode, false, "BAYAR DENDA DULU");
                             RefreshReminderCore();
                             return;
                         }
+                    }
 
-                        // Optional: kalau kamu expose properti IsPaid / CreatedTRS di form, bisa dicek:
-                        // if (!frm.IsPaid) { ... return; }
+                    // IMPORTANT: setelah fine diverify, JamKeluar sudah diperpanjang.
+                    // jadi biar aman, reload tiket lagi supaya pakai JamKeluar baru.
+                    dt = controllerTrans.GetTicketByRFID(rfid, "ENTER-IN", startDay, endDay);
+                    if (dt == null || dt.Rows.Count != 1)
+                    {
+                        SendGateReply(port, gateCode, false, "TIKET TIDAK VALID");
+                        RefreshReminderCore();
+                        return;
+                    }
+
+                    row = dt.Rows[0];
+                    jamKeluar = row["JamKeluar"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["JamKeluar"]);
+                    toleransi = row["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(row["Toleransi"]);
+                    batasToleransi = jamKeluar.AddMinutes(toleransi);
+                    isRed = now > batasToleransi;
+
+                    if (isRed)
+                    {
+                        SendGateReply(port, gateCode, false, "BAYAR DENDA DULU");
+                        RefreshReminderCore();
+                        return;
                     }
                 }
 
-                // 5) Boleh keluar (non-RED atau sudah bayar denda)
                 controllerTrans.UpdateOrderStatusTiketOut(tid, noUrut, "ENTER-OUT");
 
                 SendGateReply(port, gateCode, true, "TERIMA KASIH");
@@ -508,6 +524,7 @@ namespace MilenialPark.Views
 
 
 
+
         private void SendGateReply(SerialPort port, int gateCode, bool open, string message)
         {
             if (port == null || !port.IsOpen) return;
@@ -516,7 +533,10 @@ namespace MilenialPark.Views
             string reply = "*" + gateCode.ToString().Replace("\r", "") + "," + cmd + "," + message + "#";
             string reply2 = "*" + gateCode.ToString().Replace("\r", "") + "#";
             rtxDataIO.Text += "\n>> " + reply;
-            port.WriteLine(reply2);
+            if(open)
+            {
+                port.WriteLine(reply2);
+            }
         }
 
         private bool TryParseGatePacket(string raw, out string payload, out int gateCode)
@@ -605,6 +625,11 @@ namespace MilenialPark.Views
         private void label5_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            RefreshReminderCore();
         }
     }
 }

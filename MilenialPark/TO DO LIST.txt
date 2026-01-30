@@ -7,7 +7,17 @@
 
 newest to do list : 
 
-tambah tarik data langsung dari sales quinos ke FrmPayment
+tambah tarik data langsung dari sales quinos ke FrmPayment DONE
+
+tarik data dari table sales_line via MySql => baru lanjut ke scan RFID per tiket. Auto fill Keterangan. DONE
+
+Insert MySql transaction di SQLyog 
+Insert Items in SqLyog Done
+
 tambah response ke mesin ko kui hao utk alarm / buzzer 
-tarik data dari table sales_line via MySql => baru lanjut ke scan RFID per tiket. Auto fill Keterangan. 
+Buat Skenario Sanksi Program
+
+tambah LogRFID 
+tambah function utk swap RFID in case hilang / Rusak 
+
 
