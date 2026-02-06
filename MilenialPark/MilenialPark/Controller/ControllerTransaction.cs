@@ -40,93 +40,44 @@ namespace MilenialPark.Controller
 
         #region function
 
-        public void AutogenereateTransactionID (string type, string ID)
+        public void AutogenereateTransactionID(string type)
         {
-            if(type == "KREDIT")
+            string prefix;
+
+            switch (type)
             {
-                query = $"Select top 1 TransactionID from WHNPOS.dbo.Transaksi where TransactionID like 'TRK.{ID}%'  Order By TransactionID desc";  
-                dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
-                if (dt.Rows.Count > 0)
-                {
-                    int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRK." + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
-                }
-                else
-                {
-                    TransactionID = "TRK." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
-                }
+                case "KREDIT": prefix = "TRK"; break;
+                case "DEBIT": prefix = "TRD"; break;
+                case "REFUND": prefix = "TRR"; break;
+                case "CANCEL": prefix = "TRC"; break;
+                case "TICKET": prefix = "TRT"; break;
+                case "SANKSI": prefix = "TRS"; break;
+                default:
+                    throw new ArgumentException($"Unknown transaction type: {type}");
             }
-            else if(type == "DEBIT")
+
+            string yy = DateTime.Now.ToString("yy");
+
+            // Match: TR?.26-xxxxxx  (example: TRT.26-000001)
+            query = $@"
+        SELECT TOP 1 TransactionID
+        FROM WHNPOS.dbo.Transaksi
+        WHERE TransactionID LIKE '{prefix}.{yy}-%'
+        ORDER BY TransactionID DESC";
+
+            dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+
+            int nextIndex = 1;
+            if (dt.Rows.Count > 0)
             {
-                query = $"Select top 1 TransactionID from WHNPOS.dbo.Transaksi where TransactionID like 'TRD.{ID}%'  Order By TransactionID desc";
-                dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
-                if (dt.Rows.Count > 0)
-                {
-                    int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRD." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
-                }
-                else
-                {
-                    TransactionID = "TRD." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
-                }
+                string lastId = dt.Rows[0]["TransactionID"].ToString();
+                string last6 = lastId.Substring(lastId.Length - 6, 6);
+                nextIndex = int.Parse(last6) + 1;
             }
-            else if(type == "REFUND")
-            {
-                query = $"Select top 1 TransactionID from WHNPOS.dbo.Transaksi where TransactionID like 'TRR.{ID}%'  Order By TransactionID desc";
-                dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
-                if (dt.Rows.Count > 0)
-                {
-                    int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRR." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
-                }
-                else
-                {
-                    TransactionID = "TRR." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
-                }
-            }
-            else if(type == "CANCEL")
-            {
-                query = $"Select top 1 TransactionID from WHNPOS.dbo.Transaksi where TransactionID like 'TRC.{ID}%'  Order By TransactionID desc";
-                dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
-                if (dt.Rows.Count > 0)
-                {
-                    int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRC." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
-                }
-                else
-                {
-                    TransactionID = "TRC." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
-                }
-            }
-            else if(type == "TICKET")
-            {
-                query = $"Select top 1 TransactionID from WHNPOS.dbo.Transaksi where TransactionID like 'TRT.{ID}%'  Order By TransactionID desc";
-                dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
-                if (dt.Rows.Count > 0)
-                {
-                    int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRT." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
-                }
-                else
-                {
-                    TransactionID = "TRT." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
-                }
-            }
-            else if (type == "SANKSI") // <-- ADD
-            {
-                query = $"Select top 1 TransactionID from WHNPOS.dbo.Transaksi where TransactionID like 'TRS.{ID}%'  Order By TransactionID desc";
-                dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
-                if (dt.Rows.Count > 0)
-                {
-                    int tmp = Convert.ToInt32(dt.Rows[0]["TransactionID"].ToString().Substring(dt.Rows[0]["TransactionID"].ToString().Length - 6, 6));
-                    TransactionID = "TRS." + "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + (tmp + 1).ToString("D6");
-                }
-                else
-                {
-                    TransactionID = "TRS." +  "-" + DateTime.Now.Year.ToString().Substring(2, 2) + "-" + 1.ToString("D6");
-                }
-            }
-        } 
+
+            TransactionID = $"{prefix}.{yy}-{nextIndex:D6}";
+        }
+
 
         public DataTable getCard(string CardID)
         {
@@ -503,6 +454,77 @@ namespace MilenialPark.Controller
             }
 
 
+        }
+
+        public DataTable GetGateLogTop(int top = 200)
+        {
+            string sql =
+                "SELECT TOP " + top.ToString() + " LogID, LogDate, LogMessage, LogReason, UserID " +
+                "FROM WHNPOS.dbo.GateLog " +
+                "ORDER BY LogID DESC;";
+
+            return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(sql);
+        }
+
+        public void UpdateTicketRfid(string transactionId, int noUrut, string newRfid, string appendKeterangan)
+        {
+            string tid = (transactionId ?? "").Trim();
+            string rfidNew = (newRfid ?? "").Trim();
+            if (string.IsNullOrEmpty(tid)) throw new Exception("TransactionID kosong.");
+            if (noUrut <= 0) throw new Exception("NoUrut tidak valid.");
+            if (string.IsNullOrEmpty(rfidNew)) throw new Exception("RFID baru kosong.");
+
+            // Validasi: RFID baru belum dipakai ticket lain (minimal hari ini)
+            DateTime startDay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
+            DateTime endDay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59);
+
+            string startS = startDay.ToString("yyyy-MM-dd HH':'mm':'ss");
+            string endS = endDay.ToString("yyyy-MM-dd HH':'mm':'ss");
+
+            string qCheck =
+                "SELECT TOP 1 1 FROM WHNPOS.dbo.TransaksiTiketDetail " +
+                "WHERE RFID = " + ClsFungsi.C2Q(rfidNew) + " " +
+                "AND TransactionDate >= " + ClsFungsi.C2QTime(startDay) + " " +
+                "AND TransactionDate <= " + ClsFungsi.C2QTime(endDay) + " ;";
+
+            var dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(qCheck);
+            if (dt != null && dt.Rows.Count > 0)
+                throw new Exception("RFID baru sudah dipakai ticket lain (hari ini).");
+
+            string ketAppend = (appendKeterangan ?? "").Trim();
+            if (ketAppend.Length > 200) ketAppend = ketAppend.Substring(0, 200);
+
+            string sql =
+                "UPDATE WHNPOS.dbo.TransaksiTiketDetail " +
+                "SET RFID = " + ClsFungsi.C2Q(rfidNew) + ", " +
+                "    Keterangan = ISNULL(Keterangan,'') + " + ClsFungsi.C2Q(" | " + ketAppend) + " " +
+                "WHERE TransactionID = " + ClsFungsi.C2Q(tid) + " AND NoUrut = " + noUrut.ToString() + ";";
+
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(sql);
+        }
+
+        public void InsertGateLog(string logMessage, string logReason, string userId)
+        {
+            // Pastikan kolom di GateLog adalah NVARCHAR biar aman (tidak truncate)
+            // LogMessage/Reason juga sebaiknya cukup panjang (misal 200-500).
+            string msg = (logMessage ?? "").Trim();
+            string reason = (logReason ?? "").Trim();
+            string uid = (userId ?? "").Trim();
+
+            // Optional truncate supaya aman kalau kolom kecil
+            if (msg.Length > 300) msg = msg.Substring(0, 300);
+            if (reason.Length > 100) reason = reason.Substring(0, 100);
+            if (uid.Length > 50) uid = uid.Substring(0, 50);
+
+            string sql =
+                "INSERT INTO WHNPOS.dbo.GateLog (LogDate, LogMessage, LogReason, UserID) VALUES (" +
+                "GETDATE(), " +
+                ClsFungsi.C2Q(msg) + ", " +
+                ClsFungsi.C2Q(reason) + ", " +
+                ClsFungsi.C2Q(uid) +
+                ");";
+
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(sql);
         }
 
         public void InsertLogMessage(string TransactionID, string Message)
@@ -1408,7 +1430,7 @@ namespace MilenialPark.Controller
             }
 
             // Generate TRS ID
-            AutogenereateTransactionID("SANKSI", shopId);
+            AutogenereateTransactionID("SANKSI");
             string trsId = this.TransactionID; // pakai property kamu
 
             // Insert header

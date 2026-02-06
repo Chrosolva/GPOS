@@ -140,13 +140,7 @@ namespace MilenialPark.Views.Transaction
             LoadUniversalShop();
             DataGridViewHelper.ApplyPOSStyle(dgvTransTiket);
 
-            // For your POS “compact list” feel:
-            DataGridViewHelper.SizeCompact(dgvTransTiket, 100, 420);
-
             DataGridViewHelper.ApplyPOSStyle(dgvTransTiketDetail);
-
-            // For your POS “compact list” feel:
-            DataGridViewHelper.SizeCompact(dgvTransTiketDetail, 100, 420);
 
             btnFilter_Click(null, null);
         }
@@ -205,7 +199,7 @@ namespace MilenialPark.Views.Transaction
         {
             if (txtCardID.Text.Trim().Length == 0)
             {
-                SearchCard = ""; 
+                SearchCard = "";
             }
             else
             {
@@ -242,6 +236,9 @@ namespace MilenialPark.Views.Transaction
             }
 
             FormatAllMoney();
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvTransTiket, 120, 420);
         }
 
         private void dgvTransTiket_SelectionChanged(object sender, EventArgs e)
@@ -262,7 +259,7 @@ namespace MilenialPark.Views.Transaction
             // TRT     -> TransaksiTiketDetail
             if (prefix == "TRD" || prefix == "TRK")
                 dt2 = controllerTrans.gettransactionDetail(transactionID);
-            else if (prefix == "TRT")
+            else if (prefix == "TRT" || prefix == "TRS")
                 dt2 = controllerTrans.gettransactionTiketDetail(transactionID);
             else
                 dt2 = new DataTable(); // fallback (optional)
@@ -271,6 +268,9 @@ namespace MilenialPark.Views.Transaction
             dgvTransTiketDetail.DataSource = bind2;
 
             FormatAllMoney();
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvTransTiketDetail, 120, 420);
         }
 
         private void btnPrintQR_Click(object sender, EventArgs e)

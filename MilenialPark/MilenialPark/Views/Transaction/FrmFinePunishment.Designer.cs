@@ -32,6 +32,11 @@
             this.btnVerify = new System.Windows.Forms.Button();
             this.lblTransactionID = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.btnSet = new System.Windows.Forms.Button();
+            this.lblprice = new System.Windows.Forms.Label();
+            this.lblName = new System.Windows.Forms.Label();
+            this.txtFineCode = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.btnRefreshQuinosSales = new System.Windows.Forms.Button();
             this.lblAmount = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -60,6 +65,7 @@
             this.btnVerify.TabIndex = 89;
             this.btnVerify.Text = "VERIFY";
             this.btnVerify.UseVisualStyleBackColor = true;
+            this.btnVerify.Click += new System.EventHandler(this.btnVerify_Click);
             // 
             // lblTransactionID
             // 
@@ -74,6 +80,11 @@
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(246)))), ((int)(((byte)(250)))));
+            this.panel2.Controls.Add(this.btnSet);
+            this.panel2.Controls.Add(this.lblprice);
+            this.panel2.Controls.Add(this.lblName);
+            this.panel2.Controls.Add(this.txtFineCode);
+            this.panel2.Controls.Add(this.label10);
             this.panel2.Controls.Add(this.btnRefreshQuinosSales);
             this.panel2.Controls.Add(this.lblAmount);
             this.panel2.Controls.Add(this.label4);
@@ -88,9 +99,72 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1094, 504);
+            this.panel2.Size = new System.Drawing.Size(1094, 536);
             this.panel2.TabIndex = 9;
             this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
+            // 
+            // btnSet
+            // 
+            this.btnSet.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(176)))), ((int)(((byte)(85)))));
+            this.btnSet.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnSet.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSet.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSet.ForeColor = System.Drawing.Color.White;
+            this.btnSet.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
+            this.btnSet.Location = new System.Drawing.Point(12, 480);
+            this.btnSet.Name = "btnSet";
+            this.btnSet.Padding = new System.Windows.Forms.Padding(7);
+            this.btnSet.Size = new System.Drawing.Size(56, 44);
+            this.btnSet.TabIndex = 120;
+            this.btnSet.Text = "SET";
+            this.btnSet.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btnSet.UseVisualStyleBackColor = false;
+            this.btnSet.Click += new System.EventHandler(this.btnSet_Click);
+            // 
+            // lblprice
+            // 
+            this.lblprice.AutoSize = true;
+            this.lblprice.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblprice.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblprice.Location = new System.Drawing.Point(243, 475);
+            this.lblprice.Name = "lblprice";
+            this.lblprice.Size = new System.Drawing.Size(58, 20);
+            this.lblprice.TabIndex = 119;
+            this.lblprice.Text = "PRICE";
+            this.lblprice.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lblName
+            // 
+            this.lblName.AutoSize = true;
+            this.lblName.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblName.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblName.Location = new System.Drawing.Point(243, 450);
+            this.lblName.Name = "lblName";
+            this.lblName.Size = new System.Drawing.Size(55, 20);
+            this.lblName.TabIndex = 118;
+            this.lblName.Text = "NAME";
+            this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // txtFineCode
+            // 
+            this.txtFineCode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtFineCode.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtFineCode.Location = new System.Drawing.Point(110, 450);
+            this.txtFineCode.Name = "txtFineCode";
+            this.txtFineCode.Size = new System.Drawing.Size(113, 29);
+            this.txtFineCode.TabIndex = 117;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label10.Location = new System.Drawing.Point(8, 453);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(96, 20);
+            this.label10.TabIndex = 116;
+            this.label10.Text = "FINE CODE";
+            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // btnRefreshQuinosSales
             // 
@@ -166,7 +240,6 @@
             this.btnPrintStruk.Text = "PRINT FINE DETAILS";
             this.btnPrintStruk.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnPrintStruk.UseVisualStyleBackColor = false;
-           
             // 
             // dgvFineDetail
             // 
@@ -200,7 +273,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1094, 504);
+            this.ClientSize = new System.Drawing.Size(1094, 536);
             this.Controls.Add(this.panel2);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "FrmFinePunishment";
@@ -227,5 +300,10 @@
         public System.Windows.Forms.Label lblAmount;
         public System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button btnRefreshQuinosSales;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button btnSet;
+        private System.Windows.Forms.Label lblprice;
+        private System.Windows.Forms.Label lblName;
+        public System.Windows.Forms.TextBox txtFineCode;
     }
 }

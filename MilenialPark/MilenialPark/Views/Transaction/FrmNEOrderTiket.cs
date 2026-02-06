@@ -81,7 +81,7 @@ namespace MilenialPark.Views.Transaction
             cbxRemarks.Enabled = false;
                 
             //setCbxCategory(controllerShop.ShopID, cbxTransType.Text);
-            controllerTrans.AutogenereateTransactionID("TICKET", lblShopID.Text);
+            controllerTrans.AutogenereateTransactionID("TICKET");
             lblTransactionID.Text = controllerTrans.TransactionID;
             cbxPaymentType.SelectedIndex = 0;
             dgvTransacTiketDet.Rows.Clear();
@@ -283,7 +283,7 @@ namespace MilenialPark.Views.Transaction
                 {
                     scan();
                     // set Transaksi 
-                    controllerTrans.AutogenereateTransactionID("TICKET", controllerTrans.objTransaction.ShopId);
+                    controllerTrans.AutogenereateTransactionID("TICKET");
 
                     controllerTrans.objTransaction = new ClsTransaction(lblTransactionID.Text, DateTime.Now, finaltotalamount, cbxPaymentType.Text, txtCardID.Text, lblShopID.Text, txtRemarks.Text, finaltotalamount, PPN, balance, balance - totalamount, "BOUGHT", cbxTransType.Text);
 

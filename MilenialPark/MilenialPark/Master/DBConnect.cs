@@ -53,8 +53,8 @@ namespace MilenialPark.Master
         {
             // Original MySQL example left in comments for reference.
             //connectionstring2 = @"uid=cradlesp_desktop;Pwd=Meraki888@;Database=" + database + ";Server=" + server;
-            connectionstring = @"User ID=sa;Password=Numero1;Database=" + database + ";Server=" + server;
-            //connectionstring = @"User ID=sa;Password=Meraki888;Database=" + database + ";Server=" + server;
+            //connectionstring = @"User ID=sa;Password=Numero1;Database=" + database + ";Server=" + server;
+            connectionstring = @"User ID=sa;Password=Meraki888;Database=" + database + ";Server=" + server;
             con.ConnectionString = connectionstring;
         }
 

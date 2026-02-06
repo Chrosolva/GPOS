@@ -193,6 +193,8 @@ ORDER BY l.idx ASC, l.id ASC;";
             {
                 MessageBox.Show("LoadSalesHeader Error: " + ex.Message);
             }
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvSalesHeader, 100, 420);
         }
 
         private void dgvSalesHeader_SelectionChanged(object sender, EventArgs e)
@@ -232,6 +234,9 @@ ORDER BY l.idx ASC, l.id ASC;";
             {
                 MessageBox.Show("LoadSalesDetail Error: " + ex.Message);
             }
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvSalesDetail, 100, 420);
         }
 
         #endregion
@@ -524,13 +529,7 @@ ORDER BY l.idx ASC, l.id ASC;";
         {
             DataGridViewHelper.ApplyPOSStyle(dgvSalesHeader);
 
-            // For your POS “compact list” feel:
-            DataGridViewHelper.SizeCompact(dgvSalesHeader, 100, 420);
-
             DataGridViewHelper.ApplyPOSStyle(dgvSalesDetail);
-
-            // For your POS “compact list” feel:
-            DataGridViewHelper.SizeCompact(dgvSalesDetail, 100, 420);
         }
 
        

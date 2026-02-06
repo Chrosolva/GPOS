@@ -12,6 +12,7 @@ using MilenialPark.Master;
 using MilenialPark.UserControls;
 using MilenialPark.Controller;
 using MilenialPark;
+using System.IO;
 
 namespace MilenialPark.Views
 {
@@ -197,7 +198,7 @@ namespace MilenialPark.Views
 
         private void Mainform_Load(object sender, EventArgs e)
         {
-
+            DeleteOldBakFiles();
         }
 
         private void btnLogOutG_Click(object sender, EventArgs e)
@@ -364,6 +365,34 @@ namespace MilenialPark.Views
             frmCabang.Text = "Branch / Cabang";
             //frmMainOrder.Show();
             this.OpenChildForm(frmCabang);
+        }
+
+        public static void DeleteOldBakFiles()
+        {
+            string backupPath = @"C:\WHNPOS\BackUp";
+
+            if (!Directory.Exists(backupPath))
+                return;
+
+            DateTime cutoffDate = DateTime.Now.AddMonths(-1);
+
+            foreach (var file in Directory.GetFiles(backupPath, "*.bak"))
+            {
+                try
+                {
+                    FileInfo fi = new FileInfo(file);
+
+                    if (fi.LastWriteTime < cutoffDate)
+                    {
+                        fi.Delete();
+                    }
+                }
+                catch
+                {
+                    // Optional:
+                    // log error, but NEVER block login
+                }
+            }
         }
     }
 }

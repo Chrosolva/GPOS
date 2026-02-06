@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace MilenialPark // change namespace to your project if needed
@@ -41,12 +42,9 @@ namespace MilenialPark // change namespace to your project if needed
             public int RowHeaderWidth;
         }
 
-        // ---------- POS LIGHT PINK THEME (MATCHING YOUR SCREENSHOT) ----------
-        // You can tune only these two if you want:
-        // HeaderPink = the main pink bar color in your UI
-        // AccentBlue = nice selection + focus
-        private static readonly Color HeaderPink = Color.FromArgb(255, 76, 123);   // hot pink (close to your bars)
-        private static readonly Color AccentBlue = Color.FromArgb(0, 120, 215);    // Windows accent blue
+        // ---------- POS LIGHT PINK THEME ----------
+        private static readonly Color HeaderPink = Color.FromArgb(255, 76, 123);
+        private static readonly Color AccentBlue = Color.FromArgb(0, 120, 215);
 
         public static readonly GridTheme PosLightPink = new GridTheme
         {
@@ -61,7 +59,7 @@ namespace MilenialPark // change namespace to your project if needed
 
             GridLines = Color.FromArgb(220, 220, 220),
 
-            SelectionBack = Color.FromArgb(204, 228, 247), // soft light-blue selection
+            SelectionBack = Color.FromArgb(204, 228, 247),
             SelectionText = Color.FromArgb(20, 20, 20),
 
             RowHeaderBack = Color.FromArgb(235, 235, 235),
@@ -81,11 +79,37 @@ namespace MilenialPark // change namespace to your project if needed
             RowHeaderWidth = 28
         };
 
+        // ---------- INTERNAL PER-DGV STATE (prevents handler stacking) ----------
+        private sealed class GridState
+        {
+            public bool Attached;
+
+            public DataGridViewDataErrorEventHandler DataErrorHandler;
+            public DataGridViewCellPaintingEventHandler CellPaintingHandler;
+
+            public PaintEventHandler FocusPaintHandler;
+            public EventHandler FocusInvalidateHandler;
+
+            // fix "blue glitch" when horizontal scroll: repaint empty area
+            public PaintEventHandler EmptyAreaPaintHandler;
+            public ScrollEventHandler ScrollHandler;
+
+            public DataGridViewColumnEventHandler ColumnWidthChangedHandler; // ❌ no (ColumnWidthChanged is DataGridViewColumnEventHandler)
+            public EventHandler SizeChangedHandler;
+
+            public EventHandler DataSourceChangedHandler;
+
+            public DataGridViewColumnEventHandler ColumnAddedHandler;   // ✅ correct type
+            public DataGridViewColumnEventHandler ColumnRemovedHandler; // ✅ correct type
+        }
+
+        private static readonly ConditionalWeakTable<DataGridView, GridState> _states =
+            new ConditionalWeakTable<DataGridView, GridState>();
+
         // ---------- PUBLIC API ----------
         public static void ApplyPOSStyle(DataGridView dgv)
         {
             ApplyPOSStyle(dgv, PosLightPink, true, false);
-            RemoveFocusRectangle(dgv);
         }
 
         public static void ApplyPOSStyle(DataGridView dgv, bool readOnly, bool multiSelect)
@@ -100,10 +124,12 @@ namespace MilenialPark // change namespace to your project if needed
 
             dgv.SuspendLayout();
 
-            // General
+            // ---- General ----
             dgv.EnableHeadersVisualStyles = false;
             dgv.Font = theme.BodyFont;
-            dgv.BackgroundColor = Color.FromArgb(170, 170, 170); // gray empty area like your screenshot
+
+            // background for empty area
+            dgv.BackgroundColor = Color.FromArgb(170, 170, 170);
             dgv.BorderStyle = BorderStyle.FixedSingle;
 
             dgv.RowTemplate.Height = theme.RowHeight;
@@ -114,9 +140,12 @@ namespace MilenialPark // change namespace to your project if needed
             dgv.RowHeadersWidth = theme.RowHeaderWidth;
 
             dgv.MultiSelect = multiSelect;
-            dgv.ScrollBars = ScrollBars.Both;
 
-            // Headers
+            // IMPORTANT: do not force Both; you can set Both in your form after Apply
+            if (dgv.ScrollBars == ScrollBars.None)
+                dgv.ScrollBars = ScrollBars.Both;
+
+            // ---- Headers ----
             dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             dgv.ColumnHeadersDefaultCellStyle.BackColor = theme.HeaderBack;
             dgv.ColumnHeadersDefaultCellStyle.ForeColor = theme.HeaderText;
@@ -125,7 +154,7 @@ namespace MilenialPark // change namespace to your project if needed
             dgv.ColumnHeadersDefaultCellStyle.SelectionBackColor = theme.HeaderBack;
             dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = theme.HeaderText;
 
-            // Rows (cells)
+            // ---- Cells ----
             dgv.DefaultCellStyle.BackColor = theme.Surface;
             dgv.DefaultCellStyle.ForeColor = theme.TextPrimary;
             dgv.DefaultCellStyle.SelectionBackColor = theme.SelectionBack;
@@ -136,7 +165,7 @@ namespace MilenialPark // change namespace to your project if needed
             dgv.AlternatingRowsDefaultCellStyle.BackColor = theme.SurfaceAlt;
             dgv.AlternatingRowsDefaultCellStyle.ForeColor = theme.TextPrimary;
 
-            // Row header strip
+            // ---- Row header strip ----
             dgv.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             dgv.RowHeadersDefaultCellStyle.BackColor = theme.RowHeaderBack;
             dgv.RowHeadersDefaultCellStyle.ForeColor = theme.RowHeaderText;
@@ -149,45 +178,44 @@ namespace MilenialPark // change namespace to your project if needed
                 dgv.TopLeftHeaderCell.Style.ForeColor = theme.RowHeaderText;
             }
 
-            // Grid lines (clean like POS)
+            // ---- Grid lines ----
             dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             dgv.GridColor = theme.GridLines;
 
-            // Behavior
-            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None; // you choose sizing mode below
+            // Optional: reduce shimmer on horizontal scroll
+            try
+            {
+                dgv.AdvancedCellBorderStyle.Left = DataGridViewAdvancedCellBorderStyle.None;
+                dgv.AdvancedCellBorderStyle.Right = DataGridViewAdvancedCellBorderStyle.None;
+            }
+            catch { }
+
+            // ---- Behavior ----
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
             dgv.AllowUserToResizeColumns = true;
             dgv.AllowUserToResizeRows = false;
-
             dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+
             dgv.ReadOnly = readOnly;
             dgv.EditMode = readOnly ? DataGridViewEditMode.EditProgrammatically : DataGridViewEditMode.EditOnEnter;
 
-            // Prevent annoying popup dialogs for bad formatted values (images, etc.)
-            dgv.DataError += delegate (object sender, DataGridViewDataErrorEventArgs e)
-            {
-                e.ThrowException = false;
-            };
-
-            // Focus outline
-            AttachFocusCueHandlers(dgv, theme);
-
-            // performance (reduces flicker)
+            // performance
             EnableDoubleBuffering(dgv);
+
+            // attach handlers only once (prevents stacking + glitch)
+            AttachOnce(dgv, theme);
+
+            // keep right side clean
+            EnsureLastVisibleColumnFill(dgv);
 
             dgv.ResumeLayout(true);
         }
 
-        // ---------- OPTIONAL SIZING MODES (call after binding) ----------
-
-        /// <summary>
-        /// Compact: content-fit but clamped so grid stays tight and scrollable.
-        /// Good for POS list grids.
-        /// </summary>
+        // ---------- OPTIONAL SIZING MODES ----------
         public static void SizeCompact(DataGridView dgv, int minWidth, int maxWidth)
         {
-            if (dgv == null || dgv.Columns.Count == 0) return;
+            if (dgv == null || dgv.Columns == null || dgv.Columns.Count == 0) return;
 
             const int extraPadding = 12;
 
@@ -196,6 +224,8 @@ namespace MilenialPark // change namespace to your project if needed
 
             foreach (DataGridViewColumn c in dgv.Columns)
             {
+                if (!c.Visible) continue;
+
                 int w = c.Width + extraPadding;
                 if (w < minWidth) w = minWidth;
                 if (w > maxWidth) w = maxWidth;
@@ -206,14 +236,14 @@ namespace MilenialPark // change namespace to your project if needed
             }
 
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+
+            EnsureLastVisibleColumnFill(dgv);
+            dgv.Invalidate();
         }
 
-        /// <summary>
-        /// Full content sizing: makes columns wide enough for visible content (may be wide; uses scrollbars).
-        /// </summary>
         public static void SizeFullContent(DataGridView dgv, int minWidth)
         {
-            if (dgv == null || dgv.Columns.Count == 0) return;
+            if (dgv == null || dgv.Columns == null || dgv.Columns.Count == 0) return;
 
             const int extraPadding = 14;
 
@@ -222,6 +252,8 @@ namespace MilenialPark // change namespace to your project if needed
 
             foreach (DataGridViewColumn c in dgv.Columns)
             {
+                if (!c.Visible) continue;
+
                 int w = c.Width + extraPadding;
                 if (w < minWidth) w = minWidth;
 
@@ -231,6 +263,9 @@ namespace MilenialPark // change namespace to your project if needed
             }
 
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+
+            EnsureLastVisibleColumnFill(dgv);
+            dgv.Invalidate();
         }
 
         // ---------- READONLY COLUMN STYLING ----------
@@ -268,26 +303,43 @@ namespace MilenialPark // change namespace to your project if needed
                     BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty,
                     null, dgv, new object[] { true });
             }
-            catch
+            catch { }
+        }
+
+        private static void EnsureLastVisibleColumnFill(DataGridView dgv)
+        {
+            if (dgv == null || dgv.Columns == null || dgv.Columns.Count == 0) return;
+
+            DataGridViewColumn lastVisible = null;
+            foreach (DataGridViewColumn c in dgv.Columns)
             {
-                // ignore
+                if (c.Visible) lastVisible = c;
             }
+
+            if (lastVisible != null)
+                lastVisible.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
         }
 
-        private class FocusHandlers
+        private static void AttachOnce(DataGridView dgv, GridTheme theme)
         {
-            public PaintEventHandler PaintHandler;
-            public EventHandler FocusHandler;
-        }
+            var st = _states.GetOrCreateValue(dgv);
+            if (st.Attached) return;
 
-        private static void AttachFocusCueHandlers(DataGridView dgv, GridTheme theme)
-        {
-            FocusHandlers existing = dgv.Tag as FocusHandlers;
-            if (existing != null) return;
+            // prevent DataError popups
+            st.DataErrorHandler = (sender, e) => { e.ThrowException = false; };
+            dgv.DataError += st.DataErrorHandler;
 
-            FocusHandlers fh = new FocusHandlers();
+            // remove focus rectangle on cells
+            st.CellPaintingHandler = (sender, e) =>
+            {
+                if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+                e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.Focus);
+                e.Handled = true;
+            };
+            dgv.CellPainting += st.CellPaintingHandler;
 
-            fh.PaintHandler = delegate (object sender, PaintEventArgs e)
+            // focus outline (border)
+            st.FocusPaintHandler = (sender, e) =>
             {
                 if (dgv.Focused || dgv.ContainsFocus)
                 {
@@ -300,36 +352,106 @@ namespace MilenialPark // change namespace to your project if needed
                     }
                 }
             };
+            st.FocusInvalidateHandler = (sender, e) => dgv.Invalidate();
+            dgv.Paint += st.FocusPaintHandler;
+            dgv.GotFocus += st.FocusInvalidateHandler;
+            dgv.LostFocus += st.FocusInvalidateHandler;
 
-            fh.FocusHandler = delegate (object sender, EventArgs e)
+            // ---- fix blue artifacts when horizontal scroll: repaint empty area ----
+            st.EmptyAreaPaintHandler = (sender, e) =>
             {
+                try
+                {
+                    int rightEdge = dgv.RowHeadersVisible ? dgv.RowHeadersWidth : 0;
+
+                    foreach (DataGridViewColumn c in dgv.Columns)
+                    {
+                        if (!c.Visible) continue;
+                        Rectangle r = dgv.GetColumnDisplayRectangle(c.Index, true);
+                        if (r.Width > 0)
+                            rightEdge = Math.Max(rightEdge, r.Right);
+                    }
+
+                    Rectangle emptyRight = new Rectangle(
+                        rightEdge,
+                        0,
+                        Math.Max(0, dgv.ClientRectangle.Width - rightEdge),
+                        dgv.ClientRectangle.Height
+                    );
+
+                    Rectangle emptyBottom = new Rectangle(
+                        0,
+                        dgv.DisplayRectangle.Bottom,
+                        dgv.ClientRectangle.Width,
+                        Math.Max(0, dgv.ClientRectangle.Height - dgv.DisplayRectangle.Bottom)
+                    );
+
+                    using (var br = new SolidBrush(dgv.BackgroundColor))
+                    {
+                        e.Graphics.FillRectangle(br, emptyRight);
+                        e.Graphics.FillRectangle(br, emptyBottom);
+                    }
+                }
+                catch { }
+            };
+            dgv.Paint += st.EmptyAreaPaintHandler;
+
+            st.ScrollHandler = (sender, e) =>
+            {
+                if (e.ScrollOrientation == ScrollOrientation.HorizontalScroll)
+                    dgv.Invalidate();
+            };
+            dgv.Scroll += st.ScrollHandler;
+
+            // ColumnWidthChanged uses DataGridViewColumnEventHandler
+            st.ColumnWidthChangedHandler = (sender, e) => dgv.Invalidate();
+            dgv.ColumnWidthChanged += st.ColumnWidthChangedHandler;
+
+            st.SizeChangedHandler = (sender, e) => dgv.Invalidate();
+            dgv.SizeChanged += st.SizeChangedHandler;
+
+            st.DataSourceChangedHandler = (sender, e) =>
+            {
+                EnsureLastVisibleColumnFill(dgv);
                 dgv.Invalidate();
             };
+            dgv.DataSourceChanged += st.DataSourceChangedHandler;
 
-            dgv.Paint += fh.PaintHandler;
-            dgv.GotFocus += fh.FocusHandler;
-            dgv.LostFocus += fh.FocusHandler;
-
-            if (dgv.Tag == null || dgv.Tag is FocusHandlers)
-                dgv.Tag = fh;
-
-            dgv.Disposed += delegate
+            // ColumnAdded/Removed use DataGridViewColumnEventHandler
+            st.ColumnAddedHandler = (sender, e) =>
             {
-                try { dgv.Paint -= fh.PaintHandler; } catch { }
-                try { dgv.GotFocus -= fh.FocusHandler; } catch { }
-                try { dgv.LostFocus -= fh.FocusHandler; } catch { }
+                EnsureLastVisibleColumnFill(dgv);
+                dgv.Invalidate();
             };
-        }
+            dgv.ColumnAdded += st.ColumnAddedHandler;
 
-        private static void RemoveFocusRectangle(DataGridView dgv)
-        {
-            dgv.CellPainting += (s, e) =>
+            st.ColumnRemovedHandler = (sender, e) =>
             {
-                if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
-                e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.Focus);
-                e.Handled = true;
+                EnsureLastVisibleColumnFill(dgv);
+                dgv.Invalidate();
             };
-        }
+            dgv.ColumnRemoved += st.ColumnRemovedHandler;
 
+            // cleanup when disposed
+            dgv.Disposed += (sender, e) =>
+            {
+                try { dgv.DataError -= st.DataErrorHandler; } catch { }
+                try { dgv.CellPainting -= st.CellPaintingHandler; } catch { }
+
+                try { dgv.Paint -= st.FocusPaintHandler; } catch { }
+                try { dgv.GotFocus -= st.FocusInvalidateHandler; } catch { }
+                try { dgv.LostFocus -= st.FocusInvalidateHandler; } catch { }
+
+                try { dgv.Paint -= st.EmptyAreaPaintHandler; } catch { }
+                try { dgv.Scroll -= st.ScrollHandler; } catch { }
+                try { dgv.ColumnWidthChanged -= st.ColumnWidthChangedHandler; } catch { }
+                try { dgv.SizeChanged -= st.SizeChangedHandler; } catch { }
+                try { dgv.DataSourceChanged -= st.DataSourceChangedHandler; } catch { }
+                try { dgv.ColumnAdded -= st.ColumnAddedHandler; } catch { }
+                try { dgv.ColumnRemoved -= st.ColumnRemovedHandler; } catch { }
+            };
+
+            st.Attached = true;
+        }
     }
 }

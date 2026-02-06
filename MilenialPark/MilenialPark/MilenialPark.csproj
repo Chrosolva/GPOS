@@ -233,6 +233,12 @@
     <Compile Include="Controller\ControllerTransaction.cs" />
     <Compile Include="Controller\ControllerUser.cs" />
     <Compile Include="DataGridViewHelper.cs" />
+    <Compile Include="FrmAdminPass.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAdminPass.Designer.cs">
+      <DependentUpon>FrmAdminPass.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmLogin.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -542,6 +548,9 @@
       <DependentUpon>FrmTransactionHistory.cs</DependentUpon>
     </Compile>
     <Content Include="GPOS bg-white.ico" />
+    <EmbeddedResource Include="FrmAdminPass.resx">
+      <DependentUpon>FrmAdminPass.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Reports\LaporanDenda.rpt">
       <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
       <LastGenOutput>LaporanDenda.cs</LastGenOutput>

@@ -455,7 +455,7 @@ namespace MilenialPark.Views.Card
                     ClsTransactionDetail objtransdet = new ClsTransactionDetail("TOPUPTMP", DateTime.Now, controllerShop.objShop.listShopitem[0].ItemID, controllerShop.objShop.listShopitem[0].ItemName, controllerShop.objShop.listShopitem[0].Price, 1, "COMPLETE");
 
                     // set Transaction
-                    controllerTran.AutogenereateTransactionID("KREDIT", parentfrm.lblShopID.Text);
+                    controllerTran.AutogenereateTransactionID("KREDIT");
                     controllerTran.objTransaction = new ClsTransaction(controllerTran.TransactionID, DateTime.Now, NUDTotalAmount.Value, cmbPaymentType.Text, controllerTran.objCard.CardID, parentfrm.lblShopID.Text, ("TOP UP " + NUDTotalAmount.Value.ToString("#,##0") + " to " + controllerTran.objCard.CardID + " By " + cmbPaymentType.Text), Convert.ToDecimal(lblPaymentValue.Text), 0, controllerTran.objCard.Saldo, finalbalance, "COMPLETE", "TOP-UP");
 
                     controllerTran.objTransaction.listtransdet = new List<ClsTransactionDetail>();
@@ -512,7 +512,7 @@ namespace MilenialPark.Views.Card
                             ClsTransactionDetail objtransdet = new ClsTransactionDetail("REFUNDTMP", DateTime.Now, controllerShop.objShop.listShopitem[0].ItemID, controllerShop.objShop.listShopitem[0].ItemName, controllerShop.objShop.listShopitem[0].Price, 1, "COMPLETE");
 
                             // set Transaction
-                            controllerTran.AutogenereateTransactionID("REFUND", parentfrm.lblShopID.Text);
+                            controllerTran.AutogenereateTransactionID("REFUND");
                             controllerTran.objTransaction = new ClsTransaction(controllerTran.TransactionID, DateTime.Now, NUDTotalAmount.Value, "REFUND", controllerTran.objCard.CardID, parentfrm.lblShopID.Text, ("REFUND " + NUDTotalAmount.Value.ToString("#,##0") + " From " + controllerTran.objCard.CardID), 0, 0, controllerTran.objCard.Saldo, finalbalance, "COMPLETE", "REFUND");
 
                             controllerTran.objTransaction.listtransdet = new List<ClsTransactionDetail>();
@@ -642,7 +642,7 @@ namespace MilenialPark.Views.Card
                             ClsTransactionDetail objtransdet = new ClsTransactionDetail("REFUNDTMP", DateTime.Now, controllerShop.objShop.listShopitem[0].ItemID, controllerShop.objShop.listShopitem[0].ItemName, controllerShop.objShop.listShopitem[0].Price, 1, "COMPLETE");
 
                             // set Transaction
-                            controllerTran.AutogenereateTransactionID("REFUND", parentfrm.lblShopID.Text);
+                            controllerTran.AutogenereateTransactionID("REFUND");
                             controllerTran.objTransaction = new ClsTransaction(controllerTran.TransactionID, DateTime.Now, controllerTran.objCard.Saldo, "REFUND", controllerTran.objCard.CardID, parentfrm.lblShopID.Text, ("BLOCK CARD, REFUND " + controllerTran.objCard.Saldo.ToString("#,##0") + " From " + controllerTran.objCard.CardID), 0, 0, controllerTran.objCard.Saldo, finalbalance, "COMPLETE");
 
                             controllerTran.objTransaction.listtransdet = new List<ClsTransactionDetail>();
@@ -710,7 +710,7 @@ namespace MilenialPark.Views.Card
                     ClsTransactionDetail objtransdet = new ClsTransactionDetail("TOPUPTMP", DateTime.Now, controllerShop.objShop.listShopitem[0].ItemID, controllerShop.objShop.listShopitem[0].ItemName, controllerShop.objShop.listShopitem[0].Price, 1, "COMPLETE");
 
                     // set Transaction
-                    controllerTran.AutogenereateTransactionID("DEBIT", parentfrm.lblShopID.Text);
+                    controllerTran.AutogenereateTransactionID("DEBIT");
                     controllerTran.objTransaction = new ClsTransaction(controllerTran.TransactionID, DateTime.Now, NUDTotalAmount.Value, cmbPaymentType.Text, controllerTran.objCard.CardID, parentfrm.lblShopID.Text, ("REFUND " + NUDTotalAmount.Value.ToString("#,##0") + " to " + controllerTran.objCard.CardID + " By " + cmbPaymentType.Text), Convert.ToDecimal(lblPaymentValue.Text), 0, controllerTran.objCard.Saldo, finalbalance, "COMPLETE", "TOP-UP");
 
                     controllerTran.objTransaction.listtransdet = new List<ClsTransactionDetail>();

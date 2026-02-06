@@ -61,19 +61,36 @@ namespace MilenialPark.Views
             InitSerialDefaults();
 
             SetupReminderGrid();
-            RefreshReminderCore();
 
-            reminderTimer.Interval = 1 * 60 * 1000; // 1 menit (kamu tulis 5 menit tapi nilainya 1)
-            reminderTimer.Tick += reminderTimer_Tick;
-            reminderTimer.Start();
 
 
             DataGridViewHelper.ApplyPOSStyle(dgvReminder);
 
-            // For your POS “compact list” feel:
-            DataGridViewHelper.SizeCompact(dgvReminder, 200, 420);
+            DataGridViewHelper.ApplyPOSStyle(dgvGateLog);
 
             this.FormClosing += FrmGateControl_FormClosing;
+
+            // Reason dropdown
+            cbxReason.Items.Clear();
+            cbxReason.Items.Add("Hilang");
+            cbxReason.Items.Add("Rusak");
+            cbxReason.SelectedIndex = 0;
+
+            // Load Gate Log
+            LoadGateLogGrid();
+
+            RefreshReminderCore();
+
+            if (dgvReminder.Rows.Count > 0 && dgvReminder.CurrentRow == null)
+            {
+                dgvReminder.Rows[0].Selected = true;
+                dgvReminder.CurrentCell = dgvReminder.Rows[0].Cells["RFID"];
+            }
+
+            reminderTimer.Interval = 2 * 60 * 1000; // 1 menit (kamu tulis 5 menit tapi nilainya 1)
+            reminderTimer.Tick += reminderTimer_Tick;
+            reminderTimer.Start();
+
         }
 
         private void InitBaudRate()
@@ -208,9 +225,10 @@ namespace MilenialPark.Views
             {
                 rtxDataIO.Text += "\n[Reminder Error] " + ex.Message;
             }
+
+            // For your POS “compact list” feel:
+            DataGridViewHelper.SizeCompact(dgvReminder, 100, 420);
         }
-
-
 
         private void RefreshReminderWithPopup()
         {
@@ -307,18 +325,50 @@ namespace MilenialPark.Views
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            if (ClsStaticVariable.controllerUser.objUser.TipeUser == "Admin")
+            try
             {
-                if (sp.IsOpen)
+                if (!sp.IsOpen)
                 {
-                    //string reply = "*" + txtGateCode.Text.Replace("\r", "") + "," + "buka" + "," + "ADMIN ACCESS" + "#";
-                    string reply = "*" + txtGateCode.Text.Replace("\r", "") + "#";
+                    MessageBox.Show("Serial Port belum connect.");
+                    return;
+                }
+
+                string gateCodeText = (txtGateCode.Text ?? "").Trim().Replace("\r", "");
+                if (string.IsNullOrEmpty(gateCodeText))
+                {
+                    MessageBox.Show("Gate code kosong.");
+                    return;
+                }
+
+                // 1) Admin verify dialog
+                using (var f = new FrmAdminPass())
+                {
+                    if (f.ShowDialog(this) != DialogResult.OK || !f.IsVerified)
+                    {
+                        MessageBox.Show("Aksi dibatalkan / tidak ada izin admin.");
+                        return;
+                    }
+
+                    string adminUserId = f.VerifiedUserId;
+
+                    // 2) Kirim pesan (tetap seperti sekarang)
+                    string reply = "*" + gateCodeText + "#";
                     sp.WriteLine(reply);
+
+                    // 3) Simpan GateLog
+                    controllerTrans.InsertGateLog(
+                        $"ADMIN OPEN GATE manual. GateCode={gateCodeText}",
+                        "ADMIN_ACCESS",
+                        adminUserId
+                    );
+
+                    LoadGateLogGrid();
+                    MessageBox.Show("Gate command terkirim & sudah di-log.");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Maaf anda tidak memiliki akses untuk menggunakan fitur ini , hubungi admin anda !!!");
+                MessageBox.Show("Gagal kirim command: " + ex.Message);
             }
         }
 
@@ -533,7 +583,7 @@ namespace MilenialPark.Views
             string reply = "*" + gateCode.ToString().Replace("\r", "") + "," + cmd + "," + message + "#";
             string reply2 = "*" + gateCode.ToString().Replace("\r", "") + "#";
             rtxDataIO.Text += "\n>> " + reply;
-            if(open)
+            if (open)
             {
                 port.WriteLine(reply2);
             }
@@ -631,5 +681,142 @@ namespace MilenialPark.Views
         {
             RefreshReminderCore();
         }
+
+        private void dgvReminder_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dgvReminder.CurrentRow == null) return;
+
+            string rfid = Convert.ToString(dgvReminder.CurrentRow.Cells["RFID"].Value ?? "").Trim();
+            txtCurRFID.Text = rfid;
+        }
+
+        private void LoadGateLogGrid()
+        {
+            try
+            {
+                var dtLog = controllerTrans.GetGateLogTop(200);
+                dgvGateLog.DataSource = dtLog;
+            }
+            catch (Exception ex)
+            {
+                rtxDataIO.AppendText("\n[GateLog Load Error] " + ex.Message);
+            }
+            DataGridViewHelper.SizeCompact(dgvGateLog, 100, 420);
+            dgvGateLog.Columns["LogMessage"].Width = 350;
+            
+        }
+
+        private void btnChange_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dgvReminder.CurrentRow == null)
+                {
+                    MessageBox.Show("Pilih ticket dulu di list reminder.");
+                    return;
+                }
+
+                string oldRfid = (txtCurRFID.Text ?? "").Trim();
+                string newRfid = (txtNewRFID.Text ?? "").Trim();
+                string reason = (cbxReason.Text ?? "").Trim();
+
+                if (string.IsNullOrEmpty(oldRfid))
+                {
+                    MessageBox.Show("Current RFID kosong.");
+                    return;
+                }
+                if (string.IsNullOrEmpty(newRfid))
+                {
+                    MessageBox.Show("New RFID wajib diisi.");
+                    return;
+                }
+                if (newRfid == oldRfid)
+                {
+                    MessageBox.Show("New RFID tidak boleh sama dengan Current RFID.");
+                    return;
+                }
+
+                // Ambil key ticket dari row
+                string tid = Convert.ToString(dgvReminder.CurrentRow.Cells["TransactionID"].Value ?? "").Trim();
+                int noUrut = 0;
+                int.TryParse(Convert.ToString(dgvReminder.CurrentRow.Cells["NoUrut"].Value ?? "0"), out noUrut);
+
+                if (string.IsNullOrEmpty(tid) || noUrut <= 0)
+                {
+                    MessageBox.Show("Data ticket tidak valid (TransactionID/NoUrut).");
+                    return;
+                }
+
+                // CEK DUPLICATE RFID DI LIST REMINDER (dgvReminder)
+                if (IsRfidExistsInReminder(newRfid, tid, noUrut))
+                {
+                    MessageBox.Show("New RFID sudah dipakai oleh ticket lain di list reminder. Pilih RFID lain.");
+                    return;
+                }
+
+                // Admin verify dialog
+                using (var f = new FrmAdminPass())
+                {
+                    if (f.ShowDialog(this) != DialogResult.OK || !f.IsVerified)
+                    {
+                        MessageBox.Show("Aksi dibatalkan / tidak ada izin admin.");
+                        return;
+                    }
+
+                    string adminUserId = f.VerifiedUserId;
+
+                    // Update RFID in DB + append Keterangan
+                    string appendKet = $"RFID_CHANGE {oldRfid}->{newRfid} | REASON={reason} | BY {ClsStaticVariable.controllerUser.objUser.UserID} | VERIFIED_BY={adminUserId}";
+                    controllerTrans.UpdateTicketRfid(tid, noUrut, newRfid, appendKet);
+
+                    // Insert GateLog
+                    controllerTrans.InsertGateLog(
+                        $"RFID changed. TID={tid} NoUrut={noUrut} {oldRfid}->{newRfid}",
+                        reason,
+                        adminUserId
+                    );
+                }
+
+                // Refresh UI
+                RefreshReminderCore();
+                LoadGateLogGrid();
+
+                txtNewRFID.Clear();
+                MessageBox.Show("RFID berhasil diganti dan sudah di-log.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal ganti RFID: " + ex.Message);
+            }
+        }
+
+        private bool IsRfidExistsInReminder(string newRfid, string currentTid, int currentNoUrut)
+        {
+            newRfid = (newRfid ?? "").Trim();
+
+            if (string.IsNullOrEmpty(newRfid)) return false;
+
+            foreach (DataGridViewRow row in dgvReminder.Rows)
+            {
+                if (row == null || row.IsNewRow) continue;
+
+                string rowTid = Convert.ToString(row.Cells["TransactionID"].Value ?? "").Trim();
+                int rowNoUrut = 0;
+                int.TryParse(Convert.ToString(row.Cells["NoUrut"].Value ?? "0"), out rowNoUrut);
+
+                // skip row yang sedang kamu edit (ticket yang sama)
+                if (rowTid == currentTid && rowNoUrut == currentNoUrut)
+                    continue;
+
+                string rowRfid = Convert.ToString(row.Cells["RFID"].Value ?? "").Trim();
+
+                // compare case-insensitive biar aman
+                if (string.Equals(rowRfid, newRfid, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
     }
 }

@@ -30,17 +30,17 @@
         {
             this.TCMainOrder = new System.Windows.Forms.TabControl();
             this.TPOrders = new System.Windows.Forms.TabPage();
+            this.TPQuinosSales = new System.Windows.Forms.TabPage();
             this.TPNEOrders = new System.Windows.Forms.TabPage();
             this.TPTopUpCard = new System.Windows.Forms.TabPage();
             this.TPDaftarKartu = new System.Windows.Forms.TabPage();
-            this.TPQuinosSales = new System.Windows.Forms.TabPage();
             this.TCMainOrder.SuspendLayout();
             this.SuspendLayout();
             // 
             // TCMainOrder
             // 
-            this.TCMainOrder.Controls.Add(this.TPOrders);
             this.TCMainOrder.Controls.Add(this.TPQuinosSales);
+            this.TCMainOrder.Controls.Add(this.TPOrders);
             this.TCMainOrder.Controls.Add(this.TPNEOrders);
             this.TCMainOrder.Controls.Add(this.TPTopUpCard);
             this.TCMainOrder.Controls.Add(this.TPDaftarKartu);
@@ -64,6 +64,16 @@
             this.TPOrders.TabIndex = 0;
             this.TPOrders.Text = "Orders";
             this.TPOrders.UseVisualStyleBackColor = true;
+            // 
+            // TPQuinosSales
+            // 
+            this.TPQuinosSales.Location = new System.Drawing.Point(4, 39);
+            this.TPQuinosSales.Name = "TPQuinosSales";
+            this.TPQuinosSales.Padding = new System.Windows.Forms.Padding(3);
+            this.TPQuinosSales.Size = new System.Drawing.Size(1300, 589);
+            this.TPQuinosSales.TabIndex = 4;
+            this.TPQuinosSales.Text = "QUINOS ORDER";
+            this.TPQuinosSales.UseVisualStyleBackColor = true;
             // 
             // TPNEOrders
             // 
@@ -92,16 +102,6 @@
             this.TPDaftarKartu.TabIndex = 3;
             this.TPDaftarKartu.Text = "Daftar Kartu";
             this.TPDaftarKartu.UseVisualStyleBackColor = true;
-            // 
-            // TPQuinosSales
-            // 
-            this.TPQuinosSales.Location = new System.Drawing.Point(4, 39);
-            this.TPQuinosSales.Name = "TPQuinosSales";
-            this.TPQuinosSales.Padding = new System.Windows.Forms.Padding(3);
-            this.TPQuinosSales.Size = new System.Drawing.Size(1300, 589);
-            this.TPQuinosSales.TabIndex = 4;
-            this.TPQuinosSales.Text = "QUINOS ORDER";
-            this.TPQuinosSales.UseVisualStyleBackColor = true;
             // 
             // FrmMainOrder
             // 

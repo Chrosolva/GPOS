@@ -11,13 +11,17 @@ tambah tarik data langsung dari sales quinos ke FrmPayment DONE
 
 tarik data dari table sales_line via MySql => baru lanjut ke scan RFID per tiket. Auto fill Keterangan. DONE
 
-Insert MySql transaction di SQLyog 
+Insert MySql transaction di SQLyog Done
 Insert Items in SqLyog Done
 
-tambah response ke mesin ko kui hao utk alarm / buzzer 
-Buat Skenario Sanksi Program
+tambah response ke mesin ko kui hao utk alarm / buzzer Done
+Buat Skenario Sanksi Program Done
 
-tambah LogRFID 
-tambah function utk swap RFID in case hilang / Rusak 
+tambah LogRFID Done
+tambah function utk swap RFID in case hilang / Rusak Done
+
+
+Auto Delete BackUp Done
+Sesuaikan tampilan dengan pixel 1366 x 768 
 
 

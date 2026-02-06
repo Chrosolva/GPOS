@@ -291,7 +291,7 @@ namespace MilenialPark.Views.Transaction
             CalculateTotal();
             if (FLNewOrder.Controls.Count != 0)
             {
-                controllerTrans.AutogenereateTransactionID("TICKET", parentfrm.lblShopID.Text);
+                controllerTrans.AutogenereateTransactionID("TICKET");
                 controllerTrans.objTransaction = new ClsTransaction(controllerTrans.TransactionID, DateTime.Now, Convert.ToDecimal(lblTotal.Text), "", "", parentfrm.lblShopID.Text, "", Convert.ToDecimal(lblSubtotal.Text), Convert.ToDecimal(lblPPN.Text), 0, 0, "NOTPAID");
 
                 controllerTrans.objTransaction.listtransdet = new List<ClsTransactionDetail>();
@@ -345,7 +345,7 @@ namespace MilenialPark.Views.Transaction
             CalculateTotal();
             if (FLNewOrder.Controls.Count != 0)
             {
-                controllerTrans.AutogenereateTransactionID("TICKET", parentfrm.lblShopID.Text);
+                controllerTrans.AutogenereateTransactionID("TICKET");
                 controllerTrans.objTransaction = new ClsTransaction(controllerTrans.TransactionID, DateTime.Now, Convert.ToDecimal(lblTotal.Text), "", "", parentfrm.lblShopID.Text, "", Convert.ToDecimal(lblSubtotal.Text), Convert.ToDecimal(lblPPN.Text), 0, 0, "NOTPAID", cbxTransType.Text);
 
                 controllerTrans.objTransaction.listtransdet = new List<ClsTransactionDetail>();
