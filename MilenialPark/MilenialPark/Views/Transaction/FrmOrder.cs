@@ -456,7 +456,7 @@ namespace MilenialPark.Views.Transaction
             DateTime to = dtpTo.Value;
             ds = controllerReport.LoadTransactionReceipt(objtrans.TransactionID, parentfrm.lblShopID.Text, new DateTime(from.Year, from.Month, from.Day, 0, 0, 0), new DateTime(to.Year, to.Month, to.Day, 23, 59, 59));
             reportDoc = new MilenialPark.Reports.PrintTransactionReceipt();
-            reportDoc.SetDataSource(ds);
+            BindReport(reportDoc, ds);
 
             FrmShowReport frmShowReport = new FrmShowReport(reportDoc);
             FormBlank frmBlank = new FormBlank();
@@ -480,7 +480,7 @@ namespace MilenialPark.Views.Transaction
             {
                 reportDoc = new MilenialPark.Reports.PrintTopUpReceipt();
             }
-            reportDoc.SetDataSource(ds);
+            BindReport(reportDoc, ds);
 
             this.printdialog1.Document = printdocument;
             DialogResult dr = this.printdialog1.ShowDialog();
@@ -529,6 +529,22 @@ namespace MilenialPark.Views.Transaction
                 excludecategory = "WEEKDAY";
             }
             FillFLPanel(null, null);
+        }
+
+        private void BindReport(ReportDocument rpt, DataSet dataSet)
+        {
+            // Clear any saved / design-time connections
+            rpt.DataSourceConnections.Clear();
+
+            // Bind main report
+            rpt.SetDataSource(dataSet);
+
+            // Bind ALL subreports (if any)
+            foreach (ReportDocument sub in rpt.Subreports)
+            {
+                sub.DataSourceConnections.Clear();
+                sub.SetDataSource(dataSet);
+            }
         }
     }
 }

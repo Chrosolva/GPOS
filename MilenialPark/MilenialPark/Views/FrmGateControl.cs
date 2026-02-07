@@ -818,5 +818,20 @@ namespace MilenialPark.Views
             return false;
         }
 
+        private void txtNewRFID_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                txtNewRFID.Text =  Convert.ToInt32(txtNewRFID.Text).ToString();
+            }
+        }
+
+        private void txtCurRFID_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                txtCurRFID.Text =  Convert.ToInt32(txtCurRFID.Text).ToString();
+            }
+        }
     }
 }

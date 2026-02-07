@@ -217,7 +217,7 @@ namespace MilenialPark.Views.Transaction
                 {
                     reportDoc = new MilenialPark.Reports.PrintTransactionReceipt();
                 }
-                reportDoc.SetDataSource(ds);
+                BindReport(reportDoc, ds);
 
                 //FrmShowReport frmShowReport = new FrmShowReport(reportDoc);
                 //FormBlank frmBlank = new FormBlank();
@@ -226,6 +226,22 @@ namespace MilenialPark.Views.Transaction
                 //frmBlank.Close();
 
                 reportDoc.PrintToPrinter(1, false, 0, 0);
+            }
+        }
+
+        private void BindReport(ReportDocument rpt, DataSet dataSet)
+        {
+            // Clear any saved / design-time connections
+            rpt.DataSourceConnections.Clear();
+
+            // Bind main report
+            rpt.SetDataSource(dataSet);
+
+            // Bind ALL subreports (if any)
+            foreach (ReportDocument sub in rpt.Subreports)
+            {
+                sub.DataSourceConnections.Clear();
+                sub.SetDataSource(dataSet);
             }
         }
     }

@@ -139,7 +139,7 @@ namespace MilenialPark.Views.Reports
                 ds = controllerReport.LoadPendapatan(dtpFrom.Value, dtpTo.Value, TransactionTypeVal, PaymentTypeVal, UserIDVal, RemarksVal);
 
                 reportDoc = new MilenialPark.Reports.PrintLaporanDetailPenjualan();
-                reportDoc.SetDataSource(ds);
+                BindReport(reportDoc, ds);
                 reportDoc.SetParameterValue("StartDate", new DateTime(from.Year, from.Month, from.Day, 0, 0, 0));
                 reportDoc.SetParameterValue("EndDate", new DateTime(to.Year, to.Month, to.Day, 23, 59, 59));
                 reportDoc.SetParameterValue("Title", txtReportTitle.Text);
@@ -151,7 +151,7 @@ namespace MilenialPark.Views.Reports
                 ds = controllerReport.LoadPendapatanGroup(dtpFrom.Value, dtpTo.Value, TransactionTypeVal, PaymentTypeVal, UserIDVal, RemarksVal);
 
                 reportDoc = new MilenialPark.Reports.LaporanPenjualan();
-                reportDoc.SetDataSource(ds);
+                BindReport(reportDoc, ds);
                 reportDoc.SetParameterValue("StartDate", new DateTime(from.Year, from.Month, from.Day, 0, 0, 0));
                 reportDoc.SetParameterValue("EndDate", new DateTime(to.Year, to.Month, to.Day, 23, 59, 59));
                 reportDoc.SetParameterValue("Title", txtReportTitle.Text);
@@ -163,7 +163,7 @@ namespace MilenialPark.Views.Reports
                 ds = controllerReport.LoadPenjualan(dtpFrom.Value, dtpTo.Value, TransactionTypeVal, PaymentTypeVal, UserIDVal, RemarksVal);
 
                 reportDoc = new MilenialPark.Reports.PrintLaporanDetailPenjualan();
-                reportDoc.SetDataSource(ds);
+                BindReport(reportDoc, ds);
                 reportDoc.SetParameterValue("StartDate", new DateTime(from.Year, from.Month, from.Day, 0, 0, 0));
                 reportDoc.SetParameterValue("EndDate", new DateTime(to.Year, to.Month, to.Day, 23, 59, 59));
                 reportDoc.SetParameterValue("Title", txtReportTitle.Text);
@@ -176,7 +176,7 @@ namespace MilenialPark.Views.Reports
                 ds = controllerReport.LoadPenjualanGroup(dtpFrom.Value, dtpTo.Value, TransactionTypeVal, PaymentTypeVal, UserIDVal, RemarksVal);
 
                 reportDoc = new MilenialPark.Reports.LaporanPenjualan();
-                reportDoc.SetDataSource(ds);
+                BindReport(reportDoc, ds);
                 reportDoc.SetParameterValue("StartDate", new DateTime(from.Year, from.Month, from.Day, 0, 0, 0));
                 reportDoc.SetParameterValue("EndDate", new DateTime(to.Year, to.Month, to.Day, 23, 59, 59));
                 reportDoc.SetParameterValue("Title", txtReportTitle.Text);
@@ -189,7 +189,7 @@ namespace MilenialPark.Views.Reports
                 ds = controllerReport.LoadPendapatanSummary(dtpFrom.Value, dtpTo.Value, TransactionTypeVal, PaymentTypeVal, UserIDVal, RemarksVal);
 
                 reportDoc = new MilenialPark.Reports.LaporanSummaryPenjualan();
-                reportDoc.SetDataSource(ds);
+                BindReport(reportDoc, ds);
                 reportDoc.SetParameterValue("StartDate", new DateTime(from.Year, from.Month, from.Day, 0, 0, 0));
                 reportDoc.SetParameterValue("EndDate", new DateTime(to.Year, to.Month, to.Day, 23, 59, 59));
                 reportDoc.SetParameterValue("Title", txtReportTitle.Text);
@@ -201,7 +201,7 @@ namespace MilenialPark.Views.Reports
                 ds = controllerReport.LoadPenjualanSummary(dtpFrom.Value, dtpTo.Value, TransactionTypeVal, PaymentTypeVal, UserIDVal, RemarksVal);
 
                 reportDoc = new MilenialPark.Reports.LaporanSummaryPenjualan();
-                reportDoc.SetDataSource(ds);
+                BindReport(reportDoc, ds);
                 reportDoc.SetParameterValue("StartDate", new DateTime(from.Year, from.Month, from.Day, 0, 0, 0));
                 reportDoc.SetParameterValue("EndDate", new DateTime(to.Year, to.Month, to.Day, 23, 59, 59));
                 reportDoc.SetParameterValue("Title", txtReportTitle.Text);
@@ -214,7 +214,7 @@ namespace MilenialPark.Views.Reports
                 ds = controllerReport.LoadPendapatanSummary(dtpFrom.Value, dtpTo.Value, TransactionTypeVal, PaymentTypeVal, UserIDVal, RemarksVal);
 
                 reportDoc = new MilenialPark.Reports.PrintShiftSummary();
-                reportDoc.SetDataSource(ds);
+                BindReport(reportDoc, ds);
                 reportDoc.SetParameterValue("StartDate", new DateTime(from.Year, from.Month, from.Day, 0, 0, 0));
                 reportDoc.SetParameterValue("EndDate", new DateTime(to.Year, to.Month, to.Day, 23, 59, 59));
                 reportDoc.SetParameterValue("Title", txtReportTitle.Text);
@@ -227,7 +227,7 @@ namespace MilenialPark.Views.Reports
                 ds = controllerReport.LoadPenjualanSummary(dtpFrom.Value, dtpTo.Value, TransactionTypeVal, PaymentTypeVal, UserIDVal, RemarksVal);
 
                 reportDoc = new MilenialPark.Reports.PrintShiftSummary();
-                reportDoc.SetDataSource(ds);
+                BindReport(reportDoc, ds);
                 reportDoc.SetParameterValue("StartDate", new DateTime(from.Year, from.Month, from.Day, 0, 0, 0));
                 reportDoc.SetParameterValue("EndDate", new DateTime(to.Year, to.Month, to.Day, 23, 59, 59));
                 reportDoc.SetParameterValue("Title", txtReportTitle.Text);
@@ -274,6 +274,22 @@ namespace MilenialPark.Views.Reports
             }
 
             txtReportTitle.Text = cbxReportType.Text;
+        }
+
+        private void BindReport(ReportDocument rpt, DataSet dataSet)
+        {
+            // Clear any saved / design-time connections
+            rpt.DataSourceConnections.Clear();
+
+            // Bind main report
+            rpt.SetDataSource(dataSet);
+
+            // Bind ALL subreports (if any)
+            foreach (ReportDocument sub in rpt.Subreports)
+            {
+                sub.DataSourceConnections.Clear();
+                sub.SetDataSource(dataSet);
+            }
         }
     }
 }

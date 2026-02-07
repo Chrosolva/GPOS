@@ -200,6 +200,68 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
             </Mappings>
             <Sources />
           </TableAdapter>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="GetTransactionTableAdapter" GeneratorDataComponentClassName="GetTransactionTableAdapter" Name="GetTransaction" UserDataComponentName="GetTransactionTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="WHNPOSConnectionString (Settings)" DbObjectName="WHNPOS.dbo.GetTransactionTicket" DbObjectType="Function" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="true">
+                    <CommandText>Select TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, CustomerName, ShopID, Remarks, Subtotal,  PPN, InitialBalance, FinalBalance, ItemID, ItemName, Price, Sum(Qty) as Qty  from GetTransactionTicket('TRT.26-000003', 'JOYLAND', convert(datetime,'06/02/2026 00:00:00', 103)  ,  convert(datetime,'06/02/2026 23:59:59', 103) )  group by TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, CustomerName, ShopID, Remarks, Subtotal,  PPN, InitialBalance, FinalBalance,ItemID, ItemName, Price </CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="TransactionID" DataSetColumn="TransactionID" />
+              <Mapping SourceColumn="TransactionDate" DataSetColumn="TransactionDate" />
+              <Mapping SourceColumn="TotalAmount" DataSetColumn="TotalAmount" />
+              <Mapping SourceColumn="PaymentType" DataSetColumn="PaymentType" />
+              <Mapping SourceColumn="CardID" DataSetColumn="CardID" />
+              <Mapping SourceColumn="CustomerName" DataSetColumn="CustomerName" />
+              <Mapping SourceColumn="ShopID" DataSetColumn="ShopID" />
+              <Mapping SourceColumn="Remarks" DataSetColumn="Remarks" />
+              <Mapping SourceColumn="Subtotal" DataSetColumn="Subtotal" />
+              <Mapping SourceColumn="PPN" DataSetColumn="PPN" />
+              <Mapping SourceColumn="InitialBalance" DataSetColumn="InitialBalance" />
+              <Mapping SourceColumn="FinalBalance" DataSetColumn="FinalBalance" />
+              <Mapping SourceColumn="ItemID" DataSetColumn="ItemID" />
+              <Mapping SourceColumn="ItemName" DataSetColumn="ItemName" />
+              <Mapping SourceColumn="Price" DataSetColumn="Price" />
+              <Mapping SourceColumn="Qty" DataSetColumn="Qty" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="GetTransactionTicketTableAdapter" GeneratorDataComponentClassName="GetTransactionTicketTableAdapter" Name="GetTransactionTicket" UserDataComponentName="GetTransactionTicketTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="WHNPOSConnectionString (Settings)" DbObjectName="WHNPOS.dbo.GetTransactionTicket" DbObjectType="Function" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>Select TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, CustomerName, ShopID, Remarks, Subtotal,  PPN, InitialBalance, FinalBalance, ItemID, ItemName, Price, Sum(Qty) as Qty  from GetTransactionTicket('TRT.26-000003', 'JOYLAND', convert(datetime,'06/02/2026 00:00:00', 103)  ,  convert(datetime,'06/02/2026 23:59:59', 103) )  group by TransactionID, TransactionDate, TotalAmount, PaymentType, CardID, CustomerName, ShopID, Remarks, Subtotal,  PPN, InitialBalance, FinalBalance,ItemID, ItemName, Price </CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="TransactionID" DataSetColumn="TransactionID" />
+              <Mapping SourceColumn="TransactionDate" DataSetColumn="TransactionDate" />
+              <Mapping SourceColumn="TotalAmount" DataSetColumn="TotalAmount" />
+              <Mapping SourceColumn="PaymentType" DataSetColumn="PaymentType" />
+              <Mapping SourceColumn="CardID" DataSetColumn="CardID" />
+              <Mapping SourceColumn="CustomerName" DataSetColumn="CustomerName" />
+              <Mapping SourceColumn="ShopID" DataSetColumn="ShopID" />
+              <Mapping SourceColumn="Remarks" DataSetColumn="Remarks" />
+              <Mapping SourceColumn="Subtotal" DataSetColumn="Subtotal" />
+              <Mapping SourceColumn="PPN" DataSetColumn="PPN" />
+              <Mapping SourceColumn="InitialBalance" DataSetColumn="InitialBalance" />
+              <Mapping SourceColumn="FinalBalance" DataSetColumn="FinalBalance" />
+              <Mapping SourceColumn="ItemID" DataSetColumn="ItemID" />
+              <Mapping SourceColumn="ItemName" DataSetColumn="ItemName" />
+              <Mapping SourceColumn="Price" DataSetColumn="Price" />
+              <Mapping SourceColumn="Qty" DataSetColumn="Qty" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
         </Tables>
         <Sources />
       </DataSource>
@@ -619,6 +681,146 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+        <xs:element name="GetTransaction" msprop:Generator_TableClassName="GetTransactionDataTable" msprop:Generator_TableVarName="tableGetTransaction" msprop:Generator_RowChangedName="GetTransactionRowChanged" msprop:Generator_TablePropName="GetTransaction" msprop:Generator_RowDeletingName="GetTransactionRowDeleting" msprop:Generator_RowChangingName="GetTransactionRowChanging" msprop:Generator_RowEvHandlerName="GetTransactionRowChangeEventHandler" msprop:Generator_RowDeletedName="GetTransactionRowDeleted" msprop:Generator_RowClassName="GetTransactionRow" msprop:Generator_UserTableName="GetTransaction" msprop:Generator_RowEvArgName="GetTransactionRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="TransactionID" msprop:Generator_ColumnVarNameInTable="columnTransactionID" msprop:Generator_ColumnPropNameInRow="TransactionID" msprop:Generator_ColumnPropNameInTable="TransactionIDColumn" msprop:Generator_UserColumnName="TransactionID">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="TransactionDate" msprop:Generator_ColumnVarNameInTable="columnTransactionDate" msprop:Generator_ColumnPropNameInRow="TransactionDate" msprop:Generator_ColumnPropNameInTable="TransactionDateColumn" msprop:Generator_UserColumnName="TransactionDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="TotalAmount" msprop:Generator_ColumnVarNameInTable="columnTotalAmount" msprop:Generator_ColumnPropNameInRow="TotalAmount" msprop:Generator_ColumnPropNameInTable="TotalAmountColumn" msprop:Generator_UserColumnName="TotalAmount" type="xs:decimal" minOccurs="0" />
+              <xs:element name="PaymentType" msprop:Generator_ColumnVarNameInTable="columnPaymentType" msprop:Generator_ColumnPropNameInRow="PaymentType" msprop:Generator_ColumnPropNameInTable="PaymentTypeColumn" msprop:Generator_UserColumnName="PaymentType" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="15" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CardID" msprop:Generator_ColumnVarNameInTable="columnCardID" msprop:Generator_ColumnPropNameInRow="CardID" msprop:Generator_ColumnPropNameInTable="CardIDColumn" msprop:Generator_UserColumnName="CardID" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CustomerName" msprop:Generator_ColumnVarNameInTable="columnCustomerName" msprop:Generator_ColumnPropNameInRow="CustomerName" msprop:Generator_ColumnPropNameInTable="CustomerNameColumn" msprop:Generator_UserColumnName="CustomerName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="175" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ShopID" msprop:Generator_ColumnVarNameInTable="columnShopID" msprop:Generator_ColumnPropNameInRow="ShopID" msprop:Generator_ColumnPropNameInTable="ShopIDColumn" msprop:Generator_UserColumnName="ShopID" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Remarks" msprop:Generator_ColumnVarNameInTable="columnRemarks" msprop:Generator_ColumnPropNameInRow="Remarks" msprop:Generator_ColumnPropNameInTable="RemarksColumn" msprop:Generator_UserColumnName="Remarks" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Subtotal" msprop:Generator_ColumnVarNameInTable="columnSubtotal" msprop:Generator_ColumnPropNameInRow="Subtotal" msprop:Generator_ColumnPropNameInTable="SubtotalColumn" msprop:Generator_UserColumnName="Subtotal" type="xs:decimal" minOccurs="0" />
+              <xs:element name="PPN" msprop:Generator_ColumnVarNameInTable="columnPPN" msprop:Generator_ColumnPropNameInRow="PPN" msprop:Generator_ColumnPropNameInTable="PPNColumn" msprop:Generator_UserColumnName="PPN" type="xs:decimal" minOccurs="0" />
+              <xs:element name="InitialBalance" msprop:Generator_ColumnVarNameInTable="columnInitialBalance" msprop:Generator_ColumnPropNameInRow="InitialBalance" msprop:Generator_ColumnPropNameInTable="InitialBalanceColumn" msprop:Generator_UserColumnName="InitialBalance" type="xs:decimal" minOccurs="0" />
+              <xs:element name="FinalBalance" msprop:Generator_ColumnVarNameInTable="columnFinalBalance" msprop:Generator_ColumnPropNameInRow="FinalBalance" msprop:Generator_ColumnPropNameInTable="FinalBalanceColumn" msprop:Generator_UserColumnName="FinalBalance" type="xs:decimal" minOccurs="0" />
+              <xs:element name="ItemID" msprop:Generator_ColumnVarNameInTable="columnItemID" msprop:Generator_ColumnPropNameInRow="ItemID" msprop:Generator_ColumnPropNameInTable="ItemIDColumn" msprop:Generator_UserColumnName="ItemID" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="35" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ItemName" msprop:Generator_ColumnVarNameInTable="columnItemName" msprop:Generator_ColumnPropNameInRow="ItemName" msprop:Generator_ColumnPropNameInTable="ItemNameColumn" msprop:Generator_UserColumnName="ItemName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="175" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Price" msprop:Generator_ColumnVarNameInTable="columnPrice" msprop:Generator_ColumnPropNameInRow="Price" msprop:Generator_ColumnPropNameInTable="PriceColumn" msprop:Generator_UserColumnName="Price" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Qty" msdata:ReadOnly="true" msprop:Generator_ColumnVarNameInTable="columnQty" msprop:Generator_ColumnPropNameInRow="Qty" msprop:Generator_ColumnPropNameInTable="QtyColumn" msprop:Generator_UserColumnName="Qty" type="xs:int" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="GetTransactionTicket" msprop:Generator_TableClassName="GetTransactionTicketDataTable" msprop:Generator_TableVarName="tableGetTransactionTicket" msprop:Generator_TablePropName="GetTransactionTicket" msprop:Generator_RowDeletingName="GetTransactionTicketRowDeleting" msprop:Generator_RowChangingName="GetTransactionTicketRowChanging" msprop:Generator_RowEvHandlerName="GetTransactionTicketRowChangeEventHandler" msprop:Generator_RowDeletedName="GetTransactionTicketRowDeleted" msprop:Generator_UserTableName="GetTransactionTicket" msprop:Generator_RowChangedName="GetTransactionTicketRowChanged" msprop:Generator_RowEvArgName="GetTransactionTicketRowChangeEvent" msprop:Generator_RowClassName="GetTransactionTicketRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="TransactionID" msprop:Generator_ColumnVarNameInTable="columnTransactionID" msprop:Generator_ColumnPropNameInRow="TransactionID" msprop:Generator_ColumnPropNameInTable="TransactionIDColumn" msprop:Generator_UserColumnName="TransactionID">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="TransactionDate" msprop:Generator_ColumnVarNameInTable="columnTransactionDate" msprop:Generator_ColumnPropNameInRow="TransactionDate" msprop:Generator_ColumnPropNameInTable="TransactionDateColumn" msprop:Generator_UserColumnName="TransactionDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="TotalAmount" msprop:Generator_ColumnVarNameInTable="columnTotalAmount" msprop:Generator_ColumnPropNameInRow="TotalAmount" msprop:Generator_ColumnPropNameInTable="TotalAmountColumn" msprop:Generator_UserColumnName="TotalAmount" type="xs:decimal" minOccurs="0" />
+              <xs:element name="PaymentType" msprop:Generator_ColumnVarNameInTable="columnPaymentType" msprop:Generator_ColumnPropNameInRow="PaymentType" msprop:Generator_ColumnPropNameInTable="PaymentTypeColumn" msprop:Generator_UserColumnName="PaymentType" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="15" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CardID" msprop:Generator_ColumnVarNameInTable="columnCardID" msprop:Generator_ColumnPropNameInRow="CardID" msprop:Generator_ColumnPropNameInTable="CardIDColumn" msprop:Generator_UserColumnName="CardID" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CustomerName" msprop:Generator_ColumnVarNameInTable="columnCustomerName" msprop:Generator_ColumnPropNameInRow="CustomerName" msprop:Generator_ColumnPropNameInTable="CustomerNameColumn" msprop:Generator_UserColumnName="CustomerName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="175" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ShopID" msprop:Generator_ColumnVarNameInTable="columnShopID" msprop:Generator_ColumnPropNameInRow="ShopID" msprop:Generator_ColumnPropNameInTable="ShopIDColumn" msprop:Generator_UserColumnName="ShopID" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Remarks" msprop:Generator_ColumnVarNameInTable="columnRemarks" msprop:Generator_ColumnPropNameInRow="Remarks" msprop:Generator_ColumnPropNameInTable="RemarksColumn" msprop:Generator_UserColumnName="Remarks" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Subtotal" msprop:Generator_ColumnVarNameInTable="columnSubtotal" msprop:Generator_ColumnPropNameInRow="Subtotal" msprop:Generator_ColumnPropNameInTable="SubtotalColumn" msprop:Generator_UserColumnName="Subtotal" type="xs:decimal" minOccurs="0" />
+              <xs:element name="PPN" msprop:Generator_ColumnVarNameInTable="columnPPN" msprop:Generator_ColumnPropNameInRow="PPN" msprop:Generator_ColumnPropNameInTable="PPNColumn" msprop:Generator_UserColumnName="PPN" type="xs:decimal" minOccurs="0" />
+              <xs:element name="InitialBalance" msprop:Generator_ColumnVarNameInTable="columnInitialBalance" msprop:Generator_ColumnPropNameInRow="InitialBalance" msprop:Generator_ColumnPropNameInTable="InitialBalanceColumn" msprop:Generator_UserColumnName="InitialBalance" type="xs:decimal" minOccurs="0" />
+              <xs:element name="FinalBalance" msprop:Generator_ColumnVarNameInTable="columnFinalBalance" msprop:Generator_ColumnPropNameInRow="FinalBalance" msprop:Generator_ColumnPropNameInTable="FinalBalanceColumn" msprop:Generator_UserColumnName="FinalBalance" type="xs:decimal" minOccurs="0" />
+              <xs:element name="ItemID" msprop:Generator_ColumnVarNameInTable="columnItemID" msprop:Generator_ColumnPropNameInRow="ItemID" msprop:Generator_ColumnPropNameInTable="ItemIDColumn" msprop:Generator_UserColumnName="ItemID" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="35" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ItemName" msprop:Generator_ColumnVarNameInTable="columnItemName" msprop:Generator_ColumnPropNameInRow="ItemName" msprop:Generator_ColumnPropNameInTable="ItemNameColumn" msprop:Generator_UserColumnName="ItemName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="175" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Price" msprop:Generator_ColumnVarNameInTable="columnPrice" msprop:Generator_ColumnPropNameInRow="Price" msprop:Generator_ColumnPropNameInTable="PriceColumn" msprop:Generator_UserColumnName="Price" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Qty" msdata:ReadOnly="true" msprop:Generator_ColumnVarNameInTable="columnQty" msprop:Generator_ColumnPropNameInRow="Qty" msprop:Generator_ColumnPropNameInTable="QtyColumn" msprop:Generator_UserColumnName="Qty" type="xs:int" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
       </xs:choice>
     </xs:complexType>
     <xs:unique name="Constraint1" msdata:PrimaryKey="true">
@@ -634,6 +836,14 @@ group by TransactionType , TransactionID, PaymentType, CardID, UserID, CustomerN
     <xs:unique name="TblQRCodeKey1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//mstns:TblQRCode" />
       <xs:field xpath="mstns:TicketID" />
+    </xs:unique>
+    <xs:unique name="GetTransaction_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:GetTransaction" />
+      <xs:field xpath="mstns:TransactionID" />
+    </xs:unique>
+    <xs:unique name="GetTransactionTicket_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:GetTransactionTicket" />
+      <xs:field xpath="mstns:TransactionID" />
     </xs:unique>
   </xs:element>
   <xs:annotation>

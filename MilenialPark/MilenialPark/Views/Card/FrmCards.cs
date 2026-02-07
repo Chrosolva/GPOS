@@ -363,7 +363,7 @@ namespace MilenialPark.Views.Card
             {
                 reportDoc = new MilenialPark.Reports.PrintTopUpReceipt();
             }
-            reportDoc.SetDataSource(ds);
+            BindReport(reportDoc, ds);
 
             FrmShowReport frmShowReport = new FrmShowReport(reportDoc);
             FormBlank frmBlank = new FormBlank();
@@ -387,7 +387,7 @@ namespace MilenialPark.Views.Card
             {
                 reportDoc = new MilenialPark.Reports.PrintTopUpReceipt();
             }
-            reportDoc.SetDataSource(ds);
+            BindReport(reportDoc, ds);
 
             this.printdialog1.Document = printdocument;
             DialogResult dr = this.printdialog1.ShowDialog();
@@ -726,6 +726,22 @@ namespace MilenialPark.Views.Card
                     scan();
 
                 }
+            }
+        }
+
+        private void BindReport(ReportDocument rpt, DataSet dataSet)
+        {
+            // Clear any saved / design-time connections
+            rpt.DataSourceConnections.Clear();
+
+            // Bind main report
+            rpt.SetDataSource(dataSet);
+
+            // Bind ALL subreports (if any)
+            foreach (ReportDocument sub in rpt.Subreports)
+            {
+                sub.DataSourceConnections.Clear();
+                sub.SetDataSource(dataSet);
             }
         }
     }

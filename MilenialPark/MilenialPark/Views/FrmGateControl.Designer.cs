@@ -495,6 +495,7 @@
             this.txtNewRFID.Name = "txtNewRFID";
             this.txtNewRFID.Size = new System.Drawing.Size(136, 26);
             this.txtNewRFID.TabIndex = 62;
+            this.txtNewRFID.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtNewRFID_KeyDown);
             // 
             // txtCurRFID
             // 
@@ -503,6 +504,7 @@
             this.txtCurRFID.Name = "txtCurRFID";
             this.txtCurRFID.Size = new System.Drawing.Size(136, 26);
             this.txtCurRFID.TabIndex = 60;
+            this.txtCurRFID.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtCurRFID_KeyDown);
             // 
             // label9
             // 

@@ -98,7 +98,7 @@ namespace MilenialPark.Views.Transaction
             {
                 if (r.IsNewRow) continue;
 
-                string rfid = Convert.ToString(r.Cells["RFID"].Value)?.Trim();
+                string rfid = Convert.ToString(Convert.ToInt32(r.Cells["RFID"].Value))?.Trim();
                 if (string.IsNullOrEmpty(rfid))
                 {
                     missingCount++;
@@ -113,7 +113,7 @@ namespace MilenialPark.Views.Transaction
                 // Focus first missing row
                 var firstMissing = dgvTransacTiketDet.Rows
                     .Cast<DataGridViewRow>()
-                    .FirstOrDefault(r => !r.IsNewRow && string.IsNullOrWhiteSpace(Convert.ToString(r.Cells["RFID"].Value)));
+                    .FirstOrDefault(r => !r.IsNewRow && string.IsNullOrWhiteSpace(Convert.ToString(Convert.ToInt32(r.Cells["RFID"].Value))));
 
                 if (firstMissing != null)
                 {
@@ -189,7 +189,7 @@ namespace MilenialPark.Views.Transaction
                     int qty = ToIntSafe(row.Cells["Qty"].Value);             // should be 1 per row (your requirement)
                     int waktu = ToIntSafe(row.Cells["WaktuBermain"].Value);
                     int toleransi = ToIntSafe(row.Cells["Toleransi"].Value);
-                    string rfid = Convert.ToString(row.Cells["RFID"].Value); // may be null / empty
+                    string rfid = Convert.ToString(Convert.ToInt32(row.Cells["RFID"].Value)); // may be null / empty
                     string keterangan = Convert.ToString(row.Cells["Keterangan"].Value); // may be null / empty
 
                     var det = new ClsTransactionTiketDetail(
@@ -421,7 +421,7 @@ namespace MilenialPark.Views.Transaction
             {
                 reportDoc = new MilenialPark.Reports.PrintTransactionReceipt();
             }
-            reportDoc.SetDataSource(ds);
+            BindReport(reportDoc, ds);
 
             //FrmShowReport frmShowReport = new FrmShowReport(reportDoc);
             //FormBlank frmBlank = new FormBlank();
@@ -541,7 +541,7 @@ namespace MilenialPark.Views.Transaction
 
             if (dgvTransacTiketDet.CurrentRow == null) return;
 
-            string rfid = txtRFIDScan.Text.Trim();
+            string rfid = Convert.ToInt32(txtRFIDScan.Text).ToString().Trim();
             if (string.IsNullOrEmpty(rfid)) return;
 
             // Optional: prevent duplicate RFID
@@ -635,6 +635,22 @@ namespace MilenialPark.Views.Transaction
         {
             if (dgvTransacTiketDet.CurrentRow == null) return;
             dgvTransacTiketDet.CurrentRow.Cells["Keterangan"].Value = txtKeterangan.Text;
+        }
+
+        private void BindReport(ReportDocument rpt, DataSet dataSet)
+        {
+            // Clear any saved / design-time connections
+            rpt.DataSourceConnections.Clear();
+
+            // Bind main report
+            rpt.SetDataSource(dataSet);
+
+            // Bind ALL subreports (if any)
+            foreach (ReportDocument sub in rpt.Subreports)
+            {
+                sub.DataSourceConnections.Clear();
+                sub.SetDataSource(dataSet);
+            }
         }
     }
 }
