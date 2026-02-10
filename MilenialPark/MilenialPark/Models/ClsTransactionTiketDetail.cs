@@ -24,6 +24,7 @@ namespace MilenialPark.Models
         public int Toleransi { get; set; }
         public string RFID { get; set; }  // new property
         public string Keterangan { get; set; }  // new property
+        public string TagID { get; set; }  // new property
 
 
         #endregion
@@ -79,7 +80,7 @@ namespace MilenialPark.Models
 
         public ClsTransactionTiketDetail(string transactionid, DateTime transactiondate, string itemid,
        string itemname, decimal price, int qty, int noUrut, string orderStatus,
-       DateTime jamMasuk, DateTime jamKeluar, int waktuBermain, int toleransi, string rfid = null, string keterangan = null)
+       DateTime jamMasuk, DateTime jamKeluar, int waktuBermain, int toleransi, string rfid = null, string keterangan = null, string tagid = null)
         {
             TransactionID = transactionid;
             TransactionDate = transactiondate;
@@ -95,6 +96,7 @@ namespace MilenialPark.Models
             Toleransi = toleransi;
             RFID = rfid;
             Keterangan = keterangan;
+            TagID = tagid;
         }
 
 

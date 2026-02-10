@@ -38,6 +38,8 @@ namespace MilenialPark.Views
         // === ADD THIS ===
         private string _lastAlertState = "";   // "", "RED", "YELLOW"
 
+        public ControllerRFID controllerRFID = new ControllerRFID();
+
 
         private readonly int[] SupportedBaudRates =
         {
@@ -127,7 +129,8 @@ namespace MilenialPark.Views
 
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "TransactionID", HeaderText = "TransactionID", DataPropertyName = "TransactionID" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "NoUrut", HeaderText = "NoUrut", DataPropertyName = "NoUrut" });
-            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "RFID", HeaderText = "RFID", DataPropertyName = "RFID" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "RFID", HeaderText = "RFID", DataPropertyName = "RFIDDisplay" });
+            dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "TagID", HeaderText = "TagID", DataPropertyName = "TagID" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "Keterangan", HeaderText = "Katerangan", DataPropertyName = "Keterangan" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "ItemName", HeaderText = "ItemName", DataPropertyName = "ItemName" });
             dgvReminder.Columns.Add(new DataGridViewTextBoxColumn { Name = "JamMasuk", HeaderText = "JamMasuk", DataPropertyName = "JamMasuk" });
@@ -162,8 +165,14 @@ namespace MilenialPark.Views
 
                 DateTime now = DateTime.Now;
 
+                if (!raw.Columns.Contains("RFIDDisplay")) raw.Columns.Add("RFIDDisplay", typeof(string));
+
                 foreach (DataRow row in raw.Rows)
                 {
+                    string name = Convert.ToString(row["RFID"] ?? "").Trim();   // RFIDName
+                    string tag = Convert.ToString(row["TagID"] ?? "").Trim();
+                    row["RFIDDisplay"] = string.IsNullOrEmpty(tag) ? name : $"{name} ({tag})";
+
                     DateTime jamKeluar = row["JamKeluar"] == DBNull.Value
                         ? DateTime.MinValue
                         : Convert.ToDateTime(row["JamKeluar"]);
@@ -406,6 +415,7 @@ namespace MilenialPark.Views
                 int gateCode;
                 if (TryParseGatePacket(s, out payload, out gateCode))
                 {
+                    payload = NormalizeTagId(payload);   // << penting
                     // anti double-scan cepat
                     if (payload == _lastRFID && (DateTime.Now - _lastScanTime).TotalSeconds < 2)
                         return;
@@ -431,43 +441,52 @@ namespace MilenialPark.Views
             }));
         }
 
-        private void HandleEnter(string rfid, int gateCode, SerialPort port)
+        private void HandleEnter(string tagId, int gateCode, SerialPort port)
         {
             try
             {
                 _suppressReminderPopup = true;
-                // Cari tiket yang masih BOUGHT untuk hari ini berdasarkan RFID
-                dt = controllerTrans.GetTicketByRFID(rfid, "BOUGHT", startDay, endDay);
+
+                // lookup RFIDName dari master
+                var r = controllerRFID.GetByTagID(tagId);
+                if (r == null) { SendGateReply(port, gateCode, false, "RFID TIDAK TERDAFTAR"); return; }
+                if (!(r["Status"] != DBNull.Value && Convert.ToBoolean(r["Status"])))
+                { SendGateReply(port, gateCode, false, "RFID NONAKTIF"); return; }
+
+                string rfidName = Convert.ToString(r["RFIDName"] ?? "").Trim();
+                string display = $"{rfidName} ({tagId})";
+
+                // cari ticket BOUGHT berdasarkan TagID
+                dt = controllerTrans.GetTicketByTagID(tagId, "BOUGHT", startDay, endDay);
 
                 if (dt.Rows.Count == 1)
                 {
                     string tid = dt.Rows[0]["TransactionID"].ToString();
                     int noUrut = Convert.ToInt32(dt.Rows[0]["NoUrut"]);
                     int waktuBermain = dt.Rows[0]["WaktuBermain"] == DBNull.Value ? 0 : Convert.ToInt32(dt.Rows[0]["WaktuBermain"]);
-                    //int toleransi = dt.Rows[0]["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(dt.Rows[0]["Toleransi"]);
                     int toleransi = 10;
 
-                    // Update JamMasuk & JamKeluar (expected end) + status ENTER-IN
                     controllerTrans.UpdateOrderStatusTiketandTime(tid, noUrut, waktuBermain, toleransi, "ENTER-IN");
 
-                    // Buka gate
-                    SendGateReply(port, gateCode, true, "SELAMAT DATANG");
+                    controllerRFID.TouchLastScan(tagId); // optional
 
+                    SendGateReply(port, gateCode, true, "WELCOME " + display);
                     RefreshReminderCore();
                 }
                 else
                 {
                     SendGateReply(port, gateCode, false, "TIDAK ADA TIKET / SDH DIGUNAKAN");
                 }
-                _suppressReminderPopup = false;
             }
             catch (Exception ex)
             {
                 rtxDataIO.Text += "\n[ENTER Error] " + ex.Message;
                 SendGateReply(port, gateCode, false, "ERROR");
+            }
+            finally
+            {
                 _suppressReminderPopup = false;
             }
-
         }
 
         private void HandleExit(string rfid, int gateCode, SerialPort port)
@@ -686,8 +705,8 @@ namespace MilenialPark.Views
         {
             if (dgvReminder.CurrentRow == null) return;
 
-            string rfid = Convert.ToString(dgvReminder.CurrentRow.Cells["RFID"].Value ?? "").Trim();
-            txtCurRFID.Text = rfid;
+            string tagId = Convert.ToString(dgvReminder.CurrentRow.Cells["TagID"].Value ?? "").Trim();
+            txtCurRFID.Text = tagId; // ini yang dipakai buat update
         }
 
         private void LoadGateLogGrid()
@@ -710,33 +729,37 @@ namespace MilenialPark.Views
         {
             try
             {
+                // 1) Basic selection validation
                 if (dgvReminder.CurrentRow == null)
                 {
                     MessageBox.Show("Pilih ticket dulu di list reminder.");
                     return;
                 }
 
-                string oldRfid = (txtCurRFID.Text ?? "").Trim();
-                string newRfid = (txtNewRFID.Text ?? "").Trim();
+                // IMPORTANT:
+                // Pastikan txtCurRFID isinya adalah TagID lama (RFID asli).
+                // Kalau UI kamu menampilkan RFIDName, ambil oldTagId dari grid kolom "TagID" (lebih aman).
+                string oldTagId = NormalizeTagId(Convert.ToString(dgvReminder.CurrentRow.Cells["TagID"]?.Value ?? ""));
+                string newTagId = NormalizeTagId(txtNewRFID.Text);
                 string reason = (cbxReason.Text ?? "").Trim();
 
-                if (string.IsNullOrEmpty(oldRfid))
+                if (string.IsNullOrEmpty(oldTagId))
                 {
-                    MessageBox.Show("Current RFID kosong.");
+                    MessageBox.Show("Current TagID kosong / tidak valid.");
                     return;
                 }
-                if (string.IsNullOrEmpty(newRfid))
+                if (string.IsNullOrEmpty(newTagId))
                 {
-                    MessageBox.Show("New RFID wajib diisi.");
+                    MessageBox.Show("New TagID wajib diisi (numeric).");
                     return;
                 }
-                if (newRfid == oldRfid)
+                if (newTagId == oldTagId)
                 {
-                    MessageBox.Show("New RFID tidak boleh sama dengan Current RFID.");
+                    MessageBox.Show("New TagID tidak boleh sama dengan Current TagID.");
                     return;
                 }
 
-                // Ambil key ticket dari row
+                // 2) Ticket key
                 string tid = Convert.ToString(dgvReminder.CurrentRow.Cells["TransactionID"].Value ?? "").Trim();
                 int noUrut = 0;
                 int.TryParse(Convert.ToString(dgvReminder.CurrentRow.Cells["NoUrut"].Value ?? "0"), out noUrut);
@@ -747,14 +770,36 @@ namespace MilenialPark.Views
                     return;
                 }
 
-                // CEK DUPLICATE RFID DI LIST REMINDER (dgvReminder)
-                if (IsRfidExistsInReminder(newRfid, tid, noUrut))
+                // 3) Lookup RFIDName by TagID
+                DataRow tagRow = controllerRFID.GetByTagID(newTagId);
+                if (tagRow == null)
                 {
-                    MessageBox.Show("New RFID sudah dipakai oleh ticket lain di list reminder. Pilih RFID lain.");
+                    MessageBox.Show("TagID tidak terdaftar di RFIDTags.");
                     return;
                 }
 
-                // Admin verify dialog
+                bool isActive = tagRow["Status"] != DBNull.Value && Convert.ToBoolean(tagRow["Status"]);
+                if (!isActive)
+                {
+                    MessageBox.Show("RFIDTags.Status = 0 (tidak aktif). Tidak bisa dipakai.");
+                    return;
+                }
+
+                string newRfidName = Convert.ToString(tagRow["RFIDName"] ?? "").Trim();
+                if (string.IsNullOrEmpty(newRfidName))
+                {
+                    MessageBox.Show("RFIDName kosong di RFIDTags. Mohon lengkapi master RFID.");
+                    return;
+                }
+
+                // 4) Duplicate check in current reminder list (pakai TagID)
+                if (IsTagIdExistsInReminder(newTagId, tid, noUrut))
+                {
+                    MessageBox.Show("New TagID sudah dipakai oleh ticket lain di list reminder. Pilih RFID lain.");
+                    return;
+                }
+
+                // 5) Admin verify
                 using (var f = new FrmAdminPass())
                 {
                     if (f.ShowDialog(this) != DialogResult.OK || !f.IsVerified)
@@ -765,23 +810,25 @@ namespace MilenialPark.Views
 
                     string adminUserId = f.VerifiedUserId;
 
-                    // Update RFID in DB + append Keterangan
-                    string appendKet = $"RFID_CHANGE {oldRfid}->{newRfid} | REASON={reason} | BY {ClsStaticVariable.controllerUser.objUser.UserID} | VERIFIED_BY={adminUserId}";
-                    controllerTrans.UpdateTicketRfid(tid, noUrut, newRfid, appendKet);
+                    // 6) Update DB (RFIDName + TagID) + append ket
+                    string appendKet =
+                        $"RFID_CHANGE {oldTagId}->{newTagId} ({newRfidName}) | REASON={reason} | " +
+                        $"BY {ClsStaticVariable.controllerUser.objUser.UserID} | VERIFIED_BY={adminUserId}";
 
-                    // Insert GateLog
+                    controllerTrans.UpdateTicketRfid(tid, noUrut, newTagId, newRfidName, appendKet);
+
                     controllerTrans.InsertGateLog(
-                        $"RFID changed. TID={tid} NoUrut={noUrut} {oldRfid}->{newRfid}",
+                        $"RFID changed. TID={tid} NoUrut={noUrut} {oldTagId}->{newTagId} ({newRfidName})",
                         reason,
                         adminUserId
                     );
                 }
 
-                // Refresh UI
+                // 7) Refresh UI
                 RefreshReminderCore();
                 LoadGateLogGrid();
-
                 txtNewRFID.Clear();
+
                 MessageBox.Show("RFID berhasil diganti dan sudah di-log.");
             }
             catch (Exception ex)
@@ -818,6 +865,28 @@ namespace MilenialPark.Views
             return false;
         }
 
+        private bool IsTagIdExistsInReminder(string newTagId, string currentTid, int currentNoUrut)
+        {
+            newTagId = NormalizeTagId(newTagId);
+            if (string.IsNullOrEmpty(newTagId)) return false;
+
+            foreach (DataGridViewRow row in dgvReminder.Rows)
+            {
+                if (row == null || row.IsNewRow) continue;
+
+                string rowTid = Convert.ToString(row.Cells["TransactionID"].Value ?? "").Trim();
+                int rowNoUrut = 0;
+                int.TryParse(Convert.ToString(row.Cells["NoUrut"].Value ?? "0"), out rowNoUrut);
+
+                if (rowTid == currentTid && rowNoUrut == currentNoUrut)
+                    continue;
+
+                string rowTagId = NormalizeTagId(Convert.ToString(row.Cells["TagID"]?.Value ?? ""));
+                if (rowTagId == newTagId) return true;
+            }
+            return false;
+        }
+
         private void txtNewRFID_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyCode == Keys.Enter)
@@ -833,5 +902,25 @@ namespace MilenialPark.Views
                 txtCurRFID.Text =  Convert.ToInt32(txtCurRFID.Text).ToString();
             }
         }
+
+        private string NormalizeTagId(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return "";
+
+            // pastikan numeric
+            if (!raw.All(char.IsDigit))
+            {
+                ClsFungsi.Pesan("RFID harus numeric!", "ERROR");
+                return "";
+            }
+
+            // buang leading zero
+            string cleaned = raw.TrimStart('0');
+
+            // kalau semua nol -> 0
+            return cleaned.Length == 0 ? "0" : cleaned;
+        }
+
     }
 }

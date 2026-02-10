@@ -50,20 +50,6 @@
             this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgvTransacTiketDet = new System.Windows.Forms.DataGridView();
-            this.TransactionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.RFID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Keterangan = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TransactionDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ItemID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ItemName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Price = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Qty = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NoUrut = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OrderStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.JamMasuk = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.JamKeluar = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.WaktuBermain = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Toleransi = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label12 = new System.Windows.Forms.Label();
             this.cbxTransType = new System.Windows.Forms.ComboBox();
             this.cbxRemarks = new System.Windows.Forms.ComboBox();
@@ -82,6 +68,21 @@
             this.lblCustomerName = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.lblCardID2 = new System.Windows.Forms.Label();
+            this.TransactionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.RFID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Keterangan = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TransactionDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ItemID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ItemName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Price = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Qty = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.NoUrut = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.OrderStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.JamMasuk = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.JamKeluar = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.WaktuBermain = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Toleransi = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TagID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTransaksiDetail)).BeginInit();
@@ -287,7 +288,8 @@
             this.JamMasuk,
             this.JamKeluar,
             this.WaktuBermain,
-            this.Toleransi});
+            this.Toleransi,
+            this.TagID});
             this.dgvTransacTiketDet.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
             this.dgvTransacTiketDet.Location = new System.Drawing.Point(402, 52);
             this.dgvTransacTiketDet.Name = "dgvTransacTiketDet";
@@ -295,77 +297,6 @@
             this.dgvTransacTiketDet.Size = new System.Drawing.Size(824, 211);
             this.dgvTransacTiketDet.TabIndex = 96;
             this.dgvTransacTiketDet.SelectionChanged += new System.EventHandler(this.dgvTransacTiketDet_SelectionChanged);
-            // 
-            // TransactionID
-            // 
-            this.TransactionID.HeaderText = "TransactionID";
-            this.TransactionID.Name = "TransactionID";
-            // 
-            // RFID
-            // 
-            this.RFID.HeaderText = "RFID";
-            this.RFID.Name = "RFID";
-            this.RFID.ReadOnly = true;
-            // 
-            // Keterangan
-            // 
-            this.Keterangan.HeaderText = "Keterangan";
-            this.Keterangan.Name = "Keterangan";
-            // 
-            // TransactionDate
-            // 
-            this.TransactionDate.HeaderText = "TransactionDate";
-            this.TransactionDate.Name = "TransactionDate";
-            // 
-            // ItemID
-            // 
-            this.ItemID.HeaderText = "ItemID";
-            this.ItemID.Name = "ItemID";
-            // 
-            // ItemName
-            // 
-            this.ItemName.HeaderText = "ItemName";
-            this.ItemName.Name = "ItemName";
-            // 
-            // Price
-            // 
-            this.Price.HeaderText = "Price";
-            this.Price.Name = "Price";
-            // 
-            // Qty
-            // 
-            this.Qty.HeaderText = "Qty";
-            this.Qty.Name = "Qty";
-            // 
-            // NoUrut
-            // 
-            this.NoUrut.HeaderText = "NoUrut";
-            this.NoUrut.Name = "NoUrut";
-            // 
-            // OrderStatus
-            // 
-            this.OrderStatus.HeaderText = "OrderStatus";
-            this.OrderStatus.Name = "OrderStatus";
-            // 
-            // JamMasuk
-            // 
-            this.JamMasuk.HeaderText = "JamMasuk";
-            this.JamMasuk.Name = "JamMasuk";
-            // 
-            // JamKeluar
-            // 
-            this.JamKeluar.HeaderText = "JamKeluar";
-            this.JamKeluar.Name = "JamKeluar";
-            // 
-            // WaktuBermain
-            // 
-            this.WaktuBermain.HeaderText = "WaktuBermain";
-            this.WaktuBermain.Name = "WaktuBermain";
-            // 
-            // Toleransi
-            // 
-            this.Toleransi.HeaderText = "Toleransi";
-            this.Toleransi.Name = "Toleransi";
             // 
             // label12
             // 
@@ -568,6 +499,82 @@
             this.lblCardID2.TabIndex = 46;
             this.lblCardID2.Text = "Card ID";
             // 
+            // TransactionID
+            // 
+            this.TransactionID.HeaderText = "TransactionID";
+            this.TransactionID.Name = "TransactionID";
+            // 
+            // RFID
+            // 
+            this.RFID.HeaderText = "RFID";
+            this.RFID.Name = "RFID";
+            this.RFID.ReadOnly = true;
+            // 
+            // Keterangan
+            // 
+            this.Keterangan.HeaderText = "Keterangan";
+            this.Keterangan.Name = "Keterangan";
+            // 
+            // TransactionDate
+            // 
+            this.TransactionDate.HeaderText = "TransactionDate";
+            this.TransactionDate.Name = "TransactionDate";
+            // 
+            // ItemID
+            // 
+            this.ItemID.HeaderText = "ItemID";
+            this.ItemID.Name = "ItemID";
+            // 
+            // ItemName
+            // 
+            this.ItemName.HeaderText = "ItemName";
+            this.ItemName.Name = "ItemName";
+            // 
+            // Price
+            // 
+            this.Price.HeaderText = "Price";
+            this.Price.Name = "Price";
+            // 
+            // Qty
+            // 
+            this.Qty.HeaderText = "Qty";
+            this.Qty.Name = "Qty";
+            // 
+            // NoUrut
+            // 
+            this.NoUrut.HeaderText = "NoUrut";
+            this.NoUrut.Name = "NoUrut";
+            // 
+            // OrderStatus
+            // 
+            this.OrderStatus.HeaderText = "OrderStatus";
+            this.OrderStatus.Name = "OrderStatus";
+            // 
+            // JamMasuk
+            // 
+            this.JamMasuk.HeaderText = "JamMasuk";
+            this.JamMasuk.Name = "JamMasuk";
+            // 
+            // JamKeluar
+            // 
+            this.JamKeluar.HeaderText = "JamKeluar";
+            this.JamKeluar.Name = "JamKeluar";
+            // 
+            // WaktuBermain
+            // 
+            this.WaktuBermain.HeaderText = "WaktuBermain";
+            this.WaktuBermain.Name = "WaktuBermain";
+            // 
+            // Toleransi
+            // 
+            this.Toleransi.HeaderText = "Toleransi";
+            this.Toleransi.Name = "Toleransi";
+            // 
+            // TagID
+            // 
+            this.TagID.HeaderText = "TagID";
+            this.TagID.Name = "TagID";
+            // 
             // FrmPayment
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -627,6 +634,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn10;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn11;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn12;
+        public System.Windows.Forms.TextBox txtKeterangan;
+        public System.Windows.Forms.Label label8;
         private System.Windows.Forms.DataGridViewTextBoxColumn TransactionID;
         private System.Windows.Forms.DataGridViewTextBoxColumn RFID;
         private System.Windows.Forms.DataGridViewTextBoxColumn Keterangan;
@@ -641,7 +650,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn JamKeluar;
         private System.Windows.Forms.DataGridViewTextBoxColumn WaktuBermain;
         private System.Windows.Forms.DataGridViewTextBoxColumn Toleransi;
-        public System.Windows.Forms.TextBox txtKeterangan;
-        public System.Windows.Forms.Label label8;
+        private System.Windows.Forms.DataGridViewTextBoxColumn TagID;
     }
 }

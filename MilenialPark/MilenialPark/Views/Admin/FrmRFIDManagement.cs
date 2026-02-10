@@ -43,7 +43,7 @@ namespace MilenialPark.Views.Admin
         private void FrmRFIDManagement_Load(object sender, EventArgs e)
         {
             // Apply existing POS styling helpers from your project.
-            DataGridViewHelper.ApplyPOSStyle(dgvRFIDList, false, true);
+            DataGridViewHelper.ApplyPOSStyle(dgvRFIDList, true, true);
             DataGridViewHelper.SizeCompact(dgvRFIDList, 100, 420);
 
             // Default initial field values
@@ -220,6 +220,19 @@ namespace MilenialPark.Views.Admin
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void txtRFID_Enter(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void txtRFID_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                txtRFID.Text = Convert.ToInt32(txtRFID.Text).ToString();
+            }
         }
     }
 }

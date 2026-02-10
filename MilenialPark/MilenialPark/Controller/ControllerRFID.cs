@@ -81,5 +81,13 @@ namespace MilenialPark.Controller
             string query = $"DELETE FROM RFIDTags WHERE TagID = {ClsFungsi.C2Q(tagID)} AND TypeRFID = {ClsFungsi.C2Q(typeRFID)}";
             ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query);
         }
+
+        public DataTable GetRFIDByTagID(string tagID)
+        {
+            string query = "SELECT TOP 1 RFIDTagID, TagID, RFIDName, TypeRFID, Status, LastScan " +
+                           "FROM RFIDTags " +
+                           "WHERE TagID = " + ClsFungsi.C2Q(tagID) + " AND Status = 1";
+            return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        }
     }
 }

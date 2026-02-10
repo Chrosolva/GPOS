@@ -24,6 +24,7 @@ namespace MilenialPark.Views.Transaction
 
         public ControllerTransaction controllerTran = new ControllerTransaction();
         public ClsTransaction objtrans = new ClsTransaction();
+        public ControllerRFID controllerRFID = new ControllerRFID();
         public ControllerReport controllerReport = new ControllerReport();
         public ReportDocument reportDoc = new ReportDocument();
         public ReportDocument reportQRDoc2 = new ReportDocument();
@@ -53,7 +54,7 @@ namespace MilenialPark.Views.Transaction
 
         private void cbxPaymentType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         public void scan()
@@ -85,7 +86,7 @@ namespace MilenialPark.Views.Transaction
         {
             if (e.KeyCode == Keys.Enter)
             {
-                scan();  
+                scan();
             }
         }
 
@@ -99,8 +100,8 @@ namespace MilenialPark.Views.Transaction
             {
                 if (r.IsNewRow) continue;
 
-                string rfid = Convert.ToString(Convert.ToInt32(r.Cells["RFID"].Value))?.Trim();
-                if (string.IsNullOrEmpty(rfid))
+                string tagId = Convert.ToString(r.Cells["TagID"].Value)?.Trim();
+                if (string.IsNullOrEmpty(tagId))
                 {
                     missingCount++;
                     // collect NoUrut for message (if column exists)
@@ -114,7 +115,7 @@ namespace MilenialPark.Views.Transaction
                 // Focus first missing row
                 var firstMissing = dgvTransacTiketDet.Rows
                     .Cast<DataGridViewRow>()
-                    .FirstOrDefault(r => !r.IsNewRow && string.IsNullOrWhiteSpace(Convert.ToString(Convert.ToInt32(r.Cells["RFID"].Value))));
+                    .FirstOrDefault(r => !r.IsNewRow && string.IsNullOrWhiteSpace(Convert.ToString(Convert.ToInt32(r.Cells["TagID"].Value))));
 
                 if (firstMissing != null)
                 {
@@ -190,7 +191,8 @@ namespace MilenialPark.Views.Transaction
                     int qty = ToIntSafe(row.Cells["Qty"].Value);             // should be 1 per row (your requirement)
                     int waktu = ToIntSafe(row.Cells["WaktuBermain"].Value);
                     int toleransi = ToIntSafe(row.Cells["Toleransi"].Value);
-                    string rfid = Convert.ToString(Convert.ToInt32(row.Cells["RFID"].Value)); // may be null / empty
+                    string rfidName = Convert.ToString(row.Cells["RFID"].Value)?.Trim();   // display
+                    string tagId = Convert.ToString(row.Cells["TagID"].Value)?.Trim();     // real
                     string keterangan = Convert.ToString(row.Cells["Keterangan"].Value); // may be null / empty
 
                     var det = new ClsTransactionTiketDetail(
@@ -209,7 +211,8 @@ namespace MilenialPark.Views.Transaction
                     );
 
                     // if your constructor doesn't include RFID, set property like this:
-                    det.RFID = rfid;
+                    det.RFID = rfidName;
+                    det.TagID = tagId;
                     det.Keterangan = keterangan;
 
                     controllerTran.objTransaction.listtranstikdet.Add(det);
@@ -320,81 +323,6 @@ namespace MilenialPark.Views.Transaction
             txtRFIDScan.SelectAll();   // so next scan overwrites immediately
         }
 
-
-        //public void PrintQR(ControllerTransaction trans)
-        //{
-        //    string tmp;
-        //    string tmp2;
-        //    List<string> listqrcode = new List<string>();
-        //    List<string> listitemname = new List<string>();
-        //    // get list ticket and 
-        //    dt = controllerTran.gettransactionTiketDetail(trans.objTransaction.TransactionID);
-        //    foreach (DataRow row in dt.Rows)
-        //    {
-        //        if (row["category"].ToString() != "ACTIVITY")
-        //        {
-        //            tmp = "(&" + row["TransactionID"].ToString() + "&" + row["NoUrut"].ToString() + ")";
-        //            tmp2 = row["ItemName"].ToString();
-        //            listqrcode.Add(tmp);
-        //            listitemname.Add(tmp2);
-        //        }
-        //    }
-        //    //ClsFungsi.Pesan(listqrcode.ToString(), "INFO");
-        //    // generate qrcode 
-        //    List<byte[]> listQrCodes = new List<byte[]>();
-        //    QRCodeGenerator qrGenerator = new QRCodeGenerator();
-
-        //    foreach (String t in listqrcode)
-        //    {
-        //        QRCodeData qrCodeData = qrGenerator.CreateQrCode(t, QRCodeGenerator.ECCLevel.Q);
-        //        QRCode qrCode = new QRCode(qrCodeData);
-        //        Bitmap qrCodeImage = qrCode.GetGraphic(5);
-
-        //        byte[] yourByteArray;
-        //        using (var mStream = new System.IO.MemoryStream())
-        //        {
-        //            qrCodeImage.Save(mStream, System.Drawing.Imaging.ImageFormat.Bmp);
-        //            yourByteArray = mStream.ToArray();
-        //            listQrCodes.Add(yourByteArray);
-        //        }
-        //    }
-
-        //    dsQR = controllerTran.LoadListQRCodes(listQrCodes, listqrcode, listitemname);
-        //    // Show or Print Tiket 
-
-        //    reportQRDoc2 = new PrintQRCode();
-        //    reportQRDoc2.SetDataSource(dsQR);
-
-        //    //MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-        //    //DialogResult result = MessageBox.Show("Data Ticket berhasil Diload !!! \n Lanjut Cetak Ticket ?", "Print Ticket ? ", buttons);
-        //    //if (result == DialogResult.Yes)
-        //    //{
-
-        //    //}
-        //    //else
-        //    //{
-
-        //    //}
-
-        //    if (listQrCodes.Count > 0)
-        //    {
-        //        PrintQRCode(reportQRDoc2);
-        //    }
-        //    else
-        //    {
-
-        //    }
-        //    //// check transaction type 
-        //    //if (dgvTransTiket.CurrentRow.Cells["TransactionType"].Value.ToString() == "ONE-TIME-TICKET")
-        //    //{
-
-        //    //}
-        //    //else
-        //    //{
-        //    //    ClsFungsi.Pesan("Tidak bisa mencetak QRCode karena tiket tersebut bukan ONE TIME TICKET, silahkan gunakan kartu untuk masuk", "INFO");
-        //    //}
-        //}
-
         public void PrintQRCode(ReportDocument reportQRDoc)
         {
 
@@ -494,7 +422,7 @@ namespace MilenialPark.Views.Transaction
                     0   // Toleransi
                 );
                 }
-                    
+
             }
 
             cbxRemarks.SelectedIndex = 0;
@@ -533,70 +461,76 @@ namespace MilenialPark.Views.Transaction
 
         private void txtRFIDScan_KeyPress(object sender, KeyPressEventArgs e)
         {
-            
+
         }
 
         private void txtRFIDScan_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Enter) return;
-
             e.SuppressKeyPress = true;
 
             if (dgvTransacTiketDet.CurrentRow == null) return;
 
-            string rfid = Convert.ToInt32(txtRFIDScan.Text).ToString().Trim();
-            if (string.IsNullOrEmpty(rfid)) return;
+            string tagId = NormalizeTagId(txtRFIDScan.Text);
+            if (string.IsNullOrEmpty(tagId))
+            {
+                FocusRFIDScan();
+                return;
+            }
 
-            // Optional: prevent duplicate RFID
+            // Lookup RFIDName from master RFIDTags
+            // NOTE: ControllerRFID kamu belum ada fungsi GetByTagID -> bikin di controller (lihat bagian C)
+            DataTable dtTag = controllerRFID.GetRFIDByTagID(tagId);
+            if (dtTag.Rows.Count == 0)
+            {
+                ClsFungsi.Pesan("TagID tidak terdaftar di RFIDTags!", "ERROR");
+                FocusRFIDScan();
+                return;
+            }
+
+            string rfidName = Convert.ToString(dtTag.Rows[0]["RFIDName"]); // band number e.g. "001"
+
+            // prevent duplicate in GRID by TagID (real)
             bool exists = dgvTransacTiketDet.Rows
                 .Cast<DataGridViewRow>()
-                .Any(r => !r.IsNewRow &&
-                          Convert.ToString(r.Cells["RFID"].Value) == rfid);
+                .Any(r => !r.IsNewRow && string.Equals(Convert.ToString(r.Cells["TagID"].Value), tagId, StringComparison.OrdinalIgnoreCase));
 
             if (exists)
             {
-                ClsFungsi.Pesan("RFID sudah digunakan!", "WARNING");
+                ClsFungsi.Pesan("RFID (TagID) sudah digunakan!", "WARNING");
                 FocusRFIDScan();
                 return;
             }
 
-            // ----- New check: ensure this RFID is not already used in a persisted transaction -----
+            // Check already used in DB TODAY by TagID (real)
             DateTime startDay = DateTime.Today;
             DateTime endDay = DateTime.Today.AddDays(1).AddTicks(-1);
 
-            // Check both BOUGHT and ENTER‑IN statuses
             bool usedInDb =
-                (controllerTran.GetTicketByRFID(rfid, "BOUGHT", startDay, endDay)?.Rows.Count ?? 0) > 0 ||
-                (controllerTran.GetTicketByRFID(rfid, "ENTER-IN", startDay, endDay)?.Rows.Count ?? 0) > 0;
+                (controllerTran.GetTicketByTagID(tagId, "BOUGHT", startDay, endDay)?.Rows.Count ?? 0) > 0 ||
+                (controllerTran.GetTicketByTagID(tagId, "ENTER-IN", startDay, endDay)?.Rows.Count ?? 0) > 0;
 
             if (usedInDb)
             {
-                ClsFungsi.Pesan("RFID telah digunakan di transaksi lain!", "INFO");
+                ClsFungsi.Pesan("RFID (TagID) telah digunakan di transaksi lain!", "INFO");
                 FocusRFIDScan();
                 return;
             }
-            // ------------------------------------------------------------------------------
 
-            // Assign RFID to current row
-            dgvTransacTiketDet.CurrentRow.Cells["RFID"].Value = rfid;
+            // Assign BOTH
+            dgvTransacTiketDet.CurrentRow.Cells["TagID"].Value = tagId;      // real
+            dgvTransacTiketDet.CurrentRow.Cells["RFID"].Value = rfidName;    // display band no
 
-            // also fill Keterangan from textbox
+            // also fill Keterangan
             if (dgvTransacTiketDet.Columns.Contains("Keterangan"))
-            {
                 dgvTransacTiketDet.CurrentRow.Cells["Keterangan"].Value = (txtKeterangan.Text ?? "").Trim();
-            }
 
-
-            // Auto move to next row
+            // Move next row
             int nextIndex = dgvTransacTiketDet.CurrentRow.Index + 1;
             if (nextIndex < dgvTransacTiketDet.Rows.Count)
-            {
-                dgvTransacTiketDet.CurrentCell =
-                    dgvTransacTiketDet.Rows[nextIndex].Cells["RFID"];
-            }
+                dgvTransacTiketDet.CurrentCell = dgvTransacTiketDet.Rows[nextIndex].Cells["RFID"];
 
             SyncKeteranganFromCurrentRow();
-
             txtRFIDScan.Clear();
             FocusRFIDScan();
         }
@@ -654,6 +588,25 @@ namespace MilenialPark.Views.Transaction
                 sub.DataSourceConnections.Clear();
                 sub.SetDataSource(dataSet);
             }
+        }
+
+        private string NormalizeTagId(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return "";
+
+            // pastikan numeric
+            if (!raw.All(char.IsDigit))
+            {
+                ClsFungsi.Pesan("RFID harus numeric!", "ERROR");
+                return "";
+            }
+
+            // buang leading zero
+            string cleaned = raw.TrimStart('0');
+
+            // kalau semua nol -> 0
+            return cleaned.Length == 0 ? "0" : cleaned;
         }
     }
 }

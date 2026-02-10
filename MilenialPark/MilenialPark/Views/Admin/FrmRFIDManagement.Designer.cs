@@ -30,17 +30,17 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmRFIDManagement));
             this.leftpanel = new System.Windows.Forms.Panel();
+            this.btnSave = new System.Windows.Forms.Button();
             this.RFIDStatus = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.txtRFIDType = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.txtRFIDName = new System.Windows.Forms.TextBox();
+            this.btnReset = new System.Windows.Forms.Button();
             this.lblCardID2 = new System.Windows.Forms.Label();
             this.txtRFID = new System.Windows.Forms.TextBox();
             this.panellabel1 = new System.Windows.Forms.Panel();
             this.lblNewOrder = new System.Windows.Forms.Label();
-            this.btnSave = new System.Windows.Forms.Button();
-            this.btnReset = new System.Windows.Forms.Button();
             this.rightpanel = new System.Windows.Forms.Panel();
             this.rightbottompanel = new System.Windows.Forms.Panel();
             this.dgvRFIDList = new System.Windows.Forms.DataGridView();
@@ -74,6 +74,21 @@
             this.leftpanel.Name = "leftpanel";
             this.leftpanel.Size = new System.Drawing.Size(467, 678);
             this.leftpanel.TabIndex = 1;
+            // 
+            // btnSave
+            // 
+            this.btnSave.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnSave.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSave.ForeColor = System.Drawing.Color.OrangeRed;
+            this.btnSave.Image = ((System.Drawing.Image)(resources.GetObject("btnSave.Image")));
+            this.btnSave.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
+            this.btnSave.Location = new System.Drawing.Point(111, 378);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Padding = new System.Windows.Forms.Padding(7);
+            this.btnSave.Size = new System.Drawing.Size(216, 54);
+            this.btnSave.TabIndex = 51;
+            this.btnSave.Text = "Save";
+            this.btnSave.UseVisualStyleBackColor = true;
             // 
             // RFIDStatus
             // 
@@ -125,6 +140,22 @@
             this.txtRFIDName.Size = new System.Drawing.Size(327, 29);
             this.txtRFIDName.TabIndex = 46;
             // 
+            // btnReset
+            // 
+            this.btnReset.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnReset.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnReset.ForeColor = System.Drawing.Color.OrangeRed;
+            this.btnReset.Image = ((System.Drawing.Image)(resources.GetObject("btnReset.Image")));
+            this.btnReset.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
+            this.btnReset.Location = new System.Drawing.Point(358, 57);
+            this.btnReset.Name = "btnReset";
+            this.btnReset.Padding = new System.Windows.Forms.Padding(7);
+            this.btnReset.Size = new System.Drawing.Size(103, 54);
+            this.btnReset.TabIndex = 45;
+            this.btnReset.Text = "Reset";
+            this.btnReset.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btnReset.UseVisualStyleBackColor = true;
+            // 
             // lblCardID2
             // 
             this.lblCardID2.AutoSize = true;
@@ -143,6 +174,8 @@
             this.txtRFID.Name = "txtRFID";
             this.txtRFID.Size = new System.Drawing.Size(327, 29);
             this.txtRFID.TabIndex = 43;
+            this.txtRFID.Enter += new System.EventHandler(this.txtRFID_Enter);
+            this.txtRFID.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtRFID_KeyDown);
             // 
             // panellabel1
             // 
@@ -164,37 +197,6 @@
             this.lblNewOrder.Size = new System.Drawing.Size(174, 25);
             this.lblNewOrder.TabIndex = 24;
             this.lblNewOrder.Text = "RFID Management";
-            // 
-            // btnSave
-            // 
-            this.btnSave.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnSave.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSave.ForeColor = System.Drawing.Color.OrangeRed;
-            this.btnSave.Image = ((System.Drawing.Image)(resources.GetObject("btnSave.Image")));
-            this.btnSave.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.btnSave.Location = new System.Drawing.Point(111, 378);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Padding = new System.Windows.Forms.Padding(7);
-            this.btnSave.Size = new System.Drawing.Size(216, 54);
-            this.btnSave.TabIndex = 51;
-            this.btnSave.Text = "Save";
-            this.btnSave.UseVisualStyleBackColor = true;
-            // 
-            // btnReset
-            // 
-            this.btnReset.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnReset.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnReset.ForeColor = System.Drawing.Color.OrangeRed;
-            this.btnReset.Image = ((System.Drawing.Image)(resources.GetObject("btnReset.Image")));
-            this.btnReset.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.btnReset.Location = new System.Drawing.Point(358, 57);
-            this.btnReset.Name = "btnReset";
-            this.btnReset.Padding = new System.Windows.Forms.Padding(7);
-            this.btnReset.Size = new System.Drawing.Size(103, 54);
-            this.btnReset.TabIndex = 45;
-            this.btnReset.Text = "Reset";
-            this.btnReset.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.btnReset.UseVisualStyleBackColor = true;
             // 
             // rightpanel
             // 

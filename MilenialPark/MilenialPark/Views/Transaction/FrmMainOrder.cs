@@ -97,8 +97,10 @@ namespace MilenialPark.Views.Transaction
             TPQuinosSales.Controls.Add(frmQuinosSales);
             frmQuinosSales.Show();
 
+            // add to the RFID tab and show it
             TPRFID.Controls.Add(frmRFIDManagement);
-            TPRFID.Show();
+            frmRFIDManagement.Show();        // Add this line
+            TPRFID.Show();                   // optional; the TabControl will show tabs itself
 
             TCMainOrder.TabPages.Remove(TPNEOrders);
             TCMainOrder.TabPages.Remove(TPDaftarKartu);

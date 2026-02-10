@@ -312,6 +312,8 @@ namespace MilenialPark.Controller
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
 
+        
+
         #endregion
 
         #region CRUD
@@ -466,37 +468,38 @@ namespace MilenialPark.Controller
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(sql);
         }
 
-        public void UpdateTicketRfid(string transactionId, int noUrut, string newRfid, string appendKeterangan)
+        public void UpdateTicketRfid(string transactionId, int noUrut, string newTagId, string newRfidName, string appendKeterangan)
         {
             string tid = (transactionId ?? "").Trim();
-            string rfidNew = (newRfid ?? "").Trim();
+            string tagNew = (newTagId ?? "").Trim();
+            string nameNew = (newRfidName ?? "").Trim();
+
             if (string.IsNullOrEmpty(tid)) throw new Exception("TransactionID kosong.");
             if (noUrut <= 0) throw new Exception("NoUrut tidak valid.");
-            if (string.IsNullOrEmpty(rfidNew)) throw new Exception("RFID baru kosong.");
+            if (string.IsNullOrEmpty(tagNew)) throw new Exception("TagID baru kosong.");
+            if (string.IsNullOrEmpty(nameNew)) throw new Exception("RFIDName kosong.");
 
-            // Validasi: RFID baru belum dipakai ticket lain (minimal hari ini)
-            DateTime startDay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
-            DateTime endDay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59);
-
-            string startS = startDay.ToString("yyyy-MM-dd HH':'mm':'ss");
-            string endS = endDay.ToString("yyyy-MM-dd HH':'mm':'ss");
+            // validasi: TagID baru belum dipakai ticket lain (hari ini)
+            DateTime startDay = DateTime.Today;
+            DateTime endDay = DateTime.Today.AddDays(1).AddTicks(-1);
 
             string qCheck =
                 "SELECT TOP 1 1 FROM WHNPOS.dbo.TransaksiTiketDetail " +
-                "WHERE RFID = " + ClsFungsi.C2Q(rfidNew) + " " +
+                "WHERE ISNULL(TagID,'') = " + ClsFungsi.C2Q(tagNew) + " " +
                 "AND TransactionDate >= " + ClsFungsi.C2QTime(startDay) + " " +
                 "AND TransactionDate <= " + ClsFungsi.C2QTime(endDay) + " ;";
 
             var dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(qCheck);
             if (dt != null && dt.Rows.Count > 0)
-                throw new Exception("RFID baru sudah dipakai ticket lain (hari ini).");
+                throw new Exception("TagID baru sudah dipakai ticket lain (hari ini).");
 
             string ketAppend = (appendKeterangan ?? "").Trim();
             if (ketAppend.Length > 200) ketAppend = ketAppend.Substring(0, 200);
 
             string sql =
                 "UPDATE WHNPOS.dbo.TransaksiTiketDetail " +
-                "SET RFID = " + ClsFungsi.C2Q(rfidNew) + ", " +
+                "SET RFID = " + ClsFungsi.C2Q(nameNew) + ", " +          // RFID = RFIDName
+                "    TagID = " + ClsFungsi.C2Q(tagNew) + ", " +          // TagID = RFID asli
                 "    Keterangan = ISNULL(Keterangan,'') + " + ClsFungsi.C2Q(" | " + ketAppend) + " " +
                 "WHERE TransactionID = " + ClsFungsi.C2Q(tid) + " AND NoUrut = " + noUrut.ToString() + ";";
 
@@ -597,12 +600,12 @@ namespace MilenialPark.Controller
                             // Build the insert for a ticket detail with RFID
                             query2 = "INSERT INTO WHNPOS.dbo.TransaksiTiketDetail " +
                                      "(TransactionID, TransactionDate, ItemID, ItemName, Price, Qty, NoUrut, " +
-                                     " OrderStatus, JamMasuk, JamKeluar, WaktuBermain, Toleransi, RFID, Keterangan) VALUES " +
+                                     " OrderStatus, JamMasuk, JamKeluar, WaktuBermain, Toleransi, RFID, Keterangan, TagID) VALUES " +
                                      $"({ClsFungsi.C2Q(transdet.TransactionID)}, GETDATE(), {ClsFungsi.C2Q(transdet.ItemId)}, " +
                                      $"{ClsFungsi.C2Q(transdet.ItemName)}, {ClsFungsi.C2Q(transdet.Price)}, {ClsFungsi.C2Q(transdet.Qty)}, " +
                                      $"{ClsFungsi.C2Q(index)}, {ClsFungsi.C2Q(transdet.OrderStatus)}, {ClsFungsi.C2QTime(transdet.JamMasuk)}, " +
                                      $"{ClsFungsi.C2QTime(transdet.JamKeluar)}, {ClsFungsi.C2Q(transdet.WaktuBermain)}, " +
-                                     $"{ClsFungsi.C2Q(transdet.Toleransi)}, {ClsFungsi.C2Q(transdet.RFID)}, {ClsFungsi.C2Q(transdet.Keterangan)})";
+                                     $"{ClsFungsi.C2Q(transdet.Toleransi)}, {ClsFungsi.C2Q(transdet.RFID)}, {ClsFungsi.C2Q(transdet.Keterangan)}, {ClsFungsi.C2Q(transdet.TagID)})";
 
 
                             index++;
@@ -1228,14 +1231,14 @@ namespace MilenialPark.Controller
         public DataTable GetReminderEnterIn(DateTime start, DateTime end)
         {
             query =
-                "SELECT TRD.TransactionID, TRD.NoUrut, TRD.RFID, TRD.Keterangan, TRD.ItemID, TRD.ItemName, " +
-                "TRD.JamMasuk, TRD.JamKeluar, TRD.WaktuBermain, TRD.Toleransi, TRD.OrderStatus, TR.TransactionDate " +
-                "FROM WHNPOS.dbo.TransaksiTiketDetail TRD " +
-                "INNER JOIN WHNPOS.dbo.Transaksi TR ON TRD.TransactionID = TR.TransactionID " +
-                $"WHERE TRD.OrderStatus = 'ENTER-IN' " +
-                $"AND TR.TransactionDate >= {ClsFungsi.C2QTime(start)} " +
-                $"AND TR.TransactionDate <= {ClsFungsi.C2QTime(end)} " +
-                "ORDER BY TRD.JamKeluar ASC";
+    "SELECT TRD.TransactionID, TRD.NoUrut, TRD.RFID, TRD.TagID, TRD.Keterangan, TRD.ItemID, TRD.ItemName, " +
+    "TRD.JamMasuk, TRD.JamKeluar, TRD.WaktuBermain, TRD.Toleransi, TRD.OrderStatus, TR.TransactionDate " +
+    "FROM WHNPOS.dbo.TransaksiTiketDetail TRD " +
+    "INNER JOIN WHNPOS.dbo.Transaksi TR ON TRD.TransactionID = TR.TransactionID " +
+    $"WHERE TRD.OrderStatus = 'ENTER-IN' " +
+    $"AND TR.TransactionDate >= {ClsFungsi.C2QTime(start)} " +
+    $"AND TR.TransactionDate <= {ClsFungsi.C2QTime(end)} " +
+    "ORDER BY TRD.JamKeluar ASC";
 
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
@@ -1469,7 +1472,20 @@ namespace MilenialPark.Controller
             }
         }
 
+        public DataTable GetTicketByTagID(string tagId, string orderStatus, DateTime start, DateTime end)
+        {
+            query =
+                "SELECT TOP 1 TRD.*, TR.TransactionDate " +
+                "FROM WHNPOS.dbo.TransaksiTiketDetail TRD " +
+                "INNER JOIN WHNPOS.dbo.Transaksi TR ON TRD.TransactionID = TR.TransactionID " +
+                $"WHERE ISNULL(TRD.TagID,'') = {ClsFungsi.C2Q(tagId)} " +
+                $"AND TRD.OrderStatus = {ClsFungsi.C2Q(orderStatus)} " +
+                $"AND TR.TransactionDate >= {ClsFungsi.C2QTime(start)} " +
+                $"AND TR.TransactionDate <= {ClsFungsi.C2QTime(end)} " +
+                "ORDER BY TR.TransactionDate DESC, TRD.NoUrut ASC";
 
+            return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
+        }
 
         #endregion
     }
