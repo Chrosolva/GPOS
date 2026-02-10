@@ -32,6 +32,8 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblFormTitle = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.txtKeterangan = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.txtRFIDScan = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.dgvTransaksiDetail = new System.Windows.Forms.DataGridView();
@@ -80,8 +82,6 @@
             this.lblCustomerName = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.lblCardID2 = new System.Windows.Forms.Label();
-            this.txtKeterangan = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTransaksiDetail)).BeginInit();
@@ -140,6 +140,26 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(1266, 456);
             this.panel2.TabIndex = 8;
+            // 
+            // txtKeterangan
+            // 
+            this.txtKeterangan.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtKeterangan.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtKeterangan.Location = new System.Drawing.Point(514, 13);
+            this.txtKeterangan.Name = "txtKeterangan";
+            this.txtKeterangan.Size = new System.Drawing.Size(190, 29);
+            this.txtKeterangan.TabIndex = 101;
+            this.txtKeterangan.TextChanged += new System.EventHandler(this.txtKeterangan_TextChanged);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(409, 15);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(89, 21);
+            this.label8.TabIndex = 100;
+            this.label8.Text = "Keterangan";
             // 
             // txtRFIDScan
             // 
@@ -394,9 +414,9 @@
             this.btnSave.ForeColor = System.Drawing.Color.OrangeRed;
             this.btnSave.Image = ((System.Drawing.Image)(resources.GetObject("btnSave.Image")));
             this.btnSave.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.btnSave.Location = new System.Drawing.Point(88, 352);
+            this.btnSave.Location = new System.Drawing.Point(99, 354);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Padding = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.btnSave.Padding = new System.Windows.Forms.Padding(7);
             this.btnSave.Size = new System.Drawing.Size(169, 54);
             this.btnSave.TabIndex = 89;
             this.btnSave.Text = "Save";
@@ -547,26 +567,6 @@
             this.lblCardID2.Size = new System.Drawing.Size(62, 21);
             this.lblCardID2.TabIndex = 46;
             this.lblCardID2.Text = "Card ID";
-            // 
-            // txtKeterangan
-            // 
-            this.txtKeterangan.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtKeterangan.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtKeterangan.Location = new System.Drawing.Point(514, 13);
-            this.txtKeterangan.Name = "txtKeterangan";
-            this.txtKeterangan.Size = new System.Drawing.Size(190, 29);
-            this.txtKeterangan.TabIndex = 101;
-            this.txtKeterangan.TextChanged += new System.EventHandler(this.txtKeterangan_TextChanged);
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(409, 15);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(89, 21);
-            this.label8.TabIndex = 100;
-            this.label8.Text = "Keterangan";
             // 
             // FrmPayment
             // 

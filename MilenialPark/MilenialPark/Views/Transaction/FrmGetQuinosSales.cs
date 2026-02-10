@@ -21,6 +21,7 @@ namespace MilenialPark.Views.Transaction
 
         // === CONFIG ===
         // category_id Quinos untuk "PLAYTIME"
+        //private const int QUINOS_PLAYTIME_CATEGORY_ID = 16;
         private const int QUINOS_PLAYTIME_CATEGORY_ID = 9;
 
         // remark pattern untuk cek sudah diimport
@@ -130,20 +131,20 @@ ORDER BY s.id DESC;";
             return @"
 SELECT
     l.sales_id,
-    l.id          AS line_id,
+    l.id AS line_id,
     l.item_id,
-    l.itemCode    AS item_code,
-    l.description    AS item_name,
-    l.quantity    AS qty,
-    l.unitPrice   AS price,
-    l.remark      AS remark,
-    i.duration    AS duration,
-    i.tolerance   AS tolerance,
-    c.id          AS category_id,
-    c.name        AS category_name
+    l.itemCode AS item_code,
+    l.description AS item_name,
+    l.quantity AS qty,
+    l.unitPrice AS price,
+    l.remark AS remark,
+    i.duration AS duration,
+    i.tolerance AS tolerance,
+    i.category_id AS category_id,
+    c.name AS category_name
 FROM tbl_sales_lines l
-LEFT JOIN tbl_items i       ON i.id = l.item_id
-LEFT JOIN tbl_categories c  ON c.id = i.category_id
+LEFT JOIN tbl_items i      ON i.id = l.item_id
+LEFT JOIN tbl_categories c ON c.id = i.category_id
 WHERE l.sales_id = @sales_id
   AND l.item_id IS NOT NULL
   AND (l.type = 1 OR l.type IS NULL)
@@ -282,7 +283,8 @@ ORDER BY l.idx ASC, l.id ASC;";
                 // 1) cek ada PLAYTIME (category_id=9)
                 if (_dtDetail == null || _dtDetail.Rows.Count == 0)
                 {
-                    MessageBox.Show("Sales ini tidak punya item PLAYTIME (category_id=9).");
+                    MessageBox.Show("Sales ini tidak punya item PLAYTIME (category_id=16).");
+                    //MessageBox.Show("Sales ini tidak punya item PLAYTIME (category_id=9).");
                     return;
                 }
 

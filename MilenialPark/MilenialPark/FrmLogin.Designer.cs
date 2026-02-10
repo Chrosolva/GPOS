@@ -29,19 +29,13 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormLogin));
-            this.PBLogin = new System.Windows.Forms.PictureBox();
-            this.btnExit = new FontAwesome.Sharp.IconButton();
-            this.btnMinimize = new FontAwesome.Sharp.IconButton();
-            this.iconButton1 = new FontAwesome.Sharp.IconButton();
             this.txtUserID = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.txtpassword = new System.Windows.Forms.TextBox();
-            this.iconButton2 = new FontAwesome.Sharp.IconButton();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.lblserveraddress = new System.Windows.Forms.Label();
-            this.btngear = new FontAwesome.Sharp.IconButton();
             this.lblversion = new System.Windows.Forms.Label();
             this.txtServer = new System.Windows.Forms.TextBox();
             this.cbxCategory = new System.Windows.Forms.ComboBox();
@@ -51,64 +45,14 @@
             this.label5 = new System.Windows.Forms.Label();
             this.txtuidmysql = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.btngear = new FontAwesome.Sharp.IconButton();
+            this.iconButton2 = new FontAwesome.Sharp.IconButton();
+            this.btnMinimize = new FontAwesome.Sharp.IconButton();
+            this.btnExit = new FontAwesome.Sharp.IconButton();
+            this.PBLogin = new System.Windows.Forms.PictureBox();
+            this.iconButton1 = new FontAwesome.Sharp.IconButton();
             ((System.ComponentModel.ISupportInitialize)(this.PBLogin)).BeginInit();
             this.SuspendLayout();
-            // 
-            // PBLogin
-            // 
-            this.PBLogin.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.PBLogin.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("PBLogin.BackgroundImage")));
-            this.PBLogin.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.PBLogin.Image = ((System.Drawing.Image)(resources.GetObject("PBLogin.Image")));
-            this.PBLogin.Location = new System.Drawing.Point(1, 1);
-            this.PBLogin.Name = "PBLogin";
-            this.PBLogin.Size = new System.Drawing.Size(556, 668);
-            this.PBLogin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.PBLogin.TabIndex = 9;
-            this.PBLogin.TabStop = false;
-            // 
-            // btnExit
-            // 
-            this.btnExit.IconChar = FontAwesome.Sharp.IconChar.WindowClose;
-            this.btnExit.IconColor = System.Drawing.Color.Gray;
-            this.btnExit.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.btnExit.IconSize = 40;
-            this.btnExit.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.btnExit.Location = new System.Drawing.Point(1003, 12);
-            this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(46, 38);
-            this.btnExit.TabIndex = 10;
-            this.btnExit.UseVisualStyleBackColor = true;
-            this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
-            // 
-            // btnMinimize
-            // 
-            this.btnMinimize.IconChar = FontAwesome.Sharp.IconChar.WindowMinimize;
-            this.btnMinimize.IconColor = System.Drawing.Color.Gray;
-            this.btnMinimize.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.btnMinimize.IconSize = 40;
-            this.btnMinimize.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.btnMinimize.Location = new System.Drawing.Point(953, 12);
-            this.btnMinimize.Name = "btnMinimize";
-            this.btnMinimize.Size = new System.Drawing.Size(46, 38);
-            this.btnMinimize.TabIndex = 11;
-            this.btnMinimize.UseVisualStyleBackColor = true;
-            this.btnMinimize.Click += new System.EventHandler(this.btnMinimize_Click);
-            // 
-            // iconButton1
-            // 
-            this.iconButton1.IconChar = FontAwesome.Sharp.IconChar.WindowMinimize;
-            this.iconButton1.IconColor = System.Drawing.Color.Gray;
-            this.iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.iconButton1.IconSize = 40;
-            this.iconButton1.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.iconButton1.Location = new System.Drawing.Point(1108, 1);
-            this.iconButton1.Name = "iconButton1";
-            this.iconButton1.Size = new System.Drawing.Size(46, 38);
-            this.iconButton1.TabIndex = 11;
-            this.iconButton1.UseVisualStyleBackColor = true;
             // 
             // txtUserID
             // 
@@ -150,22 +94,6 @@
             this.txtpassword.TabIndex = 18;
             this.txtpassword.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtpassword_KeyUp);
             // 
-            // iconButton2
-            // 
-            this.iconButton2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(233)))), ((int)(((byte)(75)))), ((int)(((byte)(75)))));
-            this.iconButton2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.iconButton2.ForeColor = System.Drawing.Color.White;
-            this.iconButton2.IconChar = FontAwesome.Sharp.IconChar.None;
-            this.iconButton2.IconColor = System.Drawing.Color.Black;
-            this.iconButton2.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.iconButton2.Location = new System.Drawing.Point(754, 330);
-            this.iconButton2.Name = "iconButton2";
-            this.iconButton2.Size = new System.Drawing.Size(123, 50);
-            this.iconButton2.TabIndex = 20;
-            this.iconButton2.Text = "LOGIN";
-            this.iconButton2.UseVisualStyleBackColor = false;
-            this.iconButton2.Click += new System.EventHandler(this.iconButton2_Click);
-            // 
             // textBox1
             // 
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -193,19 +121,6 @@
             this.lblserveraddress.Size = new System.Drawing.Size(145, 23);
             this.lblserveraddress.TabIndex = 21;
             this.lblserveraddress.Text = "SERVER ADDRESS";
-            // 
-            // btngear
-            // 
-            this.btngear.IconChar = FontAwesome.Sharp.IconChar.Database;
-            this.btngear.IconColor = System.Drawing.Color.Gray;
-            this.btngear.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.btngear.IconSize = 40;
-            this.btngear.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.btngear.Location = new System.Drawing.Point(651, 457);
-            this.btngear.Name = "btngear";
-            this.btngear.Size = new System.Drawing.Size(34, 41);
-            this.btngear.TabIndex = 22;
-            this.btngear.UseVisualStyleBackColor = true;
             // 
             // lblversion
             // 
@@ -271,7 +186,7 @@
             this.txtpassmysql.PasswordChar = '*';
             this.txtpassmysql.Size = new System.Drawing.Size(263, 26);
             this.txtpassmysql.TabIndex = 42;
-            this.txtpassmysql.Text = "starlight";
+            this.txtpassmysql.Text = "Numero1";
             // 
             // label5
             // 
@@ -302,6 +217,91 @@
             this.label6.Size = new System.Drawing.Size(105, 15);
             this.label6.TabIndex = 44;
             this.label6.Text = "MySql Connection";
+            // 
+            // btngear
+            // 
+            this.btngear.IconChar = FontAwesome.Sharp.IconChar.Database;
+            this.btngear.IconColor = System.Drawing.Color.Gray;
+            this.btngear.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            this.btngear.IconSize = 40;
+            this.btngear.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.btngear.Location = new System.Drawing.Point(651, 457);
+            this.btngear.Name = "btngear";
+            this.btngear.Size = new System.Drawing.Size(34, 41);
+            this.btngear.TabIndex = 22;
+            this.btngear.UseVisualStyleBackColor = true;
+            // 
+            // iconButton2
+            // 
+            this.iconButton2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(233)))), ((int)(((byte)(75)))), ((int)(((byte)(75)))));
+            this.iconButton2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.iconButton2.ForeColor = System.Drawing.Color.White;
+            this.iconButton2.IconChar = FontAwesome.Sharp.IconChar.None;
+            this.iconButton2.IconColor = System.Drawing.Color.Black;
+            this.iconButton2.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            this.iconButton2.Location = new System.Drawing.Point(754, 330);
+            this.iconButton2.Name = "iconButton2";
+            this.iconButton2.Size = new System.Drawing.Size(123, 50);
+            this.iconButton2.TabIndex = 20;
+            this.iconButton2.Text = "LOGIN";
+            this.iconButton2.UseVisualStyleBackColor = false;
+            this.iconButton2.Click += new System.EventHandler(this.iconButton2_Click);
+            // 
+            // btnMinimize
+            // 
+            this.btnMinimize.IconChar = FontAwesome.Sharp.IconChar.WindowMinimize;
+            this.btnMinimize.IconColor = System.Drawing.Color.Gray;
+            this.btnMinimize.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            this.btnMinimize.IconSize = 40;
+            this.btnMinimize.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.btnMinimize.Location = new System.Drawing.Point(953, 12);
+            this.btnMinimize.Name = "btnMinimize";
+            this.btnMinimize.Size = new System.Drawing.Size(46, 38);
+            this.btnMinimize.TabIndex = 11;
+            this.btnMinimize.UseVisualStyleBackColor = true;
+            this.btnMinimize.Click += new System.EventHandler(this.btnMinimize_Click);
+            // 
+            // btnExit
+            // 
+            this.btnExit.IconChar = FontAwesome.Sharp.IconChar.WindowClose;
+            this.btnExit.IconColor = System.Drawing.Color.Gray;
+            this.btnExit.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            this.btnExit.IconSize = 40;
+            this.btnExit.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.btnExit.Location = new System.Drawing.Point(1003, 12);
+            this.btnExit.Name = "btnExit";
+            this.btnExit.Size = new System.Drawing.Size(46, 38);
+            this.btnExit.TabIndex = 10;
+            this.btnExit.UseVisualStyleBackColor = true;
+            this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
+            // 
+            // PBLogin
+            // 
+            this.PBLogin.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.PBLogin.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("PBLogin.BackgroundImage")));
+            this.PBLogin.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.PBLogin.Image = ((System.Drawing.Image)(resources.GetObject("PBLogin.Image")));
+            this.PBLogin.Location = new System.Drawing.Point(1, 1);
+            this.PBLogin.Name = "PBLogin";
+            this.PBLogin.Size = new System.Drawing.Size(556, 668);
+            this.PBLogin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.PBLogin.TabIndex = 9;
+            this.PBLogin.TabStop = false;
+            // 
+            // iconButton1
+            // 
+            this.iconButton1.IconChar = FontAwesome.Sharp.IconChar.WindowMinimize;
+            this.iconButton1.IconColor = System.Drawing.Color.Gray;
+            this.iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            this.iconButton1.IconSize = 40;
+            this.iconButton1.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.iconButton1.Location = new System.Drawing.Point(1108, 1);
+            this.iconButton1.Name = "iconButton1";
+            this.iconButton1.Size = new System.Drawing.Size(46, 38);
+            this.iconButton1.TabIndex = 11;
+            this.iconButton1.UseVisualStyleBackColor = true;
             // 
             // FormLogin
             // 

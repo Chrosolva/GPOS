@@ -219,7 +219,7 @@
             this.rightpanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.rightpanel.Location = new System.Drawing.Point(467, 0);
             this.rightpanel.Name = "rightpanel";
-            this.rightpanel.Size = new System.Drawing.Size(616, 732);
+            this.rightpanel.Size = new System.Drawing.Size(787, 732);
             this.rightpanel.TabIndex = 1;
             // 
             // rightbottompanel
@@ -229,7 +229,7 @@
             this.rightbottompanel.Location = new System.Drawing.Point(0, 51);
             this.rightbottompanel.Name = "rightbottompanel";
             this.rightbottompanel.Padding = new System.Windows.Forms.Padding(6);
-            this.rightbottompanel.Size = new System.Drawing.Size(616, 681);
+            this.rightbottompanel.Size = new System.Drawing.Size(787, 681);
             this.rightbottompanel.TabIndex = 5;
             // 
             // dgvCardList
@@ -243,7 +243,7 @@
             this.dgvCardList.Name = "dgvCardList";
             this.dgvCardList.ReadOnly = true;
             this.dgvCardList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvCardList.Size = new System.Drawing.Size(604, 669);
+            this.dgvCardList.Size = new System.Drawing.Size(775, 669);
             this.dgvCardList.TabIndex = 18;
             this.dgvCardList.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCardList_CellClick);
             // 
@@ -256,7 +256,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(616, 51);
+            this.panel1.Size = new System.Drawing.Size(787, 51);
             this.panel1.TabIndex = 4;
             // 
             // txtSearch
@@ -361,7 +361,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1083, 732);
+            this.ClientSize = new System.Drawing.Size(1254, 732);
             this.Controls.Add(this.rightpanel);
             this.Controls.Add(this.leftpanel);
             this.Name = "FrmCardManagement";

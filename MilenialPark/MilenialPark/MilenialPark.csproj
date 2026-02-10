@@ -229,6 +229,7 @@
   <ItemGroup>
     <Compile Include="Controller\ControllerCard.cs" />
     <Compile Include="Controller\ControllerReport.cs" />
+    <Compile Include="Controller\ControllerRFID.cs" />
     <Compile Include="Controller\ControllerShop.cs" />
     <Compile Include="Controller\ControllerTransaction.cs" />
     <Compile Include="Controller\ControllerUser.cs" />
@@ -254,6 +255,7 @@
     <Compile Include="Models\ClsCabang.cs" />
     <Compile Include="Models\ClsCard.cs" />
     <Compile Include="Models\ClsExtend.cs" />
+    <Compile Include="Models\ClsRFID.cs" />
     <Compile Include="Models\ClsShop.cs" />
     <Compile Include="Models\ClsShopItem.cs" />
     <Compile Include="Models\ClsShopItemTiket.cs" />
@@ -362,6 +364,12 @@
     </Compile>
     <Compile Include="Views\Admin\FrmCardManagement.Designer.cs">
       <DependentUpon>FrmCardManagement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\FrmRFIDManagement.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Admin\FrmRFIDManagement.Designer.cs">
+      <DependentUpon>FrmRFIDManagement.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\Admin\FrmUserManagement.cs">
       <SubType>Form</SubType>
@@ -591,6 +599,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Admin\FrmCardChange.resx">
       <DependentUpon>FrmCardChange.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Admin\FrmRFIDManagement.resx">
+      <DependentUpon>FrmRFIDManagement.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Admin\FrmUserManagement.resx">
       <DependentUpon>FrmUserManagement.cs</DependentUpon>

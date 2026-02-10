@@ -26,7 +26,8 @@ namespace MilenialPark
 
         private void FrmAdminPass_Load(object sender, EventArgs e)
         {
-
+            txtUserID.Focus();
+            txtUserID.SelectAll();
         }
 
         private void btnVerify_Click(object sender, EventArgs e)
@@ -74,5 +75,12 @@ namespace MilenialPark
             this.Close();
         }
 
+        private void txtpassword_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                btnVerify_Click(null, null);
+            }
+        }
     }
 }

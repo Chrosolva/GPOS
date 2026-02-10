@@ -48,6 +48,7 @@ namespace MilenialPark.Views.Transaction
             cbxPaymentType.SelectedIndex = 0;
             cbxTransType.Text = controllerTran.objTransaction.TransactionType;
             txtRemarks.Text = controllerTran.objTransaction.Remarks;
+
         }
 
         private void cbxPaymentType_SelectedIndexChanged(object sender, EventArgs e)
@@ -525,6 +526,8 @@ namespace MilenialPark.Views.Transaction
                 dgvTransacTiketDet.CurrentCell = dgvTransacTiketDet.Rows[0].Cells["RFID"]; // or any cell you want
                 SyncKeteranganFromCurrentRow();
             }
+
+            txtKeterangan.Focus();
 
         }
 

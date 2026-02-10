@@ -24,6 +24,7 @@ namespace MilenialPark.Views.Transaction
         public ControllerShop controllerShop = new ControllerShop();
         public Card.FrmCards frmCard;
         public Admin.FrmCardManagement frmCardManagement;
+        public Admin.FrmRFIDManagement frmRFIDManagement;
         public Transaction.FrmOrderTiket frmOrderTiket;
         public Transaction.FrmOrder frmOrder;
         public Transaction.FrmGetQuinosSales frmQuinosSales;
@@ -58,6 +59,12 @@ namespace MilenialPark.Views.Transaction
             frmCardManagement.FormBorderStyle = FormBorderStyle.None;
             frmCardManagement.Dock = DockStyle.Fill;
 
+            frmRFIDManagement = new Admin.FrmRFIDManagement();
+            frmRFIDManagement.Text = "RFID Management";
+            frmRFIDManagement.TopLevel = false;
+            frmRFIDManagement.FormBorderStyle = FormBorderStyle.None;
+            frmRFIDManagement.Dock = DockStyle.Fill;
+
             frmOrderTiket = new Transaction.FrmOrderTiket(parentfrm);
             frmOrderTiket.Text = "Order Tiket";
             frmOrderTiket.TopLevel = false;
@@ -89,6 +96,9 @@ namespace MilenialPark.Views.Transaction
             frmCardManagement.Show();
             TPQuinosSales.Controls.Add(frmQuinosSales);
             frmQuinosSales.Show();
+
+            TPRFID.Controls.Add(frmRFIDManagement);
+            TPRFID.Show();
 
             TCMainOrder.TabPages.Remove(TPNEOrders);
             TCMainOrder.TabPages.Remove(TPDaftarKartu);

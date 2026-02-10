@@ -54,6 +54,7 @@
             this.txtpassword.PasswordChar = '*';
             this.txtpassword.Size = new System.Drawing.Size(263, 26);
             this.txtpassword.TabIndex = 23;
+            this.txtpassword.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtpassword_KeyDown);
             // 
             // label1
             // 
@@ -73,6 +74,7 @@
             this.txtUserID.Name = "txtUserID";
             this.txtUserID.Size = new System.Drawing.Size(263, 26);
             this.txtUserID.TabIndex = 21;
+            this.txtUserID.Text = "starlight";
             // 
             // btnVerify
             // 

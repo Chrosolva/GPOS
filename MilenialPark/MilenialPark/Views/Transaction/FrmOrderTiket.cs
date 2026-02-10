@@ -213,7 +213,7 @@ namespace MilenialPark.Views.Transaction
                             SearchCard,
                             cbxOption.Text,
                             cbxTransType.Text,  // if this is "ALL" or "%%", function treats it as ALL
-                            Convert.ToString((cbxUserID.SelectedItem as dynamic).Value)// ← ALL UserID
+                            GetSelectedUserIdOrAll()// ← ALL UserID
                         );
             //controllerTrans.dt = controllerTrans.getTransaction2(parentfrm.lblShopID.Text, new DateTime(dtpFrom.Value.Year, dtpFrom.Value.Month, dtpFrom.Value.Day, 0, 0, 0), new DateTime(dtpTo.Value.Year, dtpTo.Value.Month, dtpTo.Value.Day, 23, 59, 59), SearchCard, cbxOption.Text, cbxTransType.Text.Replace("ALL", "%%"));
             if (controllerTrans.dt.Rows.Count > 0)
@@ -584,6 +584,16 @@ namespace MilenialPark.Views.Transaction
             {
                 MessageBox.Show("Maaf Kamu tidak punya hak akses untuk tombol ini ");
             }
+        }
+
+        private string GetSelectedUserIdOrAll()
+        {
+            // If nothing selected -> treat as ALL
+            if (cbxUserID.SelectedItem == null) return "";
+
+            // Your anonymous type has properties Text and Value
+            var prop = cbxUserID.SelectedItem.GetType().GetProperty("Value");
+            return prop?.GetValue(cbxUserID.SelectedItem)?.ToString() ?? "";
         }
 
         private void BindReport(ReportDocument rpt, DataSet dataSet)
