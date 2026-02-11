@@ -406,3 +406,8 @@ FodyWeavers.xsd
 *.bak
 *.mdf
 *.ldf
+
+# archives
+*.rar
+*.zip
+*.7z
