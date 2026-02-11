@@ -89,5 +89,27 @@ namespace MilenialPark.Controller
                            "WHERE TagID = " + ClsFungsi.C2Q(tagID) + " AND Status = 1";
             return ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(query);
         }
+
+        public DataRow GetByTagID(string tagID, string typeRFID = "")
+        {
+            string q =
+                "SELECT TOP 1 TagID, RFIDName, TypeRFID, Status, LastScan " +
+                "FROM RFIDTags " +
+                "WHERE TagID = " + ClsFungsi.C2Q(tagID) +
+                (string.IsNullOrWhiteSpace(typeRFID) ? "" : " AND TypeRFID = " + ClsFungsi.C2Q(typeRFID)) +
+                " ORDER BY TagID";
+
+            var dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(q);
+            return (dt != null && dt.Rows.Count > 0) ? dt.Rows[0] : null;
+        }
+
+        public void TouchLastScan(string tagID, string typeRFID = "")
+        {
+            string q =
+                "UPDATE RFIDTags SET LastScan = GETDATE() " +
+                "WHERE TagID = " + ClsFungsi.C2Q(tagID) +
+                (string.IsNullOrWhiteSpace(typeRFID) ? "" : " AND TypeRFID = " + ClsFungsi.C2Q(typeRFID));
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(q);
+        }
     }
 }

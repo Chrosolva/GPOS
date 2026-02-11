@@ -268,7 +268,7 @@ namespace MilenialPark.Controller
         public void UpdateOrderStatusTiketandTime (string TransactionID, int NoUrut, int WaktuBermain, int Toleransi, string OrderStatus)
         {
             DateTime now = DateTime.Now;
-            DateTime end = now.AddHours(WaktuBermain);
+            DateTime end = now.AddMinutes(WaktuBermain);
             end = end.AddMinutes(Toleransi);
             query = $"Update WHNPOS.dbo.TransaksiTiketDetail set JamMasuk = {ClsFungsi.C2QTime(now)} , JamKeluar = {ClsFungsi.C2QTime(end)}, OrderStatus = {ClsFungsi.C2Q(OrderStatus)} where TransactionID = {ClsFungsi.C2Q(TransactionID)} and NoUrut = {ClsFungsi.C2Q(NoUrut)}";
             ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query);

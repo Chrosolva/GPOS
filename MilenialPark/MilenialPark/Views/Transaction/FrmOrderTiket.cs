@@ -197,6 +197,13 @@ namespace MilenialPark.Views.Transaction
 
         public void btnFilter_Click(object sender, EventArgs e)
         {
+            var userId = (cbxUserID.SelectedItem as dynamic)?.Value?.ToString() ?? "";
+            var opt = cbxOption.Text ?? "";
+            var type = cbxTransType.Text ?? "";
+
+            if (string.IsNullOrWhiteSpace(opt)) opt = "ALL";   // atau default kamu
+            if (string.IsNullOrWhiteSpace(type)) type = "ALL"; // atau "%%"
+
             if (txtCardID.Text.Trim().Length == 0)
             {
                 SearchCard = "";

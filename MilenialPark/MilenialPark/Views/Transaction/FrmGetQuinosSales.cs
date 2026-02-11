@@ -21,8 +21,8 @@ namespace MilenialPark.Views.Transaction
 
         // === CONFIG ===
         // category_id Quinos untuk "PLAYTIME"
-        //private const int QUINOS_PLAYTIME_CATEGORY_ID = 16;
-        private const int QUINOS_PLAYTIME_CATEGORY_ID = 9;
+        private const int QUINOS_PLAYTIME_CATEGORY_ID = 16;
+        //private const int QUINOS_PLAYTIME_CATEGORY_ID = 9;
 
         // remark pattern untuk cek sudah diimport
         private const string REMARK_PREFIX = "QUINOS SALES_ID=";
@@ -138,7 +138,7 @@ SELECT
     l.quantity AS qty,
     l.unitPrice AS price,
     l.remark AS remark,
-    i.duration AS duration,
+    i.minimumtime AS minimumtime,
     i.tolerance AS tolerance,
     i.category_id AS category_id,
     c.name AS category_name
@@ -155,7 +155,7 @@ ORDER BY l.idx ASC, l.id ASC;";
 
         #region LOAD DATA
 
-        private void btnFilter_Click(object sender, EventArgs e)
+        public void btnFilter_Click(object sender, EventArgs e)
         {
             LoadSalesHeader();
         }
@@ -369,8 +369,8 @@ ORDER BY l.idx ASC, l.id ASC;";
                 string remark = SafeStr(r["remark"]);
 
                 // mapping waktu bermain & toleransi dari tbl_items
-                int duration = ToIntSafe(r["duration"]);
-                int tolerance = ToIntSafe(r["tolerance"]);
+                int duration = ToIntSafe(r["minimumTime"]);   // already in minutes
+                int tolerance = ToIntSafe(r["tolerance"]);    // minutes of tolerance
 
                 // catatan:
                 // - kalau itemCode kosong, fallback ke item_id
@@ -378,6 +378,8 @@ ORDER BY l.idx ASC, l.id ASC;";
                 {
                     itemCode = SafeStr(r["item_id"]);
                 }
+
+                string customerName = SafeStr(dgvSalesHeader.CurrentRow.Cells["customer_name"].Value);
 
                 // Ticket items (category 9) -> WaktuBermain > 0 agar masuk ke grid tiket
                 if (categoryId == QUINOS_PLAYTIME_CATEGORY_ID)
@@ -397,11 +399,11 @@ ORDER BY l.idx ASC, l.id ASC;";
                         duration,
                         tolerance,
                         "",
-                        remark
+                        customerName
                     );
 
-                    // Keterangan dari remark sales_lines
-                    det.Keterangan = remark;
+                    // Keterangan dari customerName tbl_sales
+                    det.Keterangan = customerName;
 
                     // RFID null (akan diisi di FrmPayment)
                     det.RFID = null;
@@ -534,6 +536,6 @@ ORDER BY l.idx ASC, l.id ASC;";
             DataGridViewHelper.ApplyPOSStyle(dgvSalesDetail);
         }
 
-       
+        
     }
 }

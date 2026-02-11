@@ -464,8 +464,8 @@ namespace MilenialPark.Views
                     string tid = dt.Rows[0]["TransactionID"].ToString();
                     int noUrut = Convert.ToInt32(dt.Rows[0]["NoUrut"]);
                     int waktuBermain = dt.Rows[0]["WaktuBermain"] == DBNull.Value ? 0 : Convert.ToInt32(dt.Rows[0]["WaktuBermain"]);
-                    int toleransi = 10;
-
+                    int toleransi = dt.Rows[0]["Toleransi"] == DBNull.Value ? 0 :
+                                        Convert.ToInt32(dt.Rows[0]["Toleransi"]);
                     controllerTrans.UpdateOrderStatusTiketandTime(tid, noUrut, waktuBermain, toleransi, "ENTER-IN");
 
                     controllerRFID.TouchLastScan(tagId); // optional
@@ -489,14 +489,32 @@ namespace MilenialPark.Views
             }
         }
 
-        private void HandleExit(string rfid, int gateCode, SerialPort port)
+        private void HandleExit(string tagId, int gateCode, SerialPort port)
         {
             _suppressReminderPopup = true;
 
             try
             {
-                // 1) Ambil tiket ENTER-IN hari ini
-                dt = controllerTrans.GetTicketByRFID(rfid, "ENTER-IN", startDay, endDay);
+                tagId = NormalizeTagId(tagId);
+
+                // (opsional tapi bagus) validasi tag ada di master & aktif
+                var r = controllerRFID.GetByTagID(tagId);
+                if (r == null)
+                {
+                    SendGateReply(port, gateCode, false, "RFID TIDAK TERDAFTAR");
+                    return;
+                }
+                if (!(r["Status"] != DBNull.Value && Convert.ToBoolean(r["Status"])))
+                {
+                    SendGateReply(port, gateCode, false, "RFID NONAKTIF");
+                    return;
+                }
+
+                string rfidName = Convert.ToString(r["RFIDName"] ?? "").Trim();
+                string display = $"{rfidName} ({tagId})";
+
+                // ✅ Ambil tiket ENTER-IN hari ini berdasarkan TagID
+                dt = controllerTrans.GetTicketByTagID(tagId, "ENTER-IN", startDay, endDay);
 
                 if (dt == null || dt.Rows.Count != 1)
                 {
@@ -537,7 +555,9 @@ namespace MilenialPark.Views
 
                 if (isRed)
                 {
-                    SendGateReply(port, 1, true, "ALARM");
+                    // kalau memang gate alarm beda channel, OK.
+                    // tapi kalau tidak, lebih aman pakai gateCode juga.
+                    SendGateReply(port, gateCode, true, "ALARM");
 
                     using (var frm = new FrmFinePunishment(tid))
                     {
@@ -550,9 +570,8 @@ namespace MilenialPark.Views
                         }
                     }
 
-                    // IMPORTANT: setelah fine diverify, JamKeluar sudah diperpanjang.
-                    // jadi biar aman, reload tiket lagi supaya pakai JamKeluar baru.
-                    dt = controllerTrans.GetTicketByRFID(rfid, "ENTER-IN", startDay, endDay);
+                    // reload setelah fine (pakai TagID juga)
+                    dt = controllerTrans.GetTicketByTagID(tagId, "ENTER-IN", startDay, endDay);
                     if (dt == null || dt.Rows.Count != 1)
                     {
                         SendGateReply(port, gateCode, false, "TIKET TIDAK VALID");
@@ -564,9 +583,8 @@ namespace MilenialPark.Views
                     jamKeluar = row["JamKeluar"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["JamKeluar"]);
                     toleransi = row["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(row["Toleransi"]);
                     batasToleransi = jamKeluar.AddMinutes(toleransi);
-                    isRed = now > batasToleransi;
 
-                    if (isRed)
+                    if (now > batasToleransi)
                     {
                         SendGateReply(port, gateCode, false, "BAYAR DENDA DULU");
                         RefreshReminderCore();
@@ -576,7 +594,10 @@ namespace MilenialPark.Views
 
                 controllerTrans.UpdateOrderStatusTiketOut(tid, noUrut, "ENTER-OUT");
 
-                SendGateReply(port, gateCode, true, "TERIMA KASIH");
+                // optional: update last scan
+                controllerRFID.TouchLastScan(tagId);
+
+                SendGateReply(port, gateCode, true, "THANK YOU " + display);
                 RefreshReminderCore();
             }
             catch (Exception ex)
@@ -590,9 +611,6 @@ namespace MilenialPark.Views
                 _suppressReminderPopup = false;
             }
         }
-
-
-
 
         private void SendGateReply(SerialPort port, int gateCode, bool open, string message)
         {

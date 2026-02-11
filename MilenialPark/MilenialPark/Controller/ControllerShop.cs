@@ -762,7 +762,7 @@ namespace MilenialPark.Controller
                c.id AS category_id,
                c.name AS category,
                i.price1 AS price, 
-               i.duration    AS WaktuBermain
+               i.minimumtime    AS WaktuBermain
 
         FROM tbl_items i
         JOIN tbl_categories c ON c.id = i.category_id

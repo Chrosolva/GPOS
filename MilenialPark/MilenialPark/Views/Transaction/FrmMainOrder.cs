@@ -109,9 +109,14 @@ namespace MilenialPark.Views.Transaction
 
         private void TCMainOrder_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (TCMainOrder.SelectedIndex == 0)
+            if (TCMainOrder.SelectedTab == TPOrders) // tab Order Tiket
             {
                 frmOrderTiket.btnFilter_Click(null, null);
+            }
+            else if (TCMainOrder.SelectedTab == TPQuinosSales)
+            {
+                // kalau mau, refresh quinos sales di sini
+                frmQuinosSales.btnFilter_Click(null, null);
             }
         }
 

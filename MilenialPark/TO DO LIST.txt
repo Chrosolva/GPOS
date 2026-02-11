@@ -1,27 +1,16 @@
-1. Universal SHop  => Create Universal Shop => Insert All Shop Items and Ticket Items. 
-2. Delete All Shop Items Done
-3. Rename previous Form to Old and Create New Form Done
-4. Revamped business process and logic on Buying Ticket , adding watch and also tap Out. Done
+Bugs on HandleExit run update when the ticket is not yet enter-in 
+continue late simulation 
+late is calculated by total late perminutes * price1 
+
+code PG0004 in dev price 20000
+code SANKSI in live price 40000
+
+Check Change Fine code function 
+
+check late print function 
+
+bugs on PrinttoPrinter 
 
 
-
-newest to do list : 
-
-tambah tarik data langsung dari sales quinos ke FrmPayment DONE
-
-tarik data dari table sales_line via MySql => baru lanjut ke scan RFID per tiket. Auto fill Keterangan. DONE
-
-Insert MySql transaction di SQLyog Done
-Insert Items in SqLyog Done
-
-tambah response ke mesin ko kui hao utk alarm / buzzer Done
-Buat Skenario Sanksi Program Done
-
-tambah LogRFID Done
-tambah function utk swap RFID in case hilang / Rusak Done
-
-
-Auto Delete BackUp Done
-Sesuaikan tampilan dengan pixel 1366 x 768 
 
 
