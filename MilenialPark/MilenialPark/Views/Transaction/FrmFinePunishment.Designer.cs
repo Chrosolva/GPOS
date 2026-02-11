@@ -46,6 +46,8 @@
             this.dgvFineDetail = new System.Windows.Forms.DataGridView();
             this.label8 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.cbxFineType = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvQuinosSales)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFineDetail)).BeginInit();
@@ -80,6 +82,8 @@
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(246)))), ((int)(((byte)(250)))));
+            this.panel2.Controls.Add(this.label3);
+            this.panel2.Controls.Add(this.cbxFineType);
             this.panel2.Controls.Add(this.btnSet);
             this.panel2.Controls.Add(this.lblprice);
             this.panel2.Controls.Add(this.lblName);
@@ -244,9 +248,9 @@
             // dgvFineDetail
             // 
             this.dgvFineDetail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvFineDetail.Location = new System.Drawing.Point(212, 12);
+            this.dgvFineDetail.Location = new System.Drawing.Point(212, 52);
             this.dgvFineDetail.Name = "dgvFineDetail";
-            this.dgvFineDetail.Size = new System.Drawing.Size(858, 202);
+            this.dgvFineDetail.Size = new System.Drawing.Size(858, 162);
             this.dgvFineDetail.TabIndex = 108;
             // 
             // label8
@@ -268,6 +272,29 @@
             this.label2.Size = new System.Drawing.Size(108, 21);
             this.label2.TabIndex = 80;
             this.label2.Text = "Transaction ID";
+            // 
+            // cbxFineType
+            // 
+            this.cbxFineType.FormattingEnabled = true;
+            this.cbxFineType.Items.AddRange(new object[] {
+            "WEEKDAY",
+            "WEEKEND"});
+            this.cbxFineType.Location = new System.Drawing.Point(311, 17);
+            this.cbxFineType.Name = "cbxFineType";
+            this.cbxFineType.Size = new System.Drawing.Size(121, 21);
+            this.cbxFineType.TabIndex = 121;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label3.Location = new System.Drawing.Point(229, 17);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(50, 20);
+            this.label3.TabIndex = 122;
+            this.label3.Text = "TYPE";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // FrmFinePunishment
             // 
@@ -305,5 +332,7 @@
         private System.Windows.Forms.Label lblprice;
         private System.Windows.Forms.Label lblName;
         public System.Windows.Forms.TextBox txtFineCode;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox cbxFineType;
     }
 }

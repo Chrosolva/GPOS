@@ -25,6 +25,9 @@ namespace MilenialPark.Views.Transaction
             public decimal Price;
         }
 
+        private List<FineSetting> _fineSettings;
+        private string _selectedDayType = "WEEKDAY";    // default day type
+
         // =========================
         // CONFIG (MVP)
         // =========================
@@ -58,6 +61,9 @@ namespace MilenialPark.Views.Transaction
 
             _transactionId = transactionId;
             lblTransactionID.Text = transactionId;
+
+            cbxFineType.SelectedIndex = 0;
+            _selectedDayType = cbxFineType.Text;
         }
 
         private void WireEvents()
@@ -75,37 +81,34 @@ namespace MilenialPark.Views.Transaction
             _timer.Tick += timer_Tick;
         }
 
-        private FineSetting LoadFineSettingFromSql()
+        private List<FineSetting> LoadFineSettingsFromSql()
         {
-            string sql =
-                "SELECT TOP 1 FineCode, FineName, Price " +
-                "FROM dbo.TblFineSetting " +
-                "WHERE FineCode IS NOT NULL " +
-                "ORDER BY FineCode;";
-
-            DataTable dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(sql);
-
-            if (dt == null || dt.Rows.Count == 0) return null;
-
-            FineSetting f = new FineSetting();
-            f.FineCode = Convert.ToString(dt.Rows[0]["FineCode"] ?? "").Trim();
-            f.FineName = Convert.ToString(dt.Rows[0]["FineName"] ?? "").Trim();
-            f.Price = (dt.Rows[0]["Price"] == DBNull.Value) ? 0m : Convert.ToDecimal(dt.Rows[0]["Price"]);
-            return f;
+            var sql = "SELECT FineCode, FineName, Price FROM dbo.TblFineSetting WHERE FineCode IS NOT NULL;";
+            var dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(sql);
+            var list = new List<FineSetting>();
+            foreach (DataRow row in dt.Rows)
+            {
+                list.Add(new FineSetting
+                {
+                    FineCode = Convert.ToString(row["FineCode"] ?? "").Trim(),
+                    FineName = Convert.ToString(row["FineName"] ?? "").Trim(),
+                    Price = row["Price"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Price"]),
+                });
+            }
+            return list;
         }
 
         private void FrmFinePunishment_Load(object sender, EventArgs e)
         {
-            _fine = LoadFineSettingFromSql();
-            if (_fine == null)
+            _fineSettings = LoadFineSettingsFromSql();
+            if (_fineSettings == null || _fineSettings.Count == 0)
             {
                 MessageBox.Show("TblFineSetting belum ada data.", "Info");
                 return;
             }
 
-            txtFineCode.Text = _fine.FineCode;
-            lblName.Text = _fine.FineName;
-            lblprice.Text = _fine.Price.ToString();
+            // optional: show selected type title on UI
+            _selectedDayType = (cbxFineType.Text ?? "WEEKDAY").Trim().ToUpper();
 
             // style grids (optional)
             try
@@ -152,31 +155,46 @@ namespace MilenialPark.Views.Transaction
         private void LoadLateTickets(string transactionId)
         {
             string sql =
-                "SELECT " +
-                "  TransactionID, NoUrut, RFID, ItemID, ItemName, Qty, Price, JamKeluar, Toleransi, OrderStatus, Keterangan, " +
-                "  CASE WHEN JamKeluar IS NULL THEN 0 " +
-                "       WHEN GETDATE() <= DATEADD(minute, ISNULL(Toleransi,0), JamKeluar) THEN 0 " +
-                "       ELSE DATEDIFF(minute, DATEADD(minute, ISNULL(Toleransi,0), JamKeluar), GETDATE()) END AS LateMinutes " +
-                "FROM WHNPOS.dbo.TransaksiTiketDetail " +
-                "WHERE TransactionID = " + ClsFungsi.C2Q(transactionId) + " " +
-                "  AND OrderStatus = 'ENTER-IN' " +
-                "  AND JamKeluar IS NOT NULL " +
-                "  AND GETDATE() > DATEADD(minute, ISNULL(Toleransi,0), JamKeluar) " +
-                "ORDER BY NoUrut ASC;";
+                    "SELECT ... LateMinutes ... " +
+                    "FROM WHNPOS.dbo.TransaksiTiketDetail " +
+                    "WHERE TransactionID = ... AND OrderStatus='ENTER-IN' ...";
 
             _dtLateTickets = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(sql);
-            dgvFineDetail.DataSource = _dtLateTickets;
 
-            int qtyNeed = (_dtLateTickets == null) ? 0 : _dtLateTickets.Rows.Count;
-            //decimal amountNeed = qtyNeed * FINE_PER_TICKET;
-            decimal amountNeed = qtyNeed * _fine.Price;
-            lblAmount.Text = amountNeed.ToString("#,##0");
+            // Add columns for fine information if needed
+            if (!_dtLateTickets.Columns.Contains("FineCode")) _dtLateTickets.Columns.Add("FineCode", typeof(string));
+            if (!_dtLateTickets.Columns.Contains("FineName")) _dtLateTickets.Columns.Add("FineName", typeof(string));
+            if (!_dtLateTickets.Columns.Contains("FinePrice")) _dtLateTickets.Columns.Add("FinePrice", typeof(decimal));
 
-            if (qtyNeed == 0)
+            decimal totalAmount = 0m;
+
+            foreach (DataRow row in _dtLateTickets.Rows)
             {
-                MessageBox.Show("Tidak ada ticket yang late untuk transaksi ini.", "Info",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var lateMinutes = Convert.ToInt32(row["LateMinutes"]);
+                // Determine fine key: <=60 minutes uses “SANKSI 1 JAM”, otherwise “SANKSI UNLIMITED”
+                var period = lateMinutes <= 60 ? "SANKSI 1 JAM" : "SANKSI UNLIMITED";
+                var fineKey = $"{period} {_selectedDayType}";
+
+                // Find the fine setting for this combination
+                var fs = _fineSettings.FirstOrDefault(f =>
+                             f.FineName.Equals(fineKey, StringComparison.OrdinalIgnoreCase));
+                if (fs == null)
+                {
+                    // handle missing fine (fallback or throw)
+                    continue;
+                }
+                row["FineCode"] = fs.FineCode;
+                row["FineName"] = fs.FineName;
+                row["FinePrice"] = fs.Price;
+
+                totalAmount += fs.Price;
             }
+
+            dgvFineDetail.DataSource = _dtLateTickets;
+            lblAmount.Text = totalAmount.ToString("#,##0");  // show total fine
+            if (_dtLateTickets.Rows.Count == 0)
+                MessageBox.Show("Tidak ada ticket yang late untuk transaksi ini.", "Info",
+                                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         // ==========================================
@@ -274,10 +292,8 @@ namespace MilenialPark.Views.Transaction
                 nr["RFID"] = SafeStr(r["RFID"]);
                 nr["ItemName"] = SafeStr(r["ItemName"]);
                 nr["LateMinutes"] = SafeInt(r["LateMinutes"]);
-                //nr["FinePerTicket"] = FINE_PER_TICKET;
-                nr["FinePerTicket"] = _fine.Price;
-                //nr["Amount"] = FINE_PER_TICKET;
-                nr["Amount"] = _fine.Price;
+                nr["FinePerTicket"] = SafeDec(r["FinePrice"]);
+                nr["Amount"] = SafeDec(r["FinePrice"]);
 
                 t.Rows.Add(nr);
             }
@@ -295,7 +311,11 @@ namespace MilenialPark.Views.Transaction
             sr["TransactionID"] = transactionId;
             sr["Qty"] = dtLateTickets.Rows.Count;
             //sr["TotalAmount"] = dtLateTickets.Rows.Count * FINE_PER_TICKET;
-            sr["TotalAmount"] = dtLateTickets.Rows.Count * _fine.Price;
+            decimal total = 0m;
+            foreach (DataRow r in dtLateTickets.Rows)
+                total += SafeDec(r["FinePrice"]);
+
+            sr["TotalAmount"] = total;
             s.Rows.Add(sr);
 
             ds.Tables.Add(s);
@@ -320,45 +340,58 @@ namespace MilenialPark.Views.Transaction
         {
             if (string.IsNullOrEmpty(_fineRef)) return;
 
-            DateTime from = (_printedAt == DateTime.MinValue)
-                ? DateTime.Now.AddHours(-2)
-                : _printedAt.AddHours(-2);
-
+            DateTime from = (_printedAt == DateTime.MinValue) ? DateTime.Now.AddHours(-2) : _printedAt.AddHours(-2);
             DateTime to = DateTime.Now;
 
-            string sql = BuildQuinosFineSalesSql();
+            // pick codes for selected day type
+            var fineCodes = _fineSettings
+                .Where(fs => fs.FineName.EndsWith(_selectedDayType, StringComparison.OrdinalIgnoreCase))
+                .Select(fs => fs.FineCode)
+                .Distinct()
+                .ToList();
 
-            MySqlParameter[] p = new MySqlParameter[]
+            if (fineCodes.Count == 0)
             {
-                new MySqlParameter("@from", MySqlDbType.DateTime) { Value = from },
-                new MySqlParameter("@to", MySqlDbType.DateTime) { Value = to },
-                new MySqlParameter("@fineRef", MySqlDbType.VarChar) { Value = _fineRef },
-                //new MySqlParameter("@itemCode", MySqlDbType.VarChar) { Value = FINE_ITEM_CODE }
-                new MySqlParameter("@itemCode", MySqlDbType.VarChar) { Value = _fine.FineCode }
-            };
+                MessageBox.Show("Fine codes tidak ditemukan untuk: " + _selectedDayType);
+                return;
+            }
 
-            _dtQuinosFineSales = MySqlFillDataTable(sql, p);
+            // build IN clause as @c0,@c1,...
+            string inClause = string.Join(",", fineCodes.Select((c, i) => "@c" + i));
+
+            string sql = BuildQuinosFineSalesSql(inClause);
+
+            var pars = new List<MySqlParameter>
+    {
+        new MySqlParameter("@from", MySqlDbType.DateTime){ Value = from },
+        new MySqlParameter("@to", MySqlDbType.DateTime){ Value = to },
+        new MySqlParameter("@fineRef", MySqlDbType.VarChar){ Value = _fineRef },
+    };
+
+            for (int i = 0; i < fineCodes.Count; i++)
+                pars.Add(new MySqlParameter("@c" + i, MySqlDbType.VarChar) { Value = fineCodes[i] });
+
+            _dtQuinosFineSales = MySqlFillDataTable(sql, pars.ToArray());
             dgvQuinosSales.DataSource = _dtQuinosFineSales;
         }
 
-        private string BuildQuinosFineSalesSql()
+        private string BuildQuinosFineSalesSql(string inClause)
         {
-            // IMPORTANT: includes FineRef filter + ignore null itemCode lines
+            // ld = row that contains FineRef in description
+            // l  = rows that contain fine items (codes inside IN clause)
             return
                 "SELECT " +
                 "  s.id AS sales_id, " +
                 "  s.createdAt AS created_at, " +
                 "  s.invoiceNo AS invoice_no, " +
                 "  s.cashierName AS cashier_name, " +
-                "  SUM(IFNULL(l.quantity,0)) AS qty, " +
-                "  SUM(IFNULL(l.unitPrice,0) * IFNULL(l.quantity,0)) AS amount, " +
-                "  MAX(l.remark) AS remark " +
+                "  SUM(CASE WHEN l.itemCode IN (" + inClause + ") THEN IFNULL(l.quantity,0) ELSE 0 END) AS qty, " +
+                "  SUM(CASE WHEN l.itemCode IN (" + inClause + ") THEN IFNULL(l.unitPrice,0)*IFNULL(l.quantity,0) ELSE 0 END) AS amount, " +
+                "  MAX(ld.description) AS remark " +
                 "FROM tbl_sales s " +
-                "JOIN tbl_sales_lines l ON l.sales_id = s.id " +
+                "JOIN tbl_sales_lines ld ON ld.sales_id = s.id AND IFNULL(ld.description,'') LIKE CONCAT('%', @fineRef, '%') " +
+                "JOIN tbl_sales_lines l  ON l.sales_id = s.id " +
                 "WHERE s.created >= @from AND s.created <= @to " +
-                "  AND l.itemCode IS NOT NULL " +
-                "  AND l.itemCode = @itemCode " +
-                "  AND IFNULL(l.remark,'') LIKE CONCAT('%', @fineRef, '%') " +
                 "GROUP BY s.id, s.createdAt, s.invoiceNo, s.cashierName " +
                 "ORDER BY s.id DESC;";
         }
@@ -403,14 +436,19 @@ namespace MilenialPark.Views.Transaction
 
             int qtyNeed = _dtLateTickets.Rows.Count;
             //decimal amountNeed = qtyNeed * FINE_PER_TICKET;
-            decimal amountNeed = qtyNeed * _fine.Price;
+            decimal amountNeed = 0m;
+            foreach (DataRow r in _dtLateTickets.Rows)
+                amountNeed += SafeDec(r["FinePrice"]);
 
-            if (qtyPaid != qtyNeed || amountPaid != amountNeed)
+            decimal amountPaidR = Math.Round(amountPaid, 0);
+            decimal amountNeedR = Math.Round(amountNeed, 0);
+
+            if (qtyPaid != qtyNeed || amountPaidR != amountNeedR)
             {
                 MessageBox.Show(
                     "Data pembayaran tidak cocok.\n" +
-                    "Need: Qty=" + qtyNeed + " Amount=" + amountNeed.ToString("#,##0") + "\n" +
-                    "Paid: Qty=" + qtyPaid + " Amount=" + amountPaid.ToString("#,##0"),
+                    "Need: Qty=" + qtyNeed + " Amount=" + amountNeedR.ToString("#,##0") + "\n" +
+                    "Paid: Qty=" + qtyPaid + " Amount=" + amountPaidR.ToString("#,##0"),
                     "Mismatch", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -523,7 +561,8 @@ namespace MilenialPark.Views.Transaction
             string shopId = ClsStaticVariable.ShopID;
             if (string.IsNullOrEmpty(shopId)) shopId = "SHOP";
 
-            string newTrxId = "TRS." + DateTime.Now.ToString("yyMMddHHmmss") + originalTransactionId.Substring(originalTransactionId.Length-6,6); // pendek biar aman
+            string newTrxId = "TRS." + DateTime.Now.ToString("yyMMddHHmmss") +
+                              originalTransactionId.Substring(originalTransactionId.Length - 6, 6);
 
             // KEEP SHORT to avoid truncation
             string remarks = "FINE_REF=" + fineRef + "|SALE=" + fineSaleId + "|ORG=" + originalTransactionId;
@@ -537,40 +576,58 @@ namespace MilenialPark.Views.Transaction
                 ClsFungsi.C2Q(newTrxId) + ", GETDATE(), " +
                 amount.ToString(System.Globalization.CultureInfo.InvariantCulture) + ", " +
                 ClsFungsi.C2Q(shopId) + ", " +
-                ClsFungsi.C2Q(remarks) + ", " + 
+                ClsFungsi.C2Q(remarks) + ", " +
                 ClsFungsi.C2Q("PAID") + ", " +
                 ClsFungsi.C2Q("SANKSI") + ", " +
                 ClsFungsi.C2Q("MASTER_CARD") + ", " +
                 ClsFungsi.C2Q("777") + ", " +
                 ClsFungsi.C2Q(ClsStaticVariable.KodeBranch) + ", " +
                 ClsFungsi.C2Q(ClsStaticVariable.controllerUser.objUser.UserID) + ", " +
-                ClsFungsi.C2Q(amount) +
+                amount.ToString(System.Globalization.CultureInfo.InvariantCulture) +
                 ");";
 
-            // 2) insert detail TransaksiTiketDetail (1 row fine)
-            //    ItemID = pakai itemCode quinos (PG0004) sesuai request kamu.
+            // execute header first
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(sql1);
+
+            // 2) insert detail TransaksiTiketDetail (multiple rows grouped by FineCode)
             string ket = "DENDA|" + remarks;
             ket = Trunc(ket, 120);
 
-            string sql2 =
-                "INSERT INTO WHNPOS.dbo.TransaksiTiketDetail " +
-                "(TransactionID, RFID, Keterangan, TransactionDate, ItemID, ItemName, Price, Qty, NoUrut, OrderStatus, JamMasuk, JamKeluar, WaktuBermain, Toleransi) " +
-                "VALUES (" +
-                ClsFungsi.C2Q(newTrxId) + ", NULL, " +
-                ClsFungsi.C2Q(ket) + ", GETDATE(), " +
-                //ClsFungsi.C2Q(FINE_ITEM_CODE) + ", " +
-                ClsFungsi.C2Q(_fine.FineCode) + ", " +
-                ClsFungsi.C2Q("DENDA KETERLAMBATAN") + ", " +
-                //FINE_PER_TICKET.ToString(System.Globalization.CultureInfo.InvariantCulture) + ", " +
-                _fine.Price.ToString(System.Globalization.CultureInfo.InvariantCulture) + ", " +
-                qty.ToString() + ", " +
-                "1, " +
-                ClsFungsi.C2Q("BOUGHT") + ", GETDATE(), GETDATE(), 0, 0" +
-                ");";
+            var grouped = _dtLateTickets.AsEnumerable()
+                .GroupBy(r => new {
+                    Code = Convert.ToString(r["FineCode"] ?? "").Trim(),
+                    Name = Convert.ToString(r["FineName"] ?? "").Trim(),
+                    Price = SafeDec(r["FinePrice"])
+                });
 
-            // Execute (kalau salah satu gagal, kamu akan lihat errornya)
-            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(sql1);
-            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(sql2);
+            int noUrutLine = 1;
+
+            foreach (var g in grouped)
+            {
+                int qtyLine = g.Count();          // ✅ renamed
+                decimal priceLine = g.Key.Price;
+
+                if (string.IsNullOrEmpty(g.Key.Code)) continue; // safety
+
+                string sql2 =
+                    "INSERT INTO WHNPOS.dbo.TransaksiTiketDetail " +
+                    "(TransactionID, RFID, Keterangan, TransactionDate, ItemID, ItemName, Price, Qty, NoUrut, OrderStatus, JamMasuk, JamKeluar, WaktuBermain, Toleransi) " +
+                    "VALUES (" +
+                    ClsFungsi.C2Q(newTrxId) + ", NULL, " +
+                    ClsFungsi.C2Q(ket) + ", GETDATE(), " +
+                    ClsFungsi.C2Q(g.Key.Code) + ", " +
+                    ClsFungsi.C2Q(g.Key.Name) + ", " +
+                    priceLine.ToString(System.Globalization.CultureInfo.InvariantCulture) + ", " +
+                    qtyLine.ToString() + ", " +
+                    noUrutLine.ToString() + ", " +
+                    ClsFungsi.C2Q("BOUGHT") + ", GETDATE(), GETDATE(), 0, 0" +
+                    ");";
+
+                // ✅ execute inside the loop
+                ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(sql2);
+
+                noUrutLine++;
+            }
         }
 
 
