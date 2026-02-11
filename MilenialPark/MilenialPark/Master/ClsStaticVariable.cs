@@ -14,10 +14,10 @@ namespace MilenialPark.Master
     {
         public static string DataBase = "WHNPOS";
         public static string server = "localhost";
-        //public static string dbmysql = "db_testing";
-        public static string dbmysql = "db_starlight";
-        //public static string servermysql = "127.0.0.1";
-        public static string servermysql = "192.168.8.205";
+        public static string dbmysql = "db_testing";
+        //public static string dbmysql = "db_starlight";
+        public static string servermysql = "127.0.0.1";
+        //public static string servermysql = "192.168.8.205";
         public static DBConnect objConnection = new DBConnect();
         public static ControllerUser controllerUser = new ControllerUser();
         public static ClsTransactionDetail objtransdet = new ClsTransactionDetail();
