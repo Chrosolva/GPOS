@@ -15,6 +15,8 @@ using MilenialPark.UserControls;
 using CrystalDecisions.CrystalReports.Engine;
 using MilenialPark.Views.Reports;
 using MilenialPark.Reports;
+using System.Drawing.Printing;
+using CrystalDecisions.Shared;
 
 namespace MilenialPark.Views.Transaction
 {
@@ -90,9 +92,8 @@ namespace MilenialPark.Views.Transaction
             }
         }
 
-        public void missingRFID()
+        public bool missingRFID()
         {
-            // ✅ Validate: all ticket rows must have RFID before saving
             int missingCount = 0;
             List<int> missingNoUrut = new List<int>();
 
@@ -101,10 +102,11 @@ namespace MilenialPark.Views.Transaction
                 if (r.IsNewRow) continue;
 
                 string tagId = Convert.ToString(r.Cells["TagID"].Value)?.Trim();
-                if (string.IsNullOrEmpty(tagId))
+
+                if (string.IsNullOrWhiteSpace(tagId) || tagId == "0")
                 {
                     missingCount++;
-                    // collect NoUrut for message (if column exists)
+
                     if (r.Cells["NoUrut"].Value != null)
                         missingNoUrut.Add(Convert.ToInt32(r.Cells["NoUrut"].Value));
                 }
@@ -112,10 +114,12 @@ namespace MilenialPark.Views.Transaction
 
             if (missingCount > 0)
             {
-                // Focus first missing row
                 var firstMissing = dgvTransacTiketDet.Rows
                     .Cast<DataGridViewRow>()
-                    .FirstOrDefault(r => !r.IsNewRow && string.IsNullOrWhiteSpace(Convert.ToString(Convert.ToInt32(r.Cells["TagID"].Value))));
+                    .FirstOrDefault(r =>
+                        !r.IsNewRow &&
+                        (string.IsNullOrWhiteSpace(Convert.ToString(r.Cells["TagID"].Value)) ||
+                         Convert.ToString(r.Cells["TagID"].Value) == "0"));
 
                 if (firstMissing != null)
                 {
@@ -125,25 +129,28 @@ namespace MilenialPark.Views.Transaction
                 }
 
                 string detail = (missingNoUrut.Count > 0)
-                    ? " NoUrut: " + string.Join(", ", missingNoUrut.Take(10)) + (missingNoUrut.Count > 10 ? "..." : "")
+                    ? " NoUrut: " + string.Join(", ", missingNoUrut.Take(10)) +
+                      (missingNoUrut.Count > 10 ? "..." : "")
                     : "";
 
                 ClsFungsi.Pesan($"RFID belum lengkap! Masih ada {missingCount} tiket belum di-scan.{detail}", "ERROR");
 
-                // return focus to RFID scan box (your helper)
                 BeginInvoke(new Action(FocusRFIDScan));
-
-                btnSave.Enabled = true;
-                return;
+                return true; // STOP SAVE
             }
 
+            return false; // semua aman
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
             btnSave.Enabled = false;
 
-            missingRFID();
+            if(missingRFID())
+            {
+                btnSave.Enabled = true;
+                return;
+            }
 
             decimal totalAmount = Convert.ToDecimal(lblTotal.Text);
             decimal balance = Convert.ToDecimal(lblCardBalance.Text);
@@ -284,16 +291,30 @@ namespace MilenialPark.Views.Transaction
 
                 // Log and insert
                 controllerTran.InsertLogMessage(controllerTran.TransactionID, "PRECHECK OK");
+
                 try
                 {
                     controllerTran.InsertTransactionTicket(controllerTran.objTransaction, controllerTran.objCard);
-                    ClsStaticVariable.sukses = true;
-                    PrintStruck(controllerTran); // always print receipt
+                    controllerTran.InsertLogMessage(controllerTran.TransactionID, "SAVE OK");
                 }
                 catch (Exception ex)
                 {
                     ClsFungsi.Pesan("Error saat menyimpan transaksi: " + ex.Message, "ERROR");
+                    btnSave.Enabled = true;
+                    return;
                 }
+
+                //try
+                //{
+                //    PrintStruck(controllerTran);
+                //    controllerTran.InsertLogMessage(controllerTran.TransactionID, "PRINT OK");
+                //}
+                //catch (Exception ex)
+                //{
+                //    // IMPORTANT: show stack trace once for debugging
+                //    MessageBox.Show(ex.ToString(), "PRINT ERROR");
+                //    ClsFungsi.Pesan("Error saat print: " + ex.Message, "ERROR");
+                //}
 
                 btnSave.Enabled = true;
                 this.Close();
@@ -315,7 +336,7 @@ namespace MilenialPark.Views.Transaction
             return int.TryParse(v.ToString(), out i) ? i : 0;
         }
 
-        private void FocusRFIDScan()
+        public void FocusRFIDScan()
         {
             if (!txtRFIDScan.Enabled || !txtRFIDScan.Visible) return;
 
@@ -340,17 +361,41 @@ namespace MilenialPark.Views.Transaction
 
         public void PrintStruck(ControllerTransaction trans)
         {
-            ds = controllerReport.LoadTransactionReceipt2(trans.objTransaction.TransactionID, trans.objTransaction.ShopId, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0), new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59));
-            string sub3 = trans.objTransaction.TransactionID.ToString().Substring(0, 3);
+            ds = controllerReport.LoadTransactionReceipt2(
+        trans.objTransaction.TransactionID,
+        trans.objTransaction.ShopId,
+        DateTime.Today,
+        DateTime.Today.AddDays(1).AddSeconds(-1)
+    );
+
+            string sub3 = trans.objTransaction.TransactionID.Substring(0, 3);
             if (sub3 == "TRK" || sub3 == "TRR")
-            {
                 reportDoc = new MilenialPark.Reports.PrintTopUpReceipt();
-            }
             else
-            {
                 reportDoc = new MilenialPark.Reports.PrintTransactionReceipt();
-            }
+
             BindReport(reportDoc, ds);
+
+            // ======== VERY IMPORTANT PART ========
+
+            PrinterSettings ps = new PrinterSettings();
+
+            // force Crystal to use current Windows default printer
+            //reportDoc.PrintOptions.PrinterName = ps.PrinterName;
+
+            //// CRITICAL FIX
+            //reportDoc.PrintOptions.DissociatePageSizeAndPrinterPaperSize = true;
+
+            //// remove stored tray source (THIS IS YOUR CRASH)
+            //reportDoc.PrintOptions.PaperSource = CrystalDecisions.Shared.PaperSource.Auto;
+
+            //// thermal printers work best with this
+            //reportDoc.PrintOptions.PaperOrientation = PaperOrientation.Portrait;
+
+            //// (optional but recommended)
+            //reportDoc.PrintOptions.ApplyPageMargins(
+            //    new PageMargins(0, 0, 0, 0)
+            //);
 
             //FrmShowReport frmShowReport = new FrmShowReport(reportDoc);
             //FormBlank frmBlank = new FormBlank();
@@ -358,6 +403,9 @@ namespace MilenialPark.Views.Transaction
             //frmShowReport.ShowDialog();
             //frmBlank.Close();
 
+            reportDoc.Refresh();
+
+            // ======== PRINT ========
             reportDoc.PrintToPrinter(1, false, 0, 0);
         }
 
@@ -455,7 +503,7 @@ namespace MilenialPark.Views.Transaction
                 SyncKeteranganFromCurrentRow();
             }
 
-            txtKeterangan.Focus();
+            FocusRFIDScan();
 
         }
 
@@ -607,6 +655,16 @@ namespace MilenialPark.Views.Transaction
 
             // kalau semua nol -> 0
             return cleaned.Length == 0 ? "0" : cleaned;
+        }
+
+        private void FrmPayment_Shown(object sender, EventArgs e)
+        {
+            BeginInvoke(new Action(() =>
+            {
+                this.ActiveControl = txtRFIDScan;
+                txtRFIDScan.Focus();
+                txtRFIDScan.SelectAll();
+            }));
         }
     }
 }

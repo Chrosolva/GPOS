@@ -313,6 +313,9 @@
       <DependentUpon>PrintTransactionReceipt.rpt</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Reports\WHNPOS.cs">
+      <DependentUpon>WHNPOS.xsd</DependentUpon>
+    </Compile>
     <Compile Include="Reports\WHNPOS.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

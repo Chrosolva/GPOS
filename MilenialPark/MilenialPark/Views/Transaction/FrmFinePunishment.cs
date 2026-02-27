@@ -45,6 +45,7 @@ namespace MilenialPark.Views.Transaction
         private DataTable _dtLateTickets;
         private DataTable _dtQuinosFineSales;
         private FineSetting _fine;
+        private bool _isInitializing = true;
 
         private Timer _timer;
 
@@ -79,6 +80,19 @@ namespace MilenialPark.Views.Transaction
             _timer = new Timer();
             _timer.Interval = AUTO_REFRESH_SECONDS * 1000;
             _timer.Tick += timer_Tick;
+
+            cbxFineType.SelectedIndexChanged += (s, e) =>
+            {
+                if (_isInitializing) return;          // ✅ jangan jalan sebelum form siap
+                if (_fineSettings == null) return;    // ✅ safety
+
+                _selectedDayType = (cbxFineType.Text ?? "WEEKDAY").Trim().ToUpper();
+
+                if (!string.IsNullOrEmpty(_transactionId))
+                    LoadLateTickets(_transactionId);
+
+                RefreshQuinosSales();
+            };
         }
 
         private List<FineSetting> LoadFineSettingsFromSql()
@@ -144,9 +158,11 @@ namespace MilenialPark.Views.Transaction
 
             // FineRef should be stable & easy for cashier to type/search
             if (string.IsNullOrEmpty(_fineRef))
-                _fineRef = BuildFineRef(_transactionId);
+                _fineRef = GetNextFineRefForTransaction(_transactionId);
 
             LoadLateTickets(_transactionId);
+
+            _isInitializing = false;
         }
 
         // ==========================================
@@ -154,47 +170,91 @@ namespace MilenialPark.Views.Transaction
         // ==========================================
         private void LoadLateTickets(string transactionId)
         {
-            string sql =
-                    "SELECT ... LateMinutes ... " +
-                    "FROM WHNPOS.dbo.TransaksiTiketDetail " +
-                    "WHERE TransactionID = ... AND OrderStatus='ENTER-IN' ...";
+            string sql = @"
+SELECT
+  TransactionID, NoUrut, RFID, ItemID, ItemName, Qty, Price, JamKeluar, Toleransi, OrderStatus, Keterangan,
+  CASE
+    WHEN JamKeluar IS NULL THEN 0
+    WHEN GETDATE() <= DATEADD(minute, ISNULL(Toleransi,0), JamKeluar) THEN 0
+    ELSE
+      CONVERT(int, CEILING( DATEDIFF(second, DATEADD(minute, ISNULL(Toleransi,0), JamKeluar), GETDATE()) / 60.0 ))
+  END AS LateMinutes
+FROM WHNPOS.dbo.TransaksiTiketDetail
+WHERE TransactionID = " + ClsFungsi.C2Q(transactionId) + @"
+  AND OrderStatus = 'ENTER-IN'
+  AND JamKeluar IS NOT NULL
+  AND GETDATE() > DATEADD(minute, ISNULL(Toleransi,0), JamKeluar)
+ORDER BY NoUrut ASC;";
 
             _dtLateTickets = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(sql);
 
-            // Add columns for fine information if needed
             if (!_dtLateTickets.Columns.Contains("FineCode")) _dtLateTickets.Columns.Add("FineCode", typeof(string));
             if (!_dtLateTickets.Columns.Contains("FineName")) _dtLateTickets.Columns.Add("FineName", typeof(string));
             if (!_dtLateTickets.Columns.Contains("FinePrice")) _dtLateTickets.Columns.Add("FinePrice", typeof(decimal));
+            if (!_dtLateTickets.Columns.Contains("ExtendMinutes"))
+                _dtLateTickets.Columns.Add("ExtendMinutes", typeof(int));
 
             decimal totalAmount = 0m;
 
             foreach (DataRow row in _dtLateTickets.Rows)
             {
-                var lateMinutes = Convert.ToInt32(row["LateMinutes"]);
-                // Determine fine key: <=60 minutes uses “SANKSI 1 JAM”, otherwise “SANKSI UNLIMITED”
-                var period = lateMinutes <= 60 ? "SANKSI 1 JAM" : "SANKSI UNLIMITED";
-                var fineKey = $"{period} {_selectedDayType}";
+                // ================= DETECT PENDAMPING =================
+                string itemName = SafeStr(row["ItemName"]).ToUpper();
 
-                // Find the fine setting for this combination
-                var fs = _fineSettings.FirstOrDefault(f =>
-                             f.FineName.Equals(fineKey, StringComparison.OrdinalIgnoreCase));
-                if (fs == null)
+                bool isCompanion =
+                    itemName.Contains("PENDAMPING") ||
+                    itemName.Contains("COMPANION") ||
+                    itemName.Contains("GUARDIAN");
+
+                // ===== PENDAMPING: NO FINE BUT STILL ALARM =====
+                if (isCompanion)
                 {
-                    // handle missing fine (fallback or throw)
+                    row["FineCode"] = DBNull.Value;
+                    row["FineName"] = "PENDAMPING (NO FINE)";
+                    row["FinePrice"] = 0m;
+
+                    // tetap ada alarm delay
+                    row["ExtendMinutes"] = 15;
+
                     continue;
                 }
-                row["FineCode"] = fs.FineCode;
-                row["FineName"] = fs.FineName;
+
+                // ================= NORMAL CHILD TICKET =================
+                int lateMinutes = SafeInt(row["LateMinutes"]);
+                if (lateMinutes < 1) lateMinutes = 1;
+
+                bool isOneHour = (lateMinutes <= 60);
+
+                string fineKey = isOneHour
+                    ? "SANKSI " + _selectedDayType + " 1 JAM"
+                    : "SANKSI UNLIMITED " + _selectedDayType;
+
+                fineKey = fineKey.Trim();
+
+                var fs = _fineSettings.FirstOrDefault(f =>
+                    !string.IsNullOrEmpty(f.FineName) &&
+                    f.FineName.Trim().Equals(fineKey, StringComparison.OrdinalIgnoreCase));
+
+                if (fs == null)
+                {
+                    row["FineCode"] = "";
+                    row["FineName"] = fineKey + " (NOT FOUND)";
+                    row["FinePrice"] = 0m;
+                    continue;
+                }
+
+                row["FineCode"] = (fs.FineCode ?? "").Trim();
+                row["FineName"] = (fs.FineName ?? "").Trim();
                 row["FinePrice"] = fs.Price;
+
+                int extendMin = GetExtendMinutesFromQuinos(row["FineCode"].ToString());
+                row["ExtendMinutes"] = extendMin;
 
                 totalAmount += fs.Price;
             }
 
             dgvFineDetail.DataSource = _dtLateTickets;
-            lblAmount.Text = totalAmount.ToString("#,##0");  // show total fine
-            if (_dtLateTickets.Rows.Count == 0)
-                MessageBox.Show("Tidak ada ticket yang late untuk transaksi ini.", "Info",
-                                 MessageBoxButtons.OK, MessageBoxIcon.Information);
+            lblAmount.Text = totalAmount.ToString("#,##0");
         }
 
         // ==========================================
@@ -218,8 +278,8 @@ namespace MilenialPark.Views.Transaction
                 rpt.SetDataSource(ds);
 
                 // preview if you want
-                var frm = new Reports.FrmShowReport(rpt);
-                frm.ShowDialog();
+                //var frm = new Reports.FrmShowReport(rpt);
+                //frm.ShowDialog();
 
                 rpt.PrintToPrinter(1, false, 0, 0);
 
@@ -241,7 +301,30 @@ namespace MilenialPark.Views.Transaction
             }
         }
 
-        private string BuildFineRef(string transactionId)
+        private int GetExtendMinutesFromQuinos(string fineCode)
+        {
+            if (string.IsNullOrWhiteSpace(fineCode))
+                return 0;
+
+            string sql = @"
+                SELECT IFNULL(minimumtime,0) AS minimumtime
+                FROM tbl_items
+                WHERE code = @code
+                LIMIT 1;";
+
+            var dt = MySqlFillDataTable(sql, new[]
+            {
+                new MySqlParameter("@code", MySqlDbType.VarChar){ Value = fineCode.Trim()
+            }
+            });
+
+            if (dt.Rows.Count == 0)
+                return 0;
+
+            return SafeInt(dt.Rows[0]["minimumtime"]);
+        }
+
+        private string BuildFineRefBase(string transactionId)
         {
             // target: F26000009
             // from: TRT.JOYLAND-26-000009
@@ -266,6 +349,40 @@ namespace MilenialPark.Views.Transaction
             return "F" + yy + digits;
         }
 
+        private string GetNextFineRefForTransaction(string transactionId)
+        {
+            string baseRef = BuildFineRefBase(transactionId);   // F26000093
+
+            // Cari max session yang sudah pernah dipakai untuk transaction ini:
+            // Keterangan mengandung "FINE_REF=F26000093-01" dst
+            string q = @"
+SELECT ISNULL(MAX(TRY_CAST(RIGHT(x.FineRef, 2) AS INT)), 0)
+FROM (
+    SELECT 
+      SUBSTRING(Keterangan,
+        CHARINDEX('FINE_REF=" + baseRef + @"-', Keterangan) + LEN('FINE_REF=" + baseRef + @"-'),
+        2
+      ) AS FineRef
+    FROM WHNPOS.dbo.TransaksiTiketDetail
+    WHERE TransactionID = " + ClsFungsi.C2Q(transactionId) + @"
+      AND CHARINDEX('FINE_REF=" + baseRef + @"-', ISNULL(Keterangan,'')) > 0
+) x
+WHERE x.FineRef IS NOT NULL;
+";
+
+            int maxNo = 0;
+            try
+            {
+                DataTable dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(q);
+                if (dt != null && dt.Rows.Count > 0)
+                    maxNo = SafeInt(dt.Rows[0][0]);
+            }
+            catch { /* kalau query gagal, fallback ke 0 */ }
+
+            int next = maxNo + 1;
+            return baseRef + "-" + next.ToString("D2"); // F26000093-01
+        }
+
 
         private DataSet BuildFineReportDataSet(DataTable dtLateTickets, string transactionId, string fineRef)
         {
@@ -280,6 +397,8 @@ namespace MilenialPark.Views.Transaction
             t.Columns.Add("LateMinutes", typeof(int));
             t.Columns.Add("FinePerTicket", typeof(decimal));
             t.Columns.Add("Amount", typeof(decimal));
+            t.Columns.Add("FineName", typeof(string));   // ✅ packet fined name
+            t.Columns.Add("FineCode", typeof(string));   // optional
 
             for (int i = 0; i < dtLateTickets.Rows.Count; i++)
             {
@@ -294,6 +413,8 @@ namespace MilenialPark.Views.Transaction
                 nr["LateMinutes"] = SafeInt(r["LateMinutes"]);
                 nr["FinePerTicket"] = SafeDec(r["FinePrice"]);
                 nr["Amount"] = SafeDec(r["FinePrice"]);
+                nr["FineName"] = SafeStr(r["FineName"]);   // ✅ packet fined name
+                nr["FineCode"] = SafeStr(r["FineCode"]);   // optional
 
                 t.Rows.Add(nr);
             }
@@ -309,7 +430,7 @@ namespace MilenialPark.Views.Transaction
             DataRow sr = s.NewRow();
             sr["FineRef"] = fineRef;
             sr["TransactionID"] = transactionId;
-            sr["Qty"] = dtLateTickets.Rows.Count;
+            sr["Qty"] = dtLateTickets.AsEnumerable().Count(r => !string.IsNullOrEmpty(SafeStr(r["FineCode"])));
             //sr["TotalAmount"] = dtLateTickets.Rows.Count * FINE_PER_TICKET;
             decimal total = 0m;
             foreach (DataRow r in dtLateTickets.Rows)
@@ -359,7 +480,7 @@ namespace MilenialPark.Views.Transaction
             // build IN clause as @c0,@c1,...
             string inClause = string.Join(",", fineCodes.Select((c, i) => "@c" + i));
 
-            string sql = BuildQuinosFineSalesSql(inClause);
+            string sql = BuildQuinosFineSalesLinesSql();
 
             var pars = new List<MySqlParameter>
     {
@@ -375,25 +496,35 @@ namespace MilenialPark.Views.Transaction
             dgvQuinosSales.DataSource = _dtQuinosFineSales;
         }
 
-        private string BuildQuinosFineSalesSql(string inClause)
+        private string BuildQuinosFineSalesLinesSql()
         {
-            // ld = row that contains FineRef in description
-            // l  = rows that contain fine items (codes inside IN clause)
-            return
-                "SELECT " +
-                "  s.id AS sales_id, " +
-                "  s.createdAt AS created_at, " +
-                "  s.invoiceNo AS invoice_no, " +
-                "  s.cashierName AS cashier_name, " +
-                "  SUM(CASE WHEN l.itemCode IN (" + inClause + ") THEN IFNULL(l.quantity,0) ELSE 0 END) AS qty, " +
-                "  SUM(CASE WHEN l.itemCode IN (" + inClause + ") THEN IFNULL(l.unitPrice,0)*IFNULL(l.quantity,0) ELSE 0 END) AS amount, " +
-                "  MAX(ld.description) AS remark " +
-                "FROM tbl_sales s " +
-                "JOIN tbl_sales_lines ld ON ld.sales_id = s.id AND IFNULL(ld.description,'') LIKE CONCAT('%', @fineRef, '%') " +
-                "JOIN tbl_sales_lines l  ON l.sales_id = s.id " +
-                "WHERE s.created >= @from AND s.created <= @to " +
-                "GROUP BY s.id, s.createdAt, s.invoiceNo, s.cashierName " +
-                "ORDER BY s.id DESC;";
+            return @"
+SELECT
+    s.id            AS sales_id,
+    s.created     AS created_at,
+    s.invoiceNo     AS invoice_no,
+    s.cashierName   AS cashier_name,
+
+    l.id            AS line_id,
+    l.itemCode      AS itemCode,
+    l.description   AS description,
+    IFNULL(l.quantity,0)  AS qty,
+    IFNULL(l.unitPrice,0) AS unitPrice,
+    (IFNULL(l.quantity,0) * IFNULL(l.unitPrice,0)) AS lineAmount
+
+FROM tbl_sales s
+JOIN tbl_sales_lines l
+    ON l.sales_id = s.id
+
+WHERE s.created >= @from AND s.created <= @to
+  AND s.id IN (
+        SELECT DISTINCT ld.sales_id
+        FROM tbl_sales_lines ld
+        WHERE IFNULL(ld.description,'') LIKE CONCAT('%', @fineRef, '%')
+  )
+
+ORDER BY s.id DESC, l.idx ASC, l.id ASC;
+";
         }
 
         // ==========================================
@@ -401,96 +532,187 @@ namespace MilenialPark.Views.Transaction
         // ==========================================
         private void btnVerify_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(_fineRef))
+            try
             {
-                MessageBox.Show("Silakan PRINT FINE DETAILS dulu agar FineRef dibuat.", "Info",
+                if (string.IsNullOrEmpty(_fineRef))
+                {
+                    MessageBox.Show("Silakan PRINT FINE DETAILS dulu agar FineRef dibuat.", "Info",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                if (_dtLateTickets == null || _dtLateTickets.Rows.Count == 0)
+                {
+                    MessageBox.Show("Tidak ada fine detail.", "Info",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                if (_dtQuinosFineSales == null || _dtQuinosFineSales.Rows.Count == 0)
+                {
+                    MessageBox.Show("Belum ada pembayaran di Quinos untuk FineRef ini.\nKlik 'Refresh' untuk update.",
+                        "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                if (dgvQuinosSales.CurrentRow == null)
+                {
+                    MessageBox.Show("Pilih salah satu baris Quinos Sales dulu.", "Info",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                int fineSaleId = SafeInt(dgvQuinosSales.CurrentRow.Cells["sales_id"].Value);
+                if (fineSaleId <= 0)
+                {
+                    MessageBox.Show("sales_id tidak valid.", "Info",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                // ================= NEED =================
+                int qtyNeed = _dtLateTickets.AsEnumerable()
+                                                .Count(r => !string.IsNullOrEmpty(SafeStr(r["FineCode"])));
+
+                decimal amountNeed = 0m;
+
+                foreach (DataRow r in _dtLateTickets.Rows)
+                {
+                    if (string.IsNullOrEmpty(SafeStr(r["FineCode"]))) continue;
+                    amountNeed += SafeDec(r["FinePrice"]);
+                }
+
+                decimal amountNeedR = Math.Round(amountNeed, 0);
+
+                // ================= QUINOS COLUMNS =================
+                string colSalesId = _dtQuinosFineSales.Columns.Contains("sales_id") ? "sales_id" : null;
+                string colDesc = _dtQuinosFineSales.Columns.Contains("description") ? "description" : null;
+
+                string colQty = _dtQuinosFineSales.Columns.Contains("qty") ? "qty" :
+                                (_dtQuinosFineSales.Columns.Contains("quantity") ? "quantity" : null);
+
+                string colUnit = _dtQuinosFineSales.Columns.Contains("unitPrice") ? "unitPrice" : null;
+                string colAmt = _dtQuinosFineSales.Columns.Contains("lineAmount") ? "lineAmount" :
+                                (_dtQuinosFineSales.Columns.Contains("amount") ? "amount" : null);
+
+                string colItem = _dtQuinosFineSales.Columns.Contains("itemCode") ? "itemCode" : null;
+
+                if (colSalesId == null || colDesc == null || colQty == null)
+                {
+                    MessageBox.Show("Kolom Quinos Sales belum sesuai.", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // ambil lines
+                List<DataRow> lines = _dtQuinosFineSales.AsEnumerable()
+                    .Where(x => SafeInt(x[colSalesId]) == fineSaleId)
+                    .ToList();
+
+                // expected fine codes
+                HashSet<string> expectedCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (DataRow r in _dtLateTickets.Rows)
+                {
+                    string c = Convert.ToString(r["FineCode"] ?? "").Trim();
+                    if (!string.IsNullOrEmpty(c)) expectedCodes.Add(c);
+                }
+
+                // ================= FILTER FINE LINES =================
+                List<DataRow> paidFineLines = new List<DataRow>();
+
+                foreach (DataRow x in lines)
+                {
+                    string desc = Convert.ToString(x[colDesc] ?? "").Trim();
+                    string code = (colItem == null) ? "" : Convert.ToString(x[colItem] ?? "").Trim();
+
+                    // buang baris FineRef
+                    if (!string.IsNullOrEmpty(desc) &&
+                        desc.IndexOf(_fineRef, StringComparison.OrdinalIgnoreCase) >= 0)
+                        continue;
+
+                    decimal lineAmt = 0m;
+                    if (colAmt != null)
+                        lineAmt = SafeDec(x[colAmt]);
+                    else if (colUnit != null)
+                        lineAmt = SafeDec(x[colUnit]) * SafeDec(x[colQty]);
+
+                    // skip non money
+                    if (Math.Round(Math.Abs(lineAmt), 0) <= 0m)
+                        continue;
+
+                    bool byCode = !string.IsNullOrEmpty(code) && expectedCodes.Contains(code);
+                    bool byDesc = !string.IsNullOrEmpty(desc) &&
+                                  desc.ToUpper().Contains("SANKSI") &&
+                                  desc.ToUpper().Contains(_selectedDayType.ToUpper());
+
+                    if (byCode || byDesc)
+                        paidFineLines.Add(x);
+                }
+
+                // ================= NETTING (FIX VOID BUG) =================
+                int qtyPaid = 0;
+                decimal amountPaid = 0m;
+
+                var grouped = paidFineLines
+                    .GroupBy(x =>
+                    {
+                        string code = (colItem == null) ? "" : Convert.ToString(x[colItem] ?? "").Trim();
+                        string desc = Convert.ToString(x[colDesc] ?? "").Trim();
+
+                        if (!string.IsNullOrEmpty(code))
+                            return "CODE|" + code;
+                        else
+                            return "DESC|" + desc;
+                    });
+
+                foreach (var g in grouped)
+                {
+                    int netQty = 0;
+                    decimal netAmt = 0m;
+
+                    foreach (DataRow x in g)
+                    {
+                        int q = SafeInt(x[colQty]);
+                        netQty += q;
+
+                        if (colAmt != null)
+                            netAmt += SafeDec(x[colAmt]);
+                        else if (colUnit != null)
+                            netAmt += SafeDec(x[colUnit]) * q;
+                    }
+
+                    qtyPaid += netQty;
+                    amountPaid += netAmt;
+                }
+
+                decimal amountPaidR = Math.Round(amountPaid, 0);
+
+                // ================= CHECK =================
+                if (qtyPaid != qtyNeed || amountPaidR != amountNeedR)
+                {
+                    MessageBox.Show(
+                        "Data pembayaran tidak cocok.\n" +
+                        "Need: Qty=" + qtyNeed + " Amount=" + amountNeedR.ToString("#,##0") + "\n" +
+                        "Paid: Qty=" + qtyPaid + " Amount=" + amountPaidR.ToString("#,##0"),
+                        "Mismatch", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // ================= SUCCESS =================
+                ExtendJamKeluarAfterFinePaid(_transactionId, _fineRef, fineSaleId);
+                InsertFineTransactionToWhnpos(_transactionId, _fineRef, fineSaleId, qtyNeed, amountNeedR);
+
+                MessageBox.Show("Fine verified. Silahkan Keluar dari Playground.", "Success",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
 
-            if (_dtLateTickets == null || _dtLateTickets.Rows.Count == 0)
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (Exception ex)
             {
-                MessageBox.Show("Tidak ada fine detail.", "Info",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
+                MessageBox.Show("Verify error: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            if (_dtQuinosFineSales == null || _dtQuinosFineSales.Rows.Count == 0)
-            {
-                MessageBox.Show("Belum ada pembayaran di Quinos untuk FineRef ini.\nKlik 'Quinos Sales' untuk refresh.",
-                    "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            // ✅ Use CURRENT selected row in dgvQuinosSales
-            if (dgvQuinosSales.CurrentRow == null)
-            {
-                MessageBox.Show("Pilih 1 baris pembayaran di Quinos Sales dulu.", "Info",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            int fineSaleId = SafeInt(dgvQuinosSales.CurrentRow.Cells["sales_id"].Value);
-            int qtyPaid = SafeInt(dgvQuinosSales.CurrentRow.Cells["qty"].Value);
-            decimal amountPaid = SafeDec(dgvQuinosSales.CurrentRow.Cells["amount"].Value);
-
-            int qtyNeed = _dtLateTickets.Rows.Count;
-            //decimal amountNeed = qtyNeed * FINE_PER_TICKET;
-            decimal amountNeed = 0m;
-            foreach (DataRow r in _dtLateTickets.Rows)
-                amountNeed += SafeDec(r["FinePrice"]);
-
-            decimal amountPaidR = Math.Round(amountPaid, 0);
-            decimal amountNeedR = Math.Round(amountNeed, 0);
-
-            if (qtyPaid != qtyNeed || amountPaidR != amountNeedR)
-            {
-                MessageBox.Show(
-                    "Data pembayaran tidak cocok.\n" +
-                    "Need: Qty=" + qtyNeed + " Amount=" + amountNeedR.ToString("#,##0") + "\n" +
-                    "Paid: Qty=" + qtyPaid + " Amount=" + amountPaidR.ToString("#,##0"),
-                    "Mismatch", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            // reuse protections
-            List<int> nourutList = new List<int>();
-            for (int i = 0; i < _dtLateTickets.Rows.Count; i++)
-                nourutList.Add(SafeInt(_dtLateTickets.Rows[i]["NoUrut"]));
-
-            if (IsFineRefAlreadyUsed(_transactionId, nourutList, _fineRef))
-            {
-                MessageBox.Show("FineRef ini sudah pernah dipakai untuk tiket yang sedang diproses.", "Info",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            if (IsFineSaleAlreadyUsed(fineSaleId))
-            {
-                MessageBox.Show("Quinos Sales ID ini sudah pernah dipakai untuk verifikasi denda.", "Info",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            if (MessageBox.Show(
-                "Verifikasi pembayaran fine?\nFineRef: " + _fineRef + "\nSalesID: " + fineSaleId,
-                "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-            {
-                return;
-            }
-
-            ExtendJamKeluarAfterFinePaid(_transactionId, _fineRef, fineSaleId);
-
-            // 2) Insert fine transaction (MVP)
-            InsertFineTransactionToWhnpos(_transactionId, _fineRef, fineSaleId, qtyNeed, amountNeed);
-
-            if (_timer != null) _timer.Stop();
-
-            MessageBox.Show("Fine verified. Silahkan Keluar dari Playground.", "Success",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            this.DialogResult = DialogResult.OK;
-            this.Close();
         }
 
         private bool IsFineSaleAlreadyUsed(int fineSaleId)
@@ -693,35 +915,26 @@ namespace MilenialPark.Views.Transaction
         {
             if (_dtLateTickets == null || _dtLateTickets.Rows.Count == 0) return;
 
-            // nourut list yang late saja
-            List<int> nourutList = new List<int>();
-            for (int i = 0; i < _dtLateTickets.Rows.Count; i++)
-                nourutList.Add(SafeInt(_dtLateTickets.Rows[i]["NoUrut"]));
+            string append = Trunc(" | FINE_REF=" + fineRef + " | FINE_SALES_ID=" + fineSaleId, 200);
 
-            if (nourutList.Count == 0) return;
+            foreach (DataRow r in _dtLateTickets.Rows)
+            {
+                int noUrut = SafeInt(r["NoUrut"]);
+                int extendMin = SafeInt(r["ExtendMinutes"]);
 
-            string inList = string.Join(",", nourutList.Select(x => x.ToString()).ToArray());
+                if (extendMin <= 0)
+                    extendMin = 15; // safety fallback
 
-            // marker yang disimpan sebagai bukti "fine sudah dibayar"
-            string append = " | FINE_REF=" + fineRef + " | FINE_SALES_ID=" + fineSaleId;
+                string sql =
+                    "UPDATE WHNPOS.dbo.TransaksiTiketDetail " +
+                    "SET JamKeluar = DATEADD(minute, " + extendMin + ", GETDATE()), " +
+                    "    OrderStatus = 'ENTER-IN', " +
+                    "    Keterangan = LEFT(ISNULL(Keterangan,'') + " + ClsFungsi.C2Q(append) + ", 200) " +
+                    "WHERE TransactionID = " + ClsFungsi.C2Q(transactionId) +
+                    " AND NoUrut = " + noUrut + ";";
 
-            // ⚠️ cegah truncation (angka ini kamu sesuaikan kalau sudah tahu panjang kolom)
-            // asumsi aman 200 char
-            append = Trunc(append, 200);
-
-            string sql =
-                "UPDATE WHNPOS.dbo.TransaksiTiketDetail " +
-                "SET " +
-                // extend jam keluar 15 menit dari sekarang
-                "    JamKeluar = DATEADD(minute, 15, GETDATE()), " +
-                // tetap ENTER-IN (tidak diubah)
-                "    OrderStatus = 'ENTER-IN', " +
-                // append keterangan (truncated)
-                "    Keterangan = LEFT(ISNULL(Keterangan,'') + " + ClsFungsi.C2Q(append) + ", 200) " +
-                "WHERE TransactionID = " + ClsFungsi.C2Q(transactionId) + " " +
-                "  AND NoUrut IN (" + inList + ");";
-
-            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(sql);
+                ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(sql);
+            }
         }
 
 
@@ -784,7 +997,7 @@ namespace MilenialPark.Views.Transaction
             // Sesuaikan nama kolom kalau berbeda:
             // tbl_items: code, name, price (atau unitPrice)
             string sql =
-                "SELECT i.code, i.name, i.price1 " +
+                "SELECT i.code, i.name, i.price1 , IFNULL(i.minimumtime,0) AS minimumtime  " +
                 "FROM tbl_items i " +
                 "WHERE i.code = @code " +
                 "LIMIT 1;";
@@ -833,7 +1046,18 @@ namespace MilenialPark.Views.Transaction
             return decimal.TryParse(v.ToString(), out d) ? d : 0m;
         }
 
+        private HashSet<string> GetExpectedFineCodes()
+        {
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (_dtLateTickets == null) return set;
 
+            foreach (DataRow r in _dtLateTickets.Rows)
+            {
+                string code = Convert.ToString(r["FineCode"] ?? "").Trim();
+                if (!string.IsNullOrEmpty(code)) set.Add(code);
+            }
+            return set;
+        }
 
 
         private decimal PickQuinosPrice(DataRow r)
@@ -843,6 +1067,37 @@ namespace MilenialPark.Views.Transaction
             if (r.Table.Columns.Contains("sellPrice") && r["sellPrice"] != DBNull.Value) return Convert.ToDecimal(r["sellPrice"]);
             if (r.Table.Columns.Contains("unitPrice") && r["unitPrice"] != DBNull.Value) return Convert.ToDecimal(r["unitPrice"]);
             return 0m;
+        }
+
+        private FineSetting FindFineSetting(int lateMinutes, string dayType)
+        {
+            dayType = (dayType ?? "WEEKDAY").Trim().ToUpper();
+            if (lateMinutes < 1) lateMinutes = 1;
+
+            // kamu bisa ganti label period sesuai naming kamu di TblFineSetting
+            string period = (lateMinutes <= 60) ? "1 JAM" : "UNLIMITED";
+
+            // Kandidat format nama yang mungkin ada di TblFineSetting.FineName
+            var candidates = new[]
+            {
+        $"SANKSI {period} {dayType}",   // SANKSI 1 JAM WEEKDAY
+        $"SANKSI {dayType} {period}",   // SANKSI WEEKDAY 1 JAM  ✅
+        $"{period} {dayType}",          // 1 JAM WEEKDAY
+        $"{dayType} {period}",          // WEEKDAY 1 JAM
+        $"SANKSI {dayType}",            // kalau ada yang cuma "SANKSI WEEKDAY"
+        $"SANKSI {period}",             // kalau ada yang cuma "SANKSI 1 JAM"
+    };
+
+            foreach (var key in candidates)
+            {
+                var fs = _fineSettings.FirstOrDefault(f =>
+                    !string.IsNullOrEmpty(f?.FineName) &&
+                    f.FineName.Trim().Equals(key, StringComparison.OrdinalIgnoreCase));
+
+                if (fs != null) return fs;
+            }
+
+            return null;
         }
 
     }

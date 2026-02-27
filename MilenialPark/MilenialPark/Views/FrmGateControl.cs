@@ -173,39 +173,46 @@ namespace MilenialPark.Views
                     string tag = Convert.ToString(row["TagID"] ?? "").Trim();
                     row["RFIDDisplay"] = string.IsNullOrEmpty(tag) ? name : $"{name} ({tag})";
 
-                    DateTime jamKeluar = row["JamKeluar"] == DBNull.Value
+                    DateTime jamKeluarBase = row["JamKeluar"] == DBNull.Value
                         ? DateTime.MinValue
                         : Convert.ToDateTime(row["JamKeluar"]);
 
                     int toleransi = row["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(row["Toleransi"]);
 
-                    if (jamKeluar == DateTime.MinValue)
+                    if (jamKeluarBase == DateTime.MinValue)
                     {
                         row["SisaMenit"] = 9999;
                         row["Urgency"] = "GREEN";
                         continue;
                     }
 
-                    // batas toleransi
-                    DateTime batasToleransi = jamKeluar.AddMinutes(toleransi);
+                    // ✅ Effective deadline = JamKeluar + Toleransi
+                    DateTime jamKeluarEffective = jamKeluarBase.AddMinutes(toleransi);
 
-                    int sisaMenit = (int)Math.Floor((jamKeluar - now).TotalMinutes);
+                    // ✅ show effective deadline in the grid
+                    row["JamKeluar"] = jamKeluarEffective;
+
+                    // minutes remaining to effective deadline
+                    int sisaMenit = (int)Math.Floor((jamKeluarEffective - now).TotalMinutes);
                     row["SisaMenit"] = sisaMenit;
 
+                    // ✅ Yellow threshold = 15 + toleransi minutes before effective deadline
+                    int yellowThreshold = 15 + toleransi;
+
                     // --- RULES ---
-                    if (now < jamKeluar)
+                    if (now < jamKeluarBase)
                     {
-                        // sebelum jam keluar
-                        row["Urgency"] = (sisaMenit <= 15) ? "YELLOW" : "GREEN";
+                        // before original JamKeluar -> GREEN/YELLOW
+                        row["Urgency"] = (sisaMenit <= yellowThreshold) ? "YELLOW" : "GREEN";
                     }
-                    else if (now >= jamKeluar && now <= batasToleransi)
+                    else if (now >= jamKeluarBase && now <= jamKeluarEffective)
                     {
-                        // sudah lewat jam keluar tapi masih dalam toleransi
+                        // past base time but still within tolerance window -> ORANGE
                         row["Urgency"] = "ORANGE";
                     }
                     else
                     {
-                        // lewat batas toleransi
+                        // past effective deadline -> RED
                         row["Urgency"] = "RED";
                     }
                 }
@@ -237,6 +244,8 @@ namespace MilenialPark.Views
 
             // For your POS “compact list” feel:
             DataGridViewHelper.SizeCompact(dgvReminder, 100, 420);
+
+            lblRowCount.Text = dgvReminder.RowCount.ToString();
         }
 
         private void RefreshReminderWithPopup()
@@ -441,11 +450,62 @@ namespace MilenialPark.Views
             }));
         }
 
+        // Cek apakah crew atau tidak 
+
+        private bool IsCrewTag(DataRow rfidRow)
+        {
+            if (rfidRow == null) return false;
+
+            string rfidName = Convert.ToString(rfidRow["RFIDName"] ?? "").Trim();
+            return rfidName.IndexOf("CREW", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private bool TryHandleCrewPass(string tagId, int gateCode, SerialPort port, string direction, DataRow rfidRow)
+        {
+            // direction: "ENTER" / "EXIT" (buat log)
+            // return true kalau ini CREW dan sudah ditangani (bypass), sehingga caller tinggal "return;"
+
+            if (!IsCrewTag(rfidRow)) return false;
+
+            // optional: pastikan aktif (kalau mau crew nonaktif jangan bisa lewat)
+            bool isActive = rfidRow["Status"] != DBNull.Value && Convert.ToBoolean(rfidRow["Status"]);
+            if (!isActive)
+            {
+                SendGateReply(port, gateCode, false, "RFID CREW NONAKTIF");
+                return true;
+            }
+
+            string rfidName = Convert.ToString(rfidRow["RFIDName"] ?? "").Trim();
+            string display = $"{rfidName} ({tagId})";
+
+            // buka gate langsung
+            SendGateReply(port, gateCode, true, $"CREW {direction}: {display}");
+
+            // ambil user login (kalau ada)
+            string userId = Convert.ToString(ClsStaticVariable.controllerUser?.objUser?.UserID ?? "").Trim();
+            if (string.IsNullOrEmpty(userId)) userId = "SYSTEM";
+
+            // log ke GateLog (Reason bisa kamu set khusus)
+            controllerTrans.InsertGateLog(
+                $"CREW {direction}. {display} passed gate. GateCode={gateCode}",
+                "CREW_ACCESS",
+                userId
+            );
+
+            // refresh UI
+            LoadGateLogGrid();
+            RefreshReminderCore();
+
+            return true;
+        }
+
         private void HandleEnter(string tagId, int gateCode, SerialPort port)
         {
             try
             {
                 _suppressReminderPopup = true;
+
+                tagId = NormalizeTagId(tagId);
 
                 // lookup RFIDName dari master
                 var r = controllerRFID.GetByTagID(tagId);
@@ -453,34 +513,103 @@ namespace MilenialPark.Views
                 if (!(r["Status"] != DBNull.Value && Convert.ToBoolean(r["Status"])))
                 { SendGateReply(port, gateCode, false, "RFID NONAKTIF"); return; }
 
+                // ✅ CREW BYPASS
+                if (TryHandleCrewPass(tagId, gateCode, port, "ENTER", r))
+                    return;
+
                 string rfidName = Convert.ToString(r["RFIDName"] ?? "").Trim();
                 string display = $"{rfidName} ({tagId})";
 
-                // cari ticket BOUGHT berdasarkan TagID
+                // 1) cari BOUGHT dulu
                 dt = controllerTrans.GetTicketByTagID(tagId, "BOUGHT", startDay, endDay);
 
-                if (dt.Rows.Count == 1)
+                // 2) kalau tidak ada, coba ENTER-OUT (re-entry)
+                if (dt == null || dt.Rows.Count == 0)
+                    dt = controllerTrans.GetTicketByTagID(tagId, "ENTER-OUT", startDay, endDay);
+
+                if (dt == null || dt.Rows.Count != 1)
                 {
-                    string tid = dt.Rows[0]["TransactionID"].ToString();
-                    int noUrut = Convert.ToInt32(dt.Rows[0]["NoUrut"]);
-                    int waktuBermain = dt.Rows[0]["WaktuBermain"] == DBNull.Value ? 0 : Convert.ToInt32(dt.Rows[0]["WaktuBermain"]);
-                    int toleransi = dt.Rows[0]["Toleransi"] == DBNull.Value ? 0 :
-                                        Convert.ToInt32(dt.Rows[0]["Toleransi"]);
+                    SendGateReply(port, gateCode, false, "TIDAK ADA TIKET / SDH DIGUNAKAN");
+                    return;
+                }
+
+                DataRow row = dt.Rows[0];
+
+                string tid = Convert.ToString(row["TransactionID"] ?? "").Trim();
+                if (string.IsNullOrEmpty(tid))
+                {
+                    SendGateReply(port, gateCode, false, "DATA TIDAK VALID");
+                    return;
+                }
+
+                int noUrut = row["NoUrut"] == DBNull.Value ? 0 : Convert.ToInt32(row["NoUrut"]);
+                int waktuBermain = row.Table.Columns.Contains("WaktuBermain") && row["WaktuBermain"] != DBNull.Value
+                    ? Convert.ToInt32(row["WaktuBermain"])
+                    : 0;
+
+                int toleransi = row["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(row["Toleransi"]);
+
+                string currentStatus = Convert.ToString(row["OrderStatus"] ?? "").Trim().ToUpper();
+
+                DateTime now = DateTime.Now;
+                DateTime jamKeluar = row["JamKeluar"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["JamKeluar"]);
+
+                // =========================
+                // VALIDASI WAKTU
+                // =========================
+
+                // A) Re-entry: ENTER-OUT -> ENTER-IN wajib cek jamKeluar+toleransi
+                if (currentStatus == "ENTER-OUT")
+                {
+                    if (jamKeluar == DateTime.MinValue)
+                    {
+                        SendGateReply(port, gateCode, false, "JAM KELUAR BELUM ADA");
+                        return;
+                    }
+
+                    DateTime batas = jamKeluar.AddMinutes(toleransi);
+                    if (now > batas)
+                    {
+                        SendGateReply(port, gateCode, false, "WAKTU HABIS");
+                        return;
+                    }
+                }
+
+                // B) First entry: BOUGHT -> ENTER-IN
+                // Kalau sistem kamu sudah mengisi JamKeluar sejak beli, maka cek juga.
+                // Kalau JamKeluar masih kosong, jangan cek (karena belum ada patokan expiry).
+                //if (currentStatus == "BOUGHT" && jamKeluar != DateTime.MinValue)
+                //{
+                //    DateTime batas = jamKeluar.AddMinutes(toleransi);
+                //    if (now > batas)
+                //    {
+                //        SendGateReply(port, gateCode, false, "WAKTU HABIS");
+                //        return;
+                //    }
+                //}
+
+                // =========================
+                // UPDATE STATUS
+                // =========================
+                if (currentStatus == "BOUGHT")
+                {
+                    // BOUGHT: set jamMasuk/jamKeluar berdasarkan waktu bermain (logic lama)
                     controllerTrans.UpdateOrderStatusTiketandTime(tid, noUrut, waktuBermain, toleransi, "ENTER-IN");
-
-                    controllerRFID.TouchLastScan(tagId); // optional
-
-                    SendGateReply(port, gateCode, true, "WELCOME " + display);
-                    RefreshReminderCore();
                 }
                 else
                 {
-                    SendGateReply(port, gateCode, false, "TIDAK ADA TIKET / SDH DIGUNAKAN");
+                    // ENTER-OUT: re-entry tanpa ubah JamKeluar
+                    controllerTrans.UpdateOrderStatusOnly(tid, noUrut, "ENTER-IN");
                 }
+
+                controllerRFID.TouchLastScan(tagId);
+
+                SendGateReply(port, gateCode, true, "WELCOME " + display);
+                RefreshReminderCore();
             }
             catch (Exception ex)
             {
-                rtxDataIO.Text += "\n[ENTER Error] " + ex.Message;
+                rtxDataIO.AppendText("\n[ENTER Error] " + ex.ToString());
                 SendGateReply(port, gateCode, false, "ERROR");
             }
             finally
@@ -492,6 +621,8 @@ namespace MilenialPark.Views
         private void HandleExit(string tagId, int gateCode, SerialPort port)
         {
             _suppressReminderPopup = true;
+
+            bool justpaid = false;
 
             try
             {
@@ -509,6 +640,10 @@ namespace MilenialPark.Views
                     SendGateReply(port, gateCode, false, "RFID NONAKTIF");
                     return;
                 }
+
+                // ✅ CREW BYPASS
+                if (TryHandleCrewPass(tagId, gateCode, port, "EXIT", r))
+                    return;
 
                 string rfidName = Convert.ToString(r["RFIDName"] ?? "").Trim();
                 string display = $"{rfidName} ({tagId})";
@@ -557,7 +692,7 @@ namespace MilenialPark.Views
                 {
                     // kalau memang gate alarm beda channel, OK.
                     // tapi kalau tidak, lebih aman pakai gateCode juga.
-                    SendGateReply(port, gateCode, true, "ALARM");
+                    SendGateReply(port, 1, true, "ALARM");
 
                     using (var frm = new FrmFinePunishment(tid))
                     {
@@ -590,19 +725,31 @@ namespace MilenialPark.Views
                         RefreshReminderCore();
                         return;
                     }
+
+                    justpaid = true;
                 }
 
-                controllerTrans.UpdateOrderStatusTiketOut(tid, noUrut, "ENTER-OUT");
+                if(!justpaid)
+                {
+                    //controllerTrans.UpdateOrderStatusTiketOut(tid, noUrut, "ENTER-OUT");
+                    controllerTrans.UpdateOrderStatusOnly(tid, noUrut, "ENTER-OUT");
+                    SendGateReply(port, gateCode, true, "THANK YOU " + display);
+                }
+                else
+                {
+                    justpaid = false;
+                }
 
                 // optional: update last scan
                 controllerRFID.TouchLastScan(tagId);
 
-                SendGateReply(port, gateCode, true, "THANK YOU " + display);
+                //SendGateReply(port, gateCode, true, "THANK YOU " + display);
+                rtxDataIO.AppendText("THANK YOU VERIFIKASI BERHASIL" + Environment.NewLine);
                 RefreshReminderCore();
             }
             catch (Exception ex)
             {
-                rtxDataIO.Text += "\n[EXIT Error] " + ex.Message;
+                rtxDataIO.Text += "\n[EXIT Error] " + ex.ToString();
                 SendGateReply(port, gateCode, false, "ERROR");
                 RefreshReminderCore();
             }
@@ -940,5 +1087,69 @@ namespace MilenialPark.Views
             return cleaned.Length == 0 ? "0" : cleaned;
         }
 
+        private void btnEnter_Click(object sender, EventArgs e)
+        {
+            SupervisorOpenGate(2); // gate code ENTER
+        }
+
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            SupervisorOpenGate(3); // gate code EXIT
+        }
+
+        private void SupervisorOpenGate(int gateCode)
+        {
+            try
+            {
+                // 0) Validasi serial port
+                if (sp == null || !sp.IsOpen)
+                {
+                    MessageBox.Show("Serial Port belum connect.");
+                    return;
+                }
+
+                // 1) Validasi input person
+                string person = (txtPerson.Text ?? "").Trim();
+                if (string.IsNullOrWhiteSpace(person))
+                {
+                    MessageBox.Show("txtPerson masih kosong. Isi dulu nama / tujuan akses.");
+                    txtPerson.Focus();
+                    return;
+                }
+
+                // 2) Current user login
+                string userId = Convert.ToString(ClsStaticVariable.controllerUser?.objUser?.UserID ?? "").Trim();
+                if (string.IsNullOrEmpty(userId))
+                    userId = "UNKNOWN";
+
+                // 3) Kirim command gate (format kamu: *{gateCode}#)
+                _suppressReminderPopup = true;
+
+                string cmd = "*" + gateCode.ToString() + "#";
+                sp.WriteLine(cmd);
+
+                // 4) Log ke GateLog
+                string logMessage = $"{userId} open the Gate for {person} (GateCode={gateCode})";
+                controllerTrans.InsertGateLog(
+                    logMessage,
+                    "Supervisor Access",
+                    userId
+                );
+
+                // 5) Refresh grid log
+                LoadGateLogGrid();
+
+                // optional UX
+                rtxDataIO.AppendText($"\n>> {cmd} [SUPERVISOR] {logMessage}\n");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal open gate: " + ex.Message);
+            }
+            finally
+            {
+                _suppressReminderPopup = false;
+            }
+        }
     }
 }

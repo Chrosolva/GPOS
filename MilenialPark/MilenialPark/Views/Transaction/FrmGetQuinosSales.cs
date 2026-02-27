@@ -304,6 +304,7 @@ ORDER BY l.idx ASC, l.id ASC;";
 
                 // buka payment (biar user scan RFID & input keterangan)
                 FrmPayment frm = new FrmPayment(tran);
+                frm.FocusRFIDScan();
                 frm.ShowDialog();
             }
             catch (Exception ex)
@@ -311,6 +312,43 @@ ORDER BY l.idx ASC, l.id ASC;";
                 MessageBox.Show("btnSelect_Click Error: " + ex.Message);
             }
         }
+
+        //private List<DataRow> GetNetQuinosDetail(DataTable dt)
+        //{
+        //    var result = new List<DataRow>();
+
+        //    var groups = dt.AsEnumerable()
+        //        .GroupBy(r => new
+        //        {
+        //            code = SafeStr(r["item_code"]),
+        //            price = ToDecimalSafe(r["price"]),
+        //            category = ToIntSafe(r["category_id"]),
+        //            minimum = ToIntSafe(r["minimumTime"]),
+        //            tolerance = ToIntSafe(r["tolerance"])
+        //        });
+
+        //    foreach (var g in groups)
+        //    {
+        //        int netQty = g.Sum(x => ToIntSafe(x["qty"]));
+
+        //        // kalau sudah void semua → abaikan
+        //        if (netQty <= 0)
+        //            continue;
+
+        //        // ambil salah satu row sebagai template
+        //        DataRow baseRow = g.First();
+
+        //        // clone row
+        //        DataRow newRow = dt.NewRow();
+        //        newRow.ItemArray = baseRow.ItemArray.Clone() as object[];
+
+        //        newRow["qty"] = netQty;
+
+        //        result.Add(newRow);
+        //    }
+
+        //    return result;
+        //}
 
         private ControllerTransaction BuildControllerTransactionFromQuinos(int salesId)
         {
@@ -359,7 +397,9 @@ ORDER BY l.idx ASC, l.id ASC;";
 
             // GROUP item yang non-ticket (category != 9) berdasarkan item_code+price
             // Ticket (category=9) boleh per-row (Qty biasanya 1) atau tetap per item.
-            foreach (DataRow r in _dtDetail.Rows)
+            //var netDetails = GetNetQuinosDetail(_dtDetail);
+
+                foreach (DataRow r in _dtDetail.Rows)
             {
                 int categoryId = ToIntSafe(r["category_id"]);
                 string itemCode = SafeStr(r["item_code"]);
@@ -382,7 +422,7 @@ ORDER BY l.idx ASC, l.id ASC;";
                 string customerName = SafeStr(dgvSalesHeader.CurrentRow.Cells["customer_name"].Value);
 
                 // Ticket items (category 9) -> WaktuBermain > 0 agar masuk ke grid tiket
-                if (categoryId == QUINOS_PLAYTIME_CATEGORY_ID)
+                if (categoryId == QUINOS_PLAYTIME_CATEGORY_ID && qty > 0)
                 {
                     // buat 1 det, qty sesuai quinos
                     ClsTransactionTiketDetail det = new ClsTransactionTiketDetail(

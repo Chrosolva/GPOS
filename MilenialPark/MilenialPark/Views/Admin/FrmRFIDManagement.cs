@@ -180,14 +180,10 @@ namespace MilenialPark.Views.Admin
         /// </summary>
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
-            string filter = txtSearch.Text.Trim().Replace("'", "''");
-            if (bind.DataSource != null)
-            {
-                DataView dv = ((DataTable)bind.DataSource).DefaultView;
-                dv.RowFilter = $"TagID LIKE '%{filter}%' OR RFIDName LIKE '%{filter}%' OR TypeRFID LIKE '%{filter}%'";
-                lblRowCount.Text = "Row Count : " + dv.Count.ToString();
-            }
+            
         }
+
+
 
         /// <summary>
         /// Overrides the form's key processing to enable deletion of a selected
@@ -232,6 +228,22 @@ namespace MilenialPark.Views.Admin
             if(e.KeyCode == Keys.Enter)
             {
                 txtRFID.Text = Convert.ToInt32(txtRFID.Text).ToString();
+            }
+        }
+
+        private void txtSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                txtSearch.Text = Convert.ToInt32(txtSearch.Text).ToString();
+
+                string filter = txtSearch.Text.Trim().Replace("'", "''");
+                if (bind.DataSource != null)
+                {
+                    DataView dv = ((DataTable)bind.DataSource).DefaultView;
+                    dv.RowFilter = $"TagID LIKE '%{filter}%' OR RFIDName LIKE '%{filter}%' OR TypeRFID LIKE '%{filter}%'";
+                    lblRowCount.Text = "Row Count : " + dv.Count.ToString();
+                }
             }
         }
     }

@@ -186,7 +186,7 @@
             this.txtpassmysql.PasswordChar = '*';
             this.txtpassmysql.Size = new System.Drawing.Size(263, 26);
             this.txtpassmysql.TabIndex = 42;
-            this.txtpassmysql.Text = "Numero1";
+            this.txtpassmysql.Text = "starlight";
             // 
             // label5
             // 

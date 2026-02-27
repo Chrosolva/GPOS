@@ -79,6 +79,53 @@ namespace MilenialPark // change namespace to your project if needed
             RowHeaderWidth = 28
         };
 
+        // ---------- POS CALM BLUE THEME ----------
+        private static readonly Color CalmBlue = Color.FromArgb(74, 119, 184);       // soft slate blue
+        private static readonly Color AccentTeal = Color.FromArgb(0, 153, 188);      // action/accent color
+
+        public static readonly GridTheme PosCalmBlue = new GridTheme
+        {
+            // Surfaces (important for eye fatigue)
+            Surface = Color.FromArgb(250, 252, 255),        // not pure white (reduces glare)
+            SurfaceAlt = Color.FromArgb(240, 244, 250),
+
+            // Text
+            TextPrimary = Color.FromArgb(28, 32, 38),
+            TextSecondary = Color.FromArgb(95, 105, 120),
+
+            // Header
+            HeaderBack = CalmBlue,
+            HeaderText = Color.White,
+
+            // Grid
+            GridLines = Color.FromArgb(214, 221, 230),
+
+            // Selection (very important for cashier usability)
+            SelectionBack = Color.FromArgb(210, 228, 245),   // soft highlight (not aggressive)
+            SelectionText = Color.FromArgb(20, 24, 28),
+
+            // Row header
+            RowHeaderBack = Color.FromArgb(235, 240, 246),
+            RowHeaderText = Color.FromArgb(70, 80, 95),
+            RowHeaderSelectBack = Color.FromArgb(215, 225, 236),
+
+            // Readonly cells
+            ReadonlyBack = Color.FromArgb(245, 247, 250),
+            ReadonlyText = Color.FromArgb(100, 110, 125),
+
+            // Accent color (buttons, active cell, focus)
+            Accent = AccentTeal,
+
+            // Fonts
+            BodyFont = new Font("Segoe UI", 9.5f, FontStyle.Regular),
+            HeaderFont = new Font("Segoe UI", 9.5f, FontStyle.Bold),
+
+            // Layout
+            RowHeight = 26,
+            HeaderHeight = 28,
+            RowHeaderWidth = 28
+        };
+
         // ---------- INTERNAL PER-DGV STATE (prevents handler stacking) ----------
         private sealed class GridState
         {

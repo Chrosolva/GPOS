@@ -4534,6 +4534,10 @@ namespace MilenialPark.Reports {
             
             private global::System.Data.DataColumn columnAmount;
             
+            private global::System.Data.DataColumn columnFineName;
+            
+            private global::System.Data.DataColumn columnFineCode;
+            
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public FineDetailDataTable() {
@@ -4633,6 +4637,22 @@ namespace MilenialPark.Reports {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public global::System.Data.DataColumn FineNameColumn {
+                get {
+                    return this.columnFineName;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public global::System.Data.DataColumn FineCodeColumn {
+                get {
+                    return this.columnFineCode;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             [global::System.ComponentModel.Browsable(false)]
             public int Count {
                 get {
@@ -4668,7 +4688,7 @@ namespace MilenialPark.Reports {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public FineDetailRow AddFineDetailRow(string FineRef, string TransactionID, string NoUrut, string RFID, string ItemName, string LateMinutes, string FinePerTicket, string Amount) {
+            public FineDetailRow AddFineDetailRow(string FineRef, string TransactionID, string NoUrut, string RFID, string ItemName, int LateMinutes, decimal FinePerTicket, decimal Amount, string FineName, string FineCode) {
                 FineDetailRow rowFineDetailRow = ((FineDetailRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         FineRef,
@@ -4678,7 +4698,9 @@ namespace MilenialPark.Reports {
                         ItemName,
                         LateMinutes,
                         FinePerTicket,
-                        Amount};
+                        Amount,
+                        FineName,
+                        FineCode};
                 rowFineDetailRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowFineDetailRow);
                 return rowFineDetailRow;
@@ -4709,6 +4731,8 @@ namespace MilenialPark.Reports {
                 this.columnLateMinutes = base.Columns["LateMinutes"];
                 this.columnFinePerTicket = base.Columns["FinePerTicket"];
                 this.columnAmount = base.Columns["Amount"];
+                this.columnFineName = base.Columns["FineName"];
+                this.columnFineCode = base.Columns["FineCode"];
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -4724,12 +4748,16 @@ namespace MilenialPark.Reports {
                 base.Columns.Add(this.columnRFID);
                 this.columnItemName = new global::System.Data.DataColumn("ItemName", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnItemName);
-                this.columnLateMinutes = new global::System.Data.DataColumn("LateMinutes", typeof(string), null, global::System.Data.MappingType.Element);
+                this.columnLateMinutes = new global::System.Data.DataColumn("LateMinutes", typeof(int), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnLateMinutes);
-                this.columnFinePerTicket = new global::System.Data.DataColumn("FinePerTicket", typeof(string), null, global::System.Data.MappingType.Element);
+                this.columnFinePerTicket = new global::System.Data.DataColumn("FinePerTicket", typeof(decimal), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnFinePerTicket);
-                this.columnAmount = new global::System.Data.DataColumn("Amount", typeof(string), null, global::System.Data.MappingType.Element);
+                this.columnAmount = new global::System.Data.DataColumn("Amount", typeof(decimal), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnAmount);
+                this.columnFineName = new global::System.Data.DataColumn("FineName", typeof(string), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnFineName);
+                this.columnFineCode = new global::System.Data.DataColumn("FineCode", typeof(string), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnFineCode);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -8396,10 +8424,10 @@ namespace MilenialPark.Reports {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public string LateMinutes {
+            public int LateMinutes {
                 get {
                     try {
-                        return ((string)(this[this.tableFineDetail.LateMinutesColumn]));
+                        return ((int)(this[this.tableFineDetail.LateMinutesColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
                         throw new global::System.Data.StrongTypingException("The value for column \'LateMinutes\' in table \'FineDetail\' is DBNull.", e);
@@ -8412,10 +8440,10 @@ namespace MilenialPark.Reports {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public string FinePerTicket {
+            public decimal FinePerTicket {
                 get {
                     try {
-                        return ((string)(this[this.tableFineDetail.FinePerTicketColumn]));
+                        return ((decimal)(this[this.tableFineDetail.FinePerTicketColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
                         throw new global::System.Data.StrongTypingException("The value for column \'FinePerTicket\' in table \'FineDetail\' is DBNull.", e);
@@ -8428,10 +8456,10 @@ namespace MilenialPark.Reports {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public string Amount {
+            public decimal Amount {
                 get {
                     try {
-                        return ((string)(this[this.tableFineDetail.AmountColumn]));
+                        return ((decimal)(this[this.tableFineDetail.AmountColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
                         throw new global::System.Data.StrongTypingException("The value for column \'Amount\' in table \'FineDetail\' is DBNull.", e);
@@ -8439,6 +8467,38 @@ namespace MilenialPark.Reports {
                 }
                 set {
                     this[this.tableFineDetail.AmountColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public string FineName {
+                get {
+                    try {
+                        return ((string)(this[this.tableFineDetail.FineNameColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'FineName\' in table \'FineDetail\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableFineDetail.FineNameColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public string FineCode {
+                get {
+                    try {
+                        return ((string)(this[this.tableFineDetail.FineCodeColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'FineCode\' in table \'FineDetail\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableFineDetail.FineCodeColumn] = value;
                 }
             }
             
@@ -8536,6 +8596,30 @@ namespace MilenialPark.Reports {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public void SetAmountNull() {
                 this[this.tableFineDetail.AmountColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public bool IsFineNameNull() {
+                return this.IsNull(this.tableFineDetail.FineNameColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public void SetFineNameNull() {
+                this[this.tableFineDetail.FineNameColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public bool IsFineCodeNull() {
+                return this.IsNull(this.tableFineDetail.FineCodeColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public void SetFineCodeNull() {
+                this[this.tableFineDetail.FineCodeColumn] = global::System.Convert.DBNull;
             }
         }
         

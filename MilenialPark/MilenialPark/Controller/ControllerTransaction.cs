@@ -269,12 +269,23 @@ namespace MilenialPark.Controller
         {
             DateTime now = DateTime.Now;
             DateTime end = now.AddMinutes(WaktuBermain);
-            end = end.AddMinutes(Toleransi);
+            end = end.AddMinutes(0);
             query = $"Update WHNPOS.dbo.TransaksiTiketDetail set JamMasuk = {ClsFungsi.C2QTime(now)} , JamKeluar = {ClsFungsi.C2QTime(end)}, OrderStatus = {ClsFungsi.C2Q(OrderStatus)} where TransactionID = {ClsFungsi.C2Q(TransactionID)} and NoUrut = {ClsFungsi.C2Q(NoUrut)}";
             ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query);
             string logmessage = $"Update Jam Masuk  = {now.ToString()} , Jam Keluar = {end.ToString()} OrderStatus = {OrderStatus} for TransactionID = {TransactionID} and NoUrut = {NoUrut} ";
             query = $"Insert Into WHNPOS.dbo.Datalog (TransactionID, LogMessage, LogType) values ({ClsFungsi.C2Q(TransactionID)}, {ClsFungsi.C2Q(logmessage)},'INFO' )";
             ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(query);
+        }
+
+        public void UpdateOrderStatusOnly(string transactionId, int noUrut, string status)
+        {
+            string sql =
+                "UPDATE WHNPOS.dbo.TransaksiTiketDetail " +
+                "SET OrderStatus = " + ClsFungsi.C2Q(status) + " " +
+                "WHERE TransactionID = " + ClsFungsi.C2Q(transactionId) + " " +
+                "  AND NoUrut = " + noUrut.ToString() + ";";
+
+            ClsStaticVariable.objConnection.objSqlServerIUDClass.ExecuteNonQuery(sql);
         }
 
         public void setOneTransaction(string TransactionID)

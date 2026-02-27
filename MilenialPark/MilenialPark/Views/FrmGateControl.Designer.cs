@@ -54,6 +54,9 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.dgvReminder = new System.Windows.Forms.DataGridView();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnExit = new System.Windows.Forms.Button();
+            this.btnEnter = new System.Windows.Forms.Button();
+            this.txtPerson = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
@@ -66,6 +69,8 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.rtxDataIO = new System.Windows.Forms.RichTextBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.lblRowCount = new System.Windows.Forms.Label();
             this.panellabel1.SuspendLayout();
             this.leftPanel.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -98,6 +103,8 @@
             // 
             // leftPanel
             // 
+            this.leftPanel.Controls.Add(this.lblRowCount);
+            this.leftPanel.Controls.Add(this.label14);
             this.leftPanel.Controls.Add(this.btnUpdate);
             this.leftPanel.Controls.Add(this.label7);
             this.leftPanel.Controls.Add(this.label6);
@@ -321,7 +328,7 @@
             this.lblmanual.AutoSize = true;
             this.lblmanual.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblmanual.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblmanual.Location = new System.Drawing.Point(664, 10);
+            this.lblmanual.Location = new System.Drawing.Point(664, 1);
             this.lblmanual.Name = "lblmanual";
             this.lblmanual.Size = new System.Drawing.Size(313, 20);
             this.lblmanual.TabIndex = 52;
@@ -334,7 +341,7 @@
             this.btnSend.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnSend.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSend.ForeColor = System.Drawing.SystemColors.Control;
-            this.btnSend.Location = new System.Drawing.Point(813, 35);
+            this.btnSend.Location = new System.Drawing.Point(813, 26);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(96, 36);
             this.btnSend.TabIndex = 51;
@@ -345,7 +352,7 @@
             // txtGateCode
             // 
             this.txtGateCode.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtGateCode.Location = new System.Drawing.Point(668, 40);
+            this.txtGateCode.Location = new System.Drawing.Point(668, 31);
             this.txtGateCode.Name = "txtGateCode";
             this.txtGateCode.Size = new System.Drawing.Size(101, 26);
             this.txtGateCode.TabIndex = 50;
@@ -365,9 +372,9 @@
             // 
             this.panel2.Controls.Add(this.dgvReminder);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(7, 427);
+            this.panel2.Location = new System.Drawing.Point(7, 283);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1075, 314);
+            this.panel2.Size = new System.Drawing.Size(1075, 458);
             this.panel2.TabIndex = 5;
             // 
             // dgvReminder
@@ -376,12 +383,15 @@
             this.dgvReminder.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvReminder.Location = new System.Drawing.Point(0, 0);
             this.dgvReminder.Name = "dgvReminder";
-            this.dgvReminder.Size = new System.Drawing.Size(1075, 314);
+            this.dgvReminder.Size = new System.Drawing.Size(1075, 458);
             this.dgvReminder.TabIndex = 0;
             this.dgvReminder.SelectionChanged += new System.EventHandler(this.dgvReminder_SelectionChanged);
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btnExit);
+            this.panel1.Controls.Add(this.btnEnter);
+            this.panel1.Controls.Add(this.txtPerson);
             this.panel1.Controls.Add(this.label13);
             this.panel1.Controls.Add(this.label12);
             this.panel1.Controls.Add(this.label11);
@@ -400,15 +410,51 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(7, 7);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1075, 420);
+            this.panel1.Size = new System.Drawing.Size(1075, 276);
             this.panel1.TabIndex = 4;
+            // 
+            // btnExit
+            // 
+            this.btnExit.BackColor = System.Drawing.Color.Green;
+            this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnExit.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnExit.ForeColor = System.Drawing.SystemColors.Control;
+            this.btnExit.Location = new System.Drawing.Point(881, 90);
+            this.btnExit.Name = "btnExit";
+            this.btnExit.Size = new System.Drawing.Size(96, 36);
+            this.btnExit.TabIndex = 69;
+            this.btnExit.Text = "EXIT";
+            this.btnExit.UseVisualStyleBackColor = false;
+            this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
+            // 
+            // btnEnter
+            // 
+            this.btnEnter.BackColor = System.Drawing.Color.Green;
+            this.btnEnter.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnEnter.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnEnter.ForeColor = System.Drawing.SystemColors.Control;
+            this.btnEnter.Location = new System.Drawing.Point(775, 91);
+            this.btnEnter.Name = "btnEnter";
+            this.btnEnter.Size = new System.Drawing.Size(96, 36);
+            this.btnEnter.TabIndex = 68;
+            this.btnEnter.Text = "ENTER";
+            this.btnEnter.UseVisualStyleBackColor = false;
+            this.btnEnter.Click += new System.EventHandler(this.btnEnter_Click);
+            // 
+            // txtPerson
+            // 
+            this.txtPerson.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtPerson.Location = new System.Drawing.Point(668, 100);
+            this.txtPerson.Name = "txtPerson";
+            this.txtPerson.Size = new System.Drawing.Size(101, 26);
+            this.txtPerson.TabIndex = 67;
             // 
             // label13
             // 
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label13.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label13.Location = new System.Drawing.Point(664, 77);
+            this.label13.Location = new System.Drawing.Point(672, 60);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(237, 20);
             this.label13.TabIndex = 66;
@@ -420,7 +466,7 @@
             this.label12.AutoSize = true;
             this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label12.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label12.Location = new System.Drawing.Point(532, 143);
+            this.label12.Location = new System.Drawing.Point(532, 134);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(197, 17);
             this.label12.TabIndex = 60;
@@ -432,7 +478,7 @@
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label11.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label11.Location = new System.Drawing.Point(389, 147);
+            this.label11.Location = new System.Drawing.Point(393, 134);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(76, 20);
             this.label11.TabIndex = 65;
@@ -444,9 +490,9 @@
             this.dgvGateLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvGateLog.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvGateLog.Location = new System.Drawing.Point(393, 171);
+            this.dgvGateLog.Location = new System.Drawing.Point(393, 157);
             this.dgvGateLog.Name = "dgvGateLog";
-            this.dgvGateLog.Size = new System.Drawing.Size(677, 243);
+            this.dgvGateLog.Size = new System.Drawing.Size(677, 113);
             this.dgvGateLog.TabIndex = 64;
             // 
             // btnChange
@@ -455,7 +501,7 @@
             this.btnChange.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnChange.ForeColor = System.Drawing.SystemColors.Control;
-            this.btnChange.Location = new System.Drawing.Point(535, 99);
+            this.btnChange.Location = new System.Drawing.Point(535, 90);
             this.btnChange.Name = "btnChange";
             this.btnChange.Size = new System.Drawing.Size(119, 36);
             this.btnChange.TabIndex = 60;
@@ -468,7 +514,7 @@
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label10.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label10.Location = new System.Drawing.Point(531, 18);
+            this.label10.Location = new System.Drawing.Point(531, 9);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(65, 20);
             this.label10.TabIndex = 63;
@@ -483,7 +529,7 @@
             this.cbxReason.Items.AddRange(new object[] {
             "HILANG",
             "RUSAK"});
-            this.cbxReason.Location = new System.Drawing.Point(535, 46);
+            this.cbxReason.Location = new System.Drawing.Point(535, 37);
             this.cbxReason.Name = "cbxReason";
             this.cbxReason.Size = new System.Drawing.Size(119, 28);
             this.cbxReason.TabIndex = 60;
@@ -491,7 +537,7 @@
             // txtNewRFID
             // 
             this.txtNewRFID.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtNewRFID.Location = new System.Drawing.Point(393, 109);
+            this.txtNewRFID.Location = new System.Drawing.Point(393, 100);
             this.txtNewRFID.Name = "txtNewRFID";
             this.txtNewRFID.Size = new System.Drawing.Size(136, 26);
             this.txtNewRFID.TabIndex = 62;
@@ -500,7 +546,7 @@
             // txtCurRFID
             // 
             this.txtCurRFID.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtCurRFID.Location = new System.Drawing.Point(393, 48);
+            this.txtCurRFID.Location = new System.Drawing.Point(393, 39);
             this.txtCurRFID.Name = "txtCurRFID";
             this.txtCurRFID.Size = new System.Drawing.Size(136, 26);
             this.txtCurRFID.TabIndex = 60;
@@ -511,7 +557,7 @@
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label9.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label9.Location = new System.Drawing.Point(389, 77);
+            this.label9.Location = new System.Drawing.Point(389, 68);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(83, 20);
             this.label9.TabIndex = 61;
@@ -523,7 +569,7 @@
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label8.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label8.Location = new System.Drawing.Point(389, 18);
+            this.label8.Location = new System.Drawing.Point(389, 9);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(105, 20);
             this.label8.TabIndex = 60;
@@ -538,9 +584,33 @@
             this.rtxDataIO.ForeColor = System.Drawing.SystemColors.Window;
             this.rtxDataIO.Location = new System.Drawing.Point(0, 0);
             this.rtxDataIO.Name = "rtxDataIO";
-            this.rtxDataIO.Size = new System.Drawing.Size(387, 420);
+            this.rtxDataIO.Size = new System.Drawing.Size(387, 276);
             this.rtxDataIO.TabIndex = 3;
             this.rtxDataIO.Text = "";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label14.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label14.Location = new System.Drawing.Point(10, 502);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(225, 34);
+            this.label14.TabIndex = 60;
+            this.label14.Text = "TOTAL YANG ADA DI DALAM \r\nPLAYGROUND : ";
+            this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lblRowCount
+            // 
+            this.lblRowCount.AutoSize = true;
+            this.lblRowCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRowCount.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblRowCount.Location = new System.Drawing.Point(277, 519);
+            this.lblRowCount.Name = "lblRowCount";
+            this.lblRowCount.Size = new System.Drawing.Size(17, 17);
+            this.lblRowCount.TabIndex = 61;
+            this.lblRowCount.Text = "0";
+            this.lblRowCount.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // FrmGateControl
             // 
@@ -609,5 +679,10 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Button btnExit;
+        private System.Windows.Forms.Button btnEnter;
+        private System.Windows.Forms.TextBox txtPerson;
+        private System.Windows.Forms.Label lblRowCount;
+        private System.Windows.Forms.Label label14;
     }
 }
