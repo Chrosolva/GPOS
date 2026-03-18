@@ -23,6 +23,10 @@ namespace MilenialPark.Views.Transaction
             public string FineCode;
             public string FineName;
             public decimal Price;
+
+            public string DayType;
+            public int MinLateMinutes;
+            public int MaxLateMinutes;
         }
 
         private List<FineSetting> _fineSettings;
@@ -97,19 +101,43 @@ namespace MilenialPark.Views.Transaction
 
         private List<FineSetting> LoadFineSettingsFromSql()
         {
-            var sql = "SELECT FineCode, FineName, Price FROM dbo.TblFineSetting WHERE FineCode IS NOT NULL;";
+            var sql = @"SELECT 
+                FineCode,
+                FineName,
+                Price,
+                DayType,
+                MinLateMinutes,
+                MaxLateMinutes
+            FROM dbo.TblFineSetting
+            WHERE FineCode IS NOT NULL;";
+
             var dt = ClsStaticVariable.objConnection.objsqlconnection.Filldatatable(sql);
             var list = new List<FineSetting>();
             foreach (DataRow row in dt.Rows)
             {
+                string name = Convert.ToString(row["FineName"] ?? "").Trim().ToUpper();
+
                 list.Add(new FineSetting
                 {
                     FineCode = Convert.ToString(row["FineCode"] ?? "").Trim(),
                     FineName = Convert.ToString(row["FineName"] ?? "").Trim(),
                     Price = row["Price"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Price"]),
+
+                    DayType = Convert.ToString(row["DayType"] ?? "").Trim().ToUpper(),
+                    MinLateMinutes = SafeInt(row["MinLateMinutes"]),
+                    MaxLateMinutes = SafeInt(row["MaxLateMinutes"])
                 });
             }
             return list;
+        }
+
+        private string GetPenaltyDuration(int lateMinutes)
+        {
+            if (lateMinutes <= 60)
+                return "1 JAM";
+
+            // rule playground
+            return "3 JAM";
         }
 
         private void FrmFinePunishment_Load(object sender, EventArgs e)
@@ -198,7 +226,6 @@ ORDER BY NoUrut ASC;";
 
             foreach (DataRow row in _dtLateTickets.Rows)
             {
-                // ================= DETECT PENDAMPING =================
                 string itemName = SafeStr(row["ItemName"]).ToUpper();
 
                 bool isCompanion =
@@ -206,49 +233,34 @@ ORDER BY NoUrut ASC;";
                     itemName.Contains("COMPANION") ||
                     itemName.Contains("GUARDIAN");
 
-                // ===== PENDAMPING: NO FINE BUT STILL ALARM =====
                 if (isCompanion)
                 {
-                    row["FineCode"] = DBNull.Value;
+                    row["FineCode"] = "";
                     row["FineName"] = "PENDAMPING (NO FINE)";
                     row["FinePrice"] = 0m;
-
-                    // tetap ada alarm delay
                     row["ExtendMinutes"] = 15;
-
                     continue;
                 }
 
-                // ================= NORMAL CHILD TICKET =================
                 int lateMinutes = SafeInt(row["LateMinutes"]);
                 if (lateMinutes < 1) lateMinutes = 1;
 
-                bool isOneHour = (lateMinutes <= 60);
-
-                string fineKey = isOneHour
-                    ? "SANKSI " + _selectedDayType + " 1 JAM"
-                    : "SANKSI UNLIMITED " + _selectedDayType;
-
-                fineKey = fineKey.Trim();
-
-                var fs = _fineSettings.FirstOrDefault(f =>
-                    !string.IsNullOrEmpty(f.FineName) &&
-                    f.FineName.Trim().Equals(fineKey, StringComparison.OrdinalIgnoreCase));
+                var fs = FindFineSetting(lateMinutes, _selectedDayType);
 
                 if (fs == null)
                 {
                     row["FineCode"] = "";
-                    row["FineName"] = fineKey + " (NOT FOUND)";
+                    row["FineName"] = "FINE CONFIG MISSING";
                     row["FinePrice"] = 0m;
                     continue;
                 }
 
-                row["FineCode"] = (fs.FineCode ?? "").Trim();
-                row["FineName"] = (fs.FineName ?? "").Trim();
+                row["FineCode"] = fs.FineCode.Trim();
+                row["FineName"] = fs.FineName.Trim();
                 row["FinePrice"] = fs.Price;
 
-                int extendMin = GetExtendMinutesFromQuinos(row["FineCode"].ToString());
-                row["ExtendMinutes"] = extendMin;
+                int extendMin = GetExtendMinutesFromQuinos(fs.FineCode);
+                row["ExtendMinutes"] = extendMin > 0 ? extendMin : 15;
 
                 totalAmount += fs.Price;
             }
@@ -1072,33 +1084,44 @@ ORDER BY s.id DESC, l.idx ASC, l.id ASC;
         private FineSetting FindFineSetting(int lateMinutes, string dayType)
         {
             dayType = (dayType ?? "WEEKDAY").Trim().ToUpper();
-            if (lateMinutes < 1) lateMinutes = 1;
 
-            // kamu bisa ganti label period sesuai naming kamu di TblFineSetting
-            string period = (lateMinutes <= 60) ? "1 JAM" : "UNLIMITED";
-
-            // Kandidat format nama yang mungkin ada di TblFineSetting.FineName
-            var candidates = new[]
-            {
-        $"SANKSI {period} {dayType}",   // SANKSI 1 JAM WEEKDAY
-        $"SANKSI {dayType} {period}",   // SANKSI WEEKDAY 1 JAM  ✅
-        $"{period} {dayType}",          // 1 JAM WEEKDAY
-        $"{dayType} {period}",          // WEEKDAY 1 JAM
-        $"SANKSI {dayType}",            // kalau ada yang cuma "SANKSI WEEKDAY"
-        $"SANKSI {period}",             // kalau ada yang cuma "SANKSI 1 JAM"
-    };
-
-            foreach (var key in candidates)
-            {
-                var fs = _fineSettings.FirstOrDefault(f =>
-                    !string.IsNullOrEmpty(f?.FineName) &&
-                    f.FineName.Trim().Equals(key, StringComparison.OrdinalIgnoreCase));
-
-                if (fs != null) return fs;
-            }
-
-            return null;
+            return _fineSettings
+                .Where(f => f.DayType == dayType)
+                .FirstOrDefault(f =>
+                    lateMinutes >= f.MinLateMinutes &&
+                    lateMinutes <= f.MaxLateMinutes);
         }
+
+        //private FineSetting FindFineSetting(int lateMinutes, string dayType)
+        //{
+        //    dayType = (dayType ?? "WEEKDAY").Trim().ToUpper();
+        //    if (lateMinutes < 1) lateMinutes = 1;
+
+        //    // kamu bisa ganti label period sesuai naming kamu di TblFineSetting
+        //    string period = (lateMinutes <= 60) ? "1 JAM" : "UNLIMITED";
+
+        //    // Kandidat format nama yang mungkin ada di TblFineSetting.FineName
+        //    var candidates = new[]
+        //    {
+        //        $"SANKSI {period} {dayType}",   // SANKSI 1 JAM WEEKDAY
+        //        $"SANKSI {dayType} {period}",   // SANKSI WEEKDAY 1 JAM  ✅
+        //        $"{period} {dayType}",          // 1 JAM WEEKDAY
+        //        $"{dayType} {period}",          // WEEKDAY 1 JAM
+        //        $"SANKSI {dayType}",            // kalau ada yang cuma "SANKSI WEEKDAY"
+        //        $"SANKSI {period}",             // kalau ada yang cuma "SANKSI 1 JAM"
+        //    };
+
+        //    foreach (var key in candidates)
+        //    {
+        //        var fs = _fineSettings.FirstOrDefault(f =>
+        //            !string.IsNullOrEmpty(f?.FineName) &&
+        //            f.FineName.Trim().Equals(key, StringComparison.OrdinalIgnoreCase));
+
+        //        if (fs != null) return fs;
+        //    }
+
+        //    return null;
+        //}
 
     }
 }

@@ -29,6 +29,7 @@ namespace MilenialPark.Views
 
         DateTime startDay => new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
         DateTime endDay => new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59);
+        private bool _reminderGridSized = false;    
 
         private readonly Timer reminderTimer = new Timer();
 
@@ -64,11 +65,15 @@ namespace MilenialPark.Views
 
             SetupReminderGrid();
 
-
-
             DataGridViewHelper.ApplyPOSStyle(dgvReminder);
 
             DataGridViewHelper.ApplyPOSStyle(dgvGateLog);
+
+            if (!_reminderGridSized)
+            {
+                DataGridViewHelper.SizeCompact(dgvReminder, 100, 420);
+                _reminderGridSized = true;
+            }
 
             this.FormClosing += FrmGateControl_FormClosing;
 
@@ -141,6 +146,11 @@ namespace MilenialPark.Views
 
             dgvReminder.ReadOnly = true;
             dgvReminder.SelectionMode = DataGridViewSelectionMode.CellSelect;
+
+            dgvReminder.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+            dgvReminder.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvReminder.AllowUserToResizeColumns = false;
+            dgvReminder.AllowUserToResizeRows = false;
         }
 
         private void reminderTimer_Tick(object sender, EventArgs e)
@@ -241,9 +251,6 @@ namespace MilenialPark.Views
             {
                 rtxDataIO.Text += "\n[Reminder Error] " + ex.Message;
             }
-
-            // For your POS “compact list” feel:
-            DataGridViewHelper.SizeCompact(dgvReminder, 100, 420);
 
             lblRowCount.Text = dgvReminder.RowCount.ToString();
         }

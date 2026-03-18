@@ -36,7 +36,8 @@ namespace MilenialPark.Master
         public static int WaktuBermain = 0;
         public static int Toleransi = 0;
         //public static string KodeBranch = "BSTCMR";
-        public static string KodeBranch = "STAR";
+        public static string KodeBranch = "JCITY";
+        //public static string KodeBranch = "STAR";
 
         #region function
 
