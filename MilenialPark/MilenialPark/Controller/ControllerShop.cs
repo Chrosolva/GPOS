@@ -759,7 +759,7 @@ namespace MilenialPark.Controller
         SELECT i.id AS item_id,
                i.code,
                i.name,
-               c.id AS category_id,
+               c.id AS category_id, 
                c.name AS category,
                i.price1 AS price, 
                i.minimumtime    AS WaktuBermain

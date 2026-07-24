@@ -118,6 +118,26 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="btnRFIDManagement.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1
+        MAAA6mAAADqYAAAXcJy6UTwAAAAJcEhZcwAADdYAAA3WAZBveZwAAAAHdElNRQfoCQMILClc9lyqAAAA
+        GXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAwVJREFUWEftl1moTlEYhh9kHkKmzJR5
+        nkXm4cJMiUjGQkqJDCkXuDFfEDdSxjJcyTxmHhNSUoYkUq7cKHd6jm9nn93B77Dd8NXb2f/aa6/1rm94
+        13fgv321BkD7nNEWqJXdWJsF3ATuAXdzxH3gAtA7S+AVMB9oBDTOEU2ArcABoFyawEdgHbAQWJQjFgC7
+        wwuV0wQ+ASeBQznjYIT6PFA+TeAd0CGey+QIbRLwGJgGdE5C8RZo841PrjYWeAMcA64AKxz8AEwBekaG
+        5oXusaEhMAdGAq8l8Bl4BNwCbucI138OXIwc6BHh5z0wEKgD1MugfqCkccXrV+D6c4FzQUAPvJSAOdAO
+        qJrZpG5MFD6n31XPxLZQm5giYCLq+SIC3YAtoVi6SlgyowI+J+PO2QZUyK5egFkFCYHFwGUHkzJUq4cA
+        gwODUuo4AOgD9I85antSWmUjqar8ABUzBCSv+B1xUA90BdbGy9Mp+Nus3R9kVkUSrU95YAJwKeaVBJXP
+        smsYc12zErAL2J4Q6Aj0CobGKQsTxhwxc53TN06urYlNXDz7nWNzgKdxyPHA2VjrMLDaBQyBLi2tSWBn
+        djBlZr+5kybgtXwGmOeEP0FAd37PrBp1IE3AcFwFxjnhTxDwsmkGNM/AMVXwQYqAJ28F3AH6ucDvErCX
+        eFFCA5LAzR/GpuaEyW0u+c7KKyKgEJXWqsVC2RYsjRYx18SUwPDQFkNRRMBYWKvZ+i0EaoDf/giWnVgJ
+        HI1KsnRrSEBBeBIDSd3nAVXPcKisM4HjiZZYz5J4BswON3lvjwFGx19/6yWTSBjLX4XfJ6FeDuxNqSmt
+        o0HQC/uAzcDSuDCGAp1CCb2EijWUpbRN0aAWs6bAZGAJsCEYngCuRcsurkcS2dl6eS0DpkdSdYnOt2YB
+        F9WeRAV/Zi7kgi5sDzcsvKJ39JJ3xKkglvxfIWGbXA+wMQ40NS4xLz11wbl2Yb9txtAsV1oVHcVmBDAj
+        4uy1bTes+NyIjU3EHXGwv2KStARrhx60LCBE/5B9AdTgBga+SyjcAAAAAElFTkSuQmCC
+</value>
+  </data>
   <data name="btnReports.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1

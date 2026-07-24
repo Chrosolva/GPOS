@@ -51,6 +51,9 @@
             this.btnExit = new FontAwesome.Sharp.IconButton();
             this.PBLogin = new System.Windows.Forms.PictureBox();
             this.iconButton1 = new FontAwesome.Sharp.IconButton();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.PBLogin)).BeginInit();
             this.SuspendLayout();
             // 
@@ -187,6 +190,7 @@
             this.txtpassmysql.Size = new System.Drawing.Size(263, 26);
             this.txtpassmysql.TabIndex = 42;
             this.txtpassmysql.Text = "starlight";
+            this.txtpassmysql.TextChanged += new System.EventHandler(this.txtpassmysql_TextChanged);
             // 
             // label5
             // 
@@ -303,12 +307,45 @@
             this.iconButton1.TabIndex = 11;
             this.iconButton1.UseVisualStyleBackColor = true;
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(964, 403);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(78, 13);
+            this.label7.TabIndex = 45;
+            this.label7.Text = "777Quin0smdn";
+            this.label7.Visible = false;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(964, 367);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(43, 13);
+            this.label8.TabIndex = 46;
+            this.label8.Text = "starlight";
+            this.label8.Visible = false;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(964, 448);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(21, 13);
+            this.label9.TabIndex = 47;
+            this.label9.Text = "N1";
+            this.label9.Visible = false;
+            // 
             // FormLogin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(246)))), ((int)(((byte)(250)))));
             this.ClientSize = new System.Drawing.Size(1114, 668);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.txtpassmysql);
@@ -364,5 +401,8 @@
         private System.Windows.Forms.Label label5;
         public System.Windows.Forms.TextBox txtuidmysql;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
     }
 }

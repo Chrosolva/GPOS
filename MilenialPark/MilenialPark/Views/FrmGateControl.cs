@@ -695,48 +695,64 @@ namespace MilenialPark.Views
                 DateTime batasToleransi = jamKeluar.AddMinutes(toleransi);
                 bool isRed = now > batasToleransi;
 
+
                 if (isRed)
                 {
-                    // kalau memang gate alarm beda channel, OK.
-                    // tapi kalau tidak, lebih aman pakai gateCode juga.
+                    //OLD LOGIC for late fine
+                    //// kalau memang gate alarm beda channel, OK.
+                    //// tapi kalau tidak, lebih aman pakai gateCode juga.
+                    //SendGateReply(port, 1, true, "ALARM");
+
+                    //using (var frm = new FrmFinePunishment(tid))
+                    //{
+                    //    var result = frm.ShowDialog(this);
+                    //    if (result != DialogResult.OK)
+                    //    {
+                    //        SendGateReply(port, gateCode, false, "BAYAR DENDA DULU");
+                    //        RefreshReminderCore();
+                    //        return;
+                    //    }
+                    //}
+
+                    //// reload setelah fine (pakai TagID juga)
+                    //dt = controllerTrans.GetTicketByTagID(tagId, "ENTER-IN", startDay, endDay);
+                    //if (dt == null || dt.Rows.Count != 1)
+                    //{
+                    //    SendGateReply(port, gateCode, false, "TIKET TIDAK VALID");
+                    //    RefreshReminderCore();
+                    //    return;
+                    //}
+
+                    //row = dt.Rows[0];
+                    //jamKeluar = row["JamKeluar"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["JamKeluar"]);
+                    //toleransi = row["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(row["Toleransi"]);
+                    //batasToleransi = jamKeluar.AddMinutes(toleransi);
+
+                    //if (now > batasToleransi)
+                    //{
+                    //    SendGateReply(port, gateCode, false, "BAYAR DENDA DULU");
+                    //    RefreshReminderCore();
+                    //    return;
+                    //}
+
+                    //justpaid = true;
+
+                    // NEW LOGIC:
+                    // Ticket sudah lewat batas toleransi.
+                    // Alarm tetap bunyi, tapi customer tetap boleh keluar.
                     SendGateReply(port, 1, true, "ALARM");
 
-                    using (var frm = new FrmFinePunishment(tid))
-                    {
-                        var result = frm.ShowDialog(this);
-                        if (result != DialogResult.OK)
-                        {
-                            SendGateReply(port, gateCode, false, "BAYAR DENDA DULU");
-                            RefreshReminderCore();
-                            return;
-                        }
-                    }
+                    controllerTrans.UpdateOrderStatusOnly(tid, noUrut, "LATE-TICKET");
+                    SendGateReply(port, gateCode, true, "LATE TICKET - THANK YOU " + display);
 
-                    // reload setelah fine (pakai TagID juga)
-                    dt = controllerTrans.GetTicketByTagID(tagId, "ENTER-IN", startDay, endDay);
-                    if (dt == null || dt.Rows.Count != 1)
-                    {
-                        SendGateReply(port, gateCode, false, "TIKET TIDAK VALID");
-                        RefreshReminderCore();
-                        return;
-                    }
+                    controllerRFID.TouchLastScan(tagId);
 
-                    row = dt.Rows[0];
-                    jamKeluar = row["JamKeluar"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["JamKeluar"]);
-                    toleransi = row["Toleransi"] == DBNull.Value ? 0 : Convert.ToInt32(row["Toleransi"]);
-                    batasToleransi = jamKeluar.AddMinutes(toleransi);
-
-                    if (now > batasToleransi)
-                    {
-                        SendGateReply(port, gateCode, false, "BAYAR DENDA DULU");
-                        RefreshReminderCore();
-                        return;
-                    }
-
-                    justpaid = true;
+                    rtxDataIO.AppendText("LATE-TICKET EXIT BERHASIL: " + display + Environment.NewLine);
+                    RefreshReminderCore();  
+                    return;
                 }
 
-                if(!justpaid)
+                if (!justpaid)
                 {
                     //controllerTrans.UpdateOrderStatusTiketOut(tid, noUrut, "ENTER-OUT");
                     controllerTrans.UpdateOrderStatusOnly(tid, noUrut, "ENTER-OUT");
@@ -1139,7 +1155,7 @@ namespace MilenialPark.Views
                 string logMessage = $"{userId} open the Gate for {person} (GateCode={gateCode})";
                 controllerTrans.InsertGateLog(
                     logMessage,
-                    "Supervisor Access",
+                    "Supervisor Access",    
                     userId
                 );
 

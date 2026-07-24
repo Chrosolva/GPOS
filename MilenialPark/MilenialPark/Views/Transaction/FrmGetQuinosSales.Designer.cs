@@ -141,7 +141,6 @@
             this.btnFilter.TabIndex = 40;
             this.btnFilter.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.btnFilter.UseVisualStyleBackColor = false;
-            
             // 
             // dtpTo
             // 

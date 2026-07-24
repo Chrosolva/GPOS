@@ -12,12 +12,15 @@ namespace MilenialPark.Master
 {
     public class ClsStaticVariable
     {
+        // pass quinos adam malik : starlight, pass quinos JCITY : 777Quin0smdn
         public static string DataBase = "WHNPOS";
         public static string server = "localhost";
         //public static string dbmysql = "db_testing";
         public static string dbmysql = "db_starlight";
-        //public static string servermysql = "127.0.0.1";
-        public static string servermysql = "192.168.8.205";
+        //public static string servermysql = "127.0.0.1"; // Numero1
+        public static string servermysql = "192.168.8.205"; // pass starlight
+        //public static string servermysql = "192.168.8.206"; // JCITY QUINOS LAN
+        //public static string servermysql = "192.168.121.87"; // JCITY QUINOS WIFI
         public static DBConnect objConnection = new DBConnect();
         public static ControllerUser controllerUser = new ControllerUser();
         public static ClsTransactionDetail objtransdet = new ClsTransactionDetail();
@@ -36,8 +39,8 @@ namespace MilenialPark.Master
         public static int WaktuBermain = 0;
         public static int Toleransi = 0;
         //public static string KodeBranch = "BSTCMR";
-        public static string KodeBranch = "JCITY";
-        //public static string KodeBranch = "STAR";
+        //public static string KodeBranch = "JCITY";
+        public static string KodeBranch = "STAR";
 
         #region function
 

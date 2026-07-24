@@ -133,5 +133,10 @@ namespace MilenialPark
         {
 
         }
+
+        private void txtpassmysql_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
